@@ -1,14 +1,14 @@
 #!/bin/bash
 CPUS=$(grep processor /proc/cpuinfo |wc -l)
 
-#export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
-#export PATH=${JAVA_HOME}/bin:$PATH
 targets="selinuxtarballs"
 variant="eng"
 
 export INIT_BOOTCHART=true
 
 build(){
+    export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    export PATH=${JAVA_HOME}/bin:$PATH
     product="${1}"
     if [ -z "${product}" ]; then
         return
@@ -35,7 +35,30 @@ build_vexpress(){
     build vexpress
     unset TARGET_UEFI_TOOLS 
 }
+
+build_tools_ddmlib(){
+    export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
+    export PATH=${JAVA_HOME}/bin:$PATH
+    cd tools
+    ./gradlew prepareRepo copyGradleProperty
+    if [ $? -ne 0 ]; then
+        echo "Failed to run:./gradlew prepareRepo copyGradleProperty"
+        return
+    fi
+    ./gradlew assemble
+    if [ $? -ne 0 ]; then
+        ./gradlew clean assemble
+        if [ $? -ne 0 ]; then
+            echo "Failed to run:./gradlew clean assemble"
+            return
+        fi
+    fi
+    ./gradlew :base:ddmlib:build
+    unset JAVA_HOME
+}
+
 #build_vexpress
 #build juno
 #build fvp
-build_manta
+#build_manta
+build_tools_ddmlib

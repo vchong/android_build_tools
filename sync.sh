@@ -1,12 +1,13 @@
 #!/usr/bin/env sh
 
 export BASE=`pwd`
-#export MIRROR="https://android.googlesource.com/platform/manifest"
-export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
+export MIRROR="https://android.googlesource.com/platform/manifest"
+#export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
 #export MIRROR="/media/liuyq/ext4/android-mirror/aosp/platform/manifest.git"
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
-export branch="android-5.0.0_r7"
+#export branch="master"
+export branch="studio-1.1-dev"
 
 sync(){
     
@@ -50,4 +51,4 @@ juno_mali_binary(){
 }
 
 sync
-sync_linaro
+#sync_linaro
