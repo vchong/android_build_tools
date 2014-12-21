@@ -6,8 +6,51 @@ export MIRROR="https://android.googlesource.com/platform/manifest"
 #export MIRROR="/media/liuyq/ext4/android-mirror/aosp/platform/manifest.git"
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
-#export branch="master"
-export branch="studio-1.1-dev"
+
+#export branch="studio-1.1-dev"
+
+print_usage(){
+    echo "$(basename $0) [-nl|--nolinaro] [-b|--branch branch] [-m|--mirror mirror_url]"
+    echo "\t -nl|--nolinaro: do not sync linaro source"
+    echo "\t -b|--branch branch: sync the specified branch, default master"
+    echo "\t -u|--mirror mirror_url: specify the url where you want to sync from"
+    echo "\t\t default: $repo_url"
+    echo "$(basename $0) [-h|--help]"
+    echo "\t -h|--help: print this usage"
+}
+
+sync_linaro=true
+branch="master"
+while [ -n "$1" ]; do
+    case "X$1" in
+        X-nl|X--nolinaro)
+            sync_linaro=false
+            shift
+            ;;
+        X-b|X--branch)
+            if [ -z "$2" ]; then
+                echo "Please specify the branch name for the -b|--branch option"
+                exit 1
+            fi
+            branch="$2"
+            shift
+            ;;
+        X-h|X--help)
+            print_usage
+            exit 1
+            ;;
+        X-*)
+            echo "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+        X*)
+            echo "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+    esac
+done
 
 sync(){
     
@@ -38,7 +81,7 @@ sync_linaro(){
         git clone https://android.git.linaro.org/git/android-patchsets.git android-patchsets
     fi
     cd ${BASE}
-    mali_binary
+    juno_mali_binary
 }
 
 juno_mali_binary(){
@@ -50,5 +93,10 @@ juno_mali_binary(){
     tar jxvf ${b_name}
 }
 
-sync
-#sync_linaro
+main(){
+    sync
+    if $sync_linaro; then
+        sync_linaro
+    fi
+}
+main "$@"

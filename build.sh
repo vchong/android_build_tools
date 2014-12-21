@@ -39,6 +39,7 @@ build_vexpress(){
 build_tools_ddmlib(){
     export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
     export PATH=${JAVA_HOME}/bin:$PATH
+    export ANDROID_HOME=/backup/soft/adt-bundle-linux/sdk/
     cd tools
     ./gradlew prepareRepo copyGradleProperty
     if [ $? -ne 0 ]; then
