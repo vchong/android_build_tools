@@ -13,6 +13,7 @@ apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanage
 apps="${apps} NULL,com.android.browser/.BrowserActivity"
 apps="${apps} NULL,com.android.settings/.Settings"
 
+#apps="46-Zedge.apk,net.zedge.android/.activity.ControllerActivity"
 #01-Gmail.apk,com.google.android.gm/.welcome.WelcomeTourActivity \
 #20-GooglePlayMusic.apk,com.google.android.music/com.android.music.activitymanagement.TopLevelActivity \
 #44-Flipboard.apk,flipboard.app/flipboard.activities.FirstRunActivity \
@@ -24,6 +25,7 @@ f_cpu="activity_cpu.raw"
 f_procrank="activity_procrank.raw"
 f_stat="activity_stat.raw"
 f_procmem="activity_procmem.raw"
+f_maps="activity_maps.raw"
 
 f_res_starttime="activity_starttime.csv"
 f_res_mem="activity_mem.csv"
@@ -53,6 +55,7 @@ function collect_raw_data(){
         let -i count=0;
         while [ $count -lt ${NUM_COUNT} ]; do
             adb logcat -c
+            adb logcat -b events -c
             sleep 3
 
             cpu_time_before=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
@@ -63,7 +66,7 @@ function collect_raw_data(){
             while ! adb logcat -d|grep -q "Displayed $app_start_activity"; do
                 sleep 1
             done
-            sleep 3
+            sleep 30
             # get cpu information
             cpu_time_after=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
             echo "${app_package},${cpu_time_before},${cpu_time_after}" >>"${f_cpu}"
@@ -77,6 +80,9 @@ function collect_raw_data(){
             pid=$(adb shell ps|grep ${app_package}|awk '{print $2}')
             if [ -n "${pid}" ]; then
                 adb shell su 0 cat /proc/${pid}/stat >> "${f_stat}"
+                echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_maps}"
+                adb shell su 0 cat /proc/${pid}/maps >> "${f_maps}"
+                echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_maps}"
                 echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_procmem}"
                 adb shell su 0 procmem ${pid} >> "${f_procmem}"
                 echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_procmem}"
@@ -96,7 +102,12 @@ function collect_raw_data(){
             echo "" >>"${f_starttime}"
             echo "" >>"${f_mem}"
             echo "" >>"${f_cpu}"
+            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
             adb logcat -d -v time *:V >>logcat.log
+            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
+            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
+            adb logcat -d -b events -v time *:V >>logcat-events.log
+            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
         done
     done
 }
