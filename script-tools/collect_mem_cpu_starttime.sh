@@ -13,7 +13,6 @@ apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanage
 apps="${apps} NULL,com.android.browser/.BrowserActivity"
 apps="${apps} NULL,com.android.settings/.Settings"
 
-#apps="46-Zedge.apk,net.zedge.android/.activity.ControllerActivity"
 #01-Gmail.apk,com.google.android.gm/.welcome.WelcomeTourActivity \
 #20-GooglePlayMusic.apk,com.google.android.music/com.android.music.activitymanagement.TopLevelActivity \
 #44-Flipboard.apk,flipboard.app/flipboard.activities.FirstRunActivity \
@@ -37,8 +36,30 @@ NUM_COUNT=12
 rm -fr ${dir_screenshot} logcat.log
 mkdir -p ${dir_screenshot}
 
+function collect_raw_procmem_data(){
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_procmem}"
+    adb shell su 0 procmem ${pid} >> "${f_procmem}"
+    echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_procmem}"
+
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_procmem}_p"
+    adb shell su 0 procmem -p ${pid} >> "${f_procmem}_p"
+    echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_procmem}_p"
+
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_procmem}_m"
+    adb shell su 0 procmem -m ${pid} >> "${f_procmem}_m"
+    echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_procmem}_m"
+}
+
+function collect_raw_logcat_data(){
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
+    adb logcat -d -v time *:V >>logcat.log
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
+    adb logcat -d -b events -v time *:V >>logcat-events.log
+    echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
+}
 function collect_raw_data(){
-    rm -fr "${f_starttime}" "${f_mem}" "${f_cpu}" "${f_procrank}" "${f_stat}" "${f_procmem}"
+    rm -fr "${f_starttime}" "${f_mem}" "${f_cpu}" "${f_procrank}" "${f_stat}" "${f_procmem}" "${f_procmem}_m" "${f_procmem}_p"
     for apk in ${apps}; do
         app_apk=$(echo $apk|cut -d, -f1)
         app_start_activity=$(echo $apk|cut -d, -f2)
@@ -83,9 +104,8 @@ function collect_raw_data(){
                 echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_maps}"
                 adb shell su 0 cat /proc/${pid}/maps >> "${f_maps}"
                 echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_maps}"
-                echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "${f_procmem}"
-                adb shell su 0 procmem ${pid} >> "${f_procmem}"
-                echo "===pid=${pid}, package=${app_package}, count=${count} end" >> "${f_procmem}"
+
+                collect_raw_procmem_data
             fi
             # get screen shot
             adb shell screencap /data/local/tmp/app_screen.png
@@ -102,12 +122,7 @@ function collect_raw_data(){
             echo "" >>"${f_starttime}"
             echo "" >>"${f_mem}"
             echo "" >>"${f_cpu}"
-            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
-            adb logcat -d -v time *:V >>logcat.log
-            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat.log"
-            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
-            adb logcat -d -b events -v time *:V >>logcat-events.log
-            echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
+            collect_raw_logcat_data
         done
     done
 }
@@ -138,6 +153,12 @@ function format_cpu_raw_data(){
 
 function format_procrank_data(){
     sed '/^\s*$/d' "${f_procrank}" |sed 's/^\s*//'|tr -d '\r'|awk '{printf("%s,%s,%s,%s,%s\n", $6, $2, $3, $4, $5)}'|tr -d 'K'>"${f_res_procrank}"
+}
+
+function format_procmem_data(){
+    sed 's/^\s*//' "${f_procmem}" |tr -s ' '|tr ' ' ',' >"${f_procmem}.csv"
+    sed 's/^\s*//' "${f_procmem}_p" |tr -s ' '|tr ' ' ',' >"${f_procmem}_p.csv"
+    sed 's/^\s*//' "${f_procmem}_m" |tr -s ' '|tr ' ' ',' >"${f_procmem}_m.csv"
 }
 
 function format_raw_data(){
