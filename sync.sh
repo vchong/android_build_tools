@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+CPUS=$(grep processor /proc/cpuinfo |wc -l)
 
 export BASE=`pwd`
 export MIRROR="https://android.googlesource.com/platform/manifest"
@@ -59,7 +60,7 @@ sync(){
     done
 
     #Syncronize and check out
-    while ! repo sync -j 16; do
+    while ! repo sync -j ${CPUS}; do
         sleep 30
     done
 }

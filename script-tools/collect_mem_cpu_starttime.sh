@@ -170,6 +170,51 @@ function format_raw_data(){
     format_procrank_data
 }
 
+function set_browser_homepage(){
+    pref_file="com.android.browser_preferences.xml"
+    pref_dir="/data/data/com.android.browser/shared_prefs/"
+    pref_content='<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<map>
+    <boolean name="enable_hardware_accel_skia" value="false" />
+    <boolean name="autofill_enabled" value="true" />
+    <string name="homepage">about:blank</string>
+    <boolean name="last_paused" value="false" />
+    <boolean name="debug_menu" value="false" />
+</map>'
+
+    # start browser for the first time to genrate preference file
+    adb shell am start com.android.browser/.BrowserActivity
+    sleep 5
+    user_grp=$(adb shell su 0 ls -l "${pref_dir}/${pref_file}"|awk '{printf "%s:%s", $2, $3}')
+    close_browser
+
+    echo "${pref_content}" > "${pref_file}"
+    adb push "${pref_file}" "/data/local/tmp/${pref_file}"
+    adb shell su 0 cp "/data/local/tmp/${pref_file}" "${pref_dir}/${pref_file}"
+    adb shell su 0 chown ${user_grp} "${pref_dir}/${pref_file}"
+    adb shell su 0 chmod 660 "${pref_dir}/${pref_file}"
+
+    adb shell am start com.android.browser/.BrowserActivity
+    sleep 5
+    close_browser
+    adb shell am start com.android.browser/.BrowserActivity
+    sleep 5
+    close_browser
+}
+
+function close_browser(){
+    pid=$(adb shell ps |grep com.android.browser|awk '{printf $2}')
+    if [ -n "${pid}" ]; then
+        adb shell su 0 kill -9 "${pid}"
+        sleep 5
+    fi
+}
+
+function prepare(){
+    set_browser_homepage
+    svc power stayon true
+}
+
 function main(){
     collect_raw_data
     format_raw_data

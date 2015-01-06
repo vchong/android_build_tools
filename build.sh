@@ -6,7 +6,7 @@ variant="userdebug"
 
 export INIT_BOOTCHART=true
 
-build(){
+function build(){
     export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
     export PATH=${JAVA_HOME}/bin:$PATH
     product="${1}"
@@ -22,7 +22,8 @@ build(){
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
-build_manta(){
+function build_manta(){
+    #export WITH_DEXPREOPT=true
     export TARGET_PREBUILT_KERNEL=device/samsung/manta/kernel
     targets=""
     build aosp_manta
@@ -30,7 +31,7 @@ build_manta(){
     targets="selinuxtarballs"
 }
 
-clean_for manta(){
+function clean_for_manta(){
     rm -fr out/target/product/manta/obj/ETC
     rm -fr out/target/product/manta/boot.img
     rm -fr out/target/product/manta/root
@@ -38,7 +39,7 @@ clean_for manta(){
     rm -fr out/target/product/manta/obj/EXECUTABLES/init_intermediates
 }
 
-build_flounder(){
+function build_flounder(){
     export TARGET_PREBUILT_KERNEL=device/htc/flounder-kernel/Image.gz-dtb
     targets=""
     build aosp_flounder64
@@ -46,13 +47,13 @@ build_flounder(){
     targets="selinuxtarballs"
 }
 
-build_vexpress(){
+function build_vexpress(){
     export TARGET_UEFI_TOOLS=arm-eabi-
     build vexpress
     unset TARGET_UEFI_TOOLS 
 }
 
-build_tools_ddmlib(){
+function build_tools_ddmlib(){
     export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
     export PATH=${JAVA_HOME}/bin:$PATH
     export ANDROID_HOME=/backup/soft/adt-bundle-linux/sdk/
