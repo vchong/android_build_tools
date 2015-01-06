@@ -2,7 +2,7 @@
 CPUS=$(grep processor /proc/cpuinfo |wc -l)
 
 targets="selinuxtarballs"
-variant="eng"
+variant="userdebug"
 
 export INIT_BOOTCHART=true
 
@@ -26,6 +26,22 @@ build_manta(){
     export TARGET_PREBUILT_KERNEL=device/samsung/manta/kernel
     targets=""
     build aosp_manta
+    unset TARGET_PREBUILT_KERNEL
+    targets="selinuxtarballs"
+}
+
+clean_for manta(){
+    rm -fr out/target/product/manta/obj/ETC
+    rm -fr out/target/product/manta/boot.img
+    rm -fr out/target/product/manta/root
+    rm -fr out/target/product/manta/ramdisk*
+    rm -fr out/target/product/manta/obj/EXECUTABLES/init_intermediates
+}
+
+build_flounder(){
+    export TARGET_PREBUILT_KERNEL=device/htc/flounder-kernel/Image.gz-dtb
+    targets=""
+    build aosp_flounder64
     unset TARGET_PREBUILT_KERNEL
     targets="selinuxtarballs"
 }
@@ -61,5 +77,6 @@ build_tools_ddmlib(){
 #build_vexpress
 #build juno
 #build fvp
-#build_manta
-build_tools_ddmlib
+# clean_for manta && build_manta
+#build_tools_ddmlib
+build_flounder
