@@ -88,12 +88,14 @@ function collect_streamline_data_post(){
         return
     fi
 
-    ps_info=`adb shell ps -x | grep -E '\s+gatord\s+'`
-    ##TODO maybe have multiple lines here
-    pid=`echo $ps_info|cut -d \  -f 2|sed 's/\r//'`
-    if [ -n "${pid}" ]; then
-        adb shell kill $pid
-    fi
+    while adb shell ps -x | grep -q -E '\s+gatord\s+'; do
+        ps_info=`adb shell ps -x | grep -E '\s+gatord\s+'`
+        ##TODO maybe have multiple lines here
+        pid=`echo $ps_info|cut -d \  -f 2|sed 's/\r//'`
+        if [ -n "${pid}" ]; then
+            adb shell su 0 kill -9 $pid
+        fi
+    done
     sleep 5
     adb pull /data/local/tmp/streamline/${app_name}.apc streamline/${app_name}.apc
     #streamline -analyze ${capture_dir}
@@ -305,7 +307,7 @@ function close_browser(){
 
 function prepare(){
     set_browser_homepage
-    svc power stayon true
+    adb shell su 0 svc power stayon true
 }
 
 function f_max(){
