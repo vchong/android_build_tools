@@ -60,6 +60,9 @@ function collect_raw_logcat_data(){
 }
 
 function collect_streamline_data_before(){
+    if [ "X${COLLECT_STREAMLINE}" != "Xtrue" ]; then
+        return
+    fi
     app_name=$1 && shift
     if [ -z "${app_name}" ];then
         return
@@ -72,11 +75,19 @@ function collect_streamline_data_before(){
 </session>
 __EOF__
     adb push session.xml /data/local/tmp/streamline/session.xml
-    adb shell "su 0 gatord -s /data/local/tmp/streamline/session.xml -o /data/streamline/${app_name}.apc &"
+    adb shell "su 0 gatord -s /data/local/tmp/streamline/session.xml -o /data/local/tmp/streamline/${app_name}.apc &"
     adb shell sleep 2
 }
 
 function collect_streamline_data_post(){
+    if [ "X${COLLECT_STREAMLINE}" != "Xtrue" ]; then
+        return
+    fi
+    app_name=$1 && shift
+    if [ -z "${app_name}" ];then
+        return
+    fi
+
     ps_info=`adb shell ps -x | grep -E '\s+gatord\s+'`
     ##TODO maybe have multiple lines here
     pid=`echo $ps_info|cut -d \  -f 2|sed 's/\r//'`
@@ -120,6 +131,8 @@ function collect_raw_data(){
             # catch the cpu information before start activity
             cpu_time_before=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
 
+            collect_streamline_data_before "${app_name}_${count}"
+
             # start activity
             adb shell am start $app_start_activity
 
@@ -149,6 +162,9 @@ function collect_raw_data(){
 
                 collect_raw_procmem_data
             fi
+
+            collect_streamline_data_post "${app_name}_${count}"
+
             # capture screen shot
             adb shell screencap /data/local/tmp/app_screen.png
             adb pull /data/local/tmp/app_screen.png ${dir_screenshot}/${app_package}_${count}.png
