@@ -1,17 +1,17 @@
 #!/bin/bash
 
-apps="01-3D_Volcano_Island.apk,com.omnigsoft.volcanoislandjava/.App"
-apps="${apps} 02-com.blong.jetboy_1.0.1.apk,com.blong.jetboy/.JetBoy"
-apps="${apps} 03-HelloEffects.apk,com.example.android.mediafx/.HelloEffects"
-apps="${apps} 04-FREEdi_YouTube_Player_v2.2.apk,tw.com.freedi.youtube.player/.MainActivity"
-apps="${apps} 17-GooglePlayBooks.apk,com.google.android.apps.books/.app.BooksActivity"
-apps="${apps} 33-Pandora.apk,com.pandora.android/.Main"
-apps="${apps} 46-Zedge.apk,net.zedge.android/.activity.ControllerActivity"
-apps="${apps} 55-ShootBubbleDeluxe.apk,com.shootbubble.bubbledexlue/.FrozenBubble"
-apps="${apps} 57-BarcodeScanner.apk,com.google.zxing.client.android/.CaptureActivity"
-apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanager.PowerMgrTabActivity"
-apps="${apps} NULL,com.android.browser/.BrowserActivity"
-apps="${apps} NULL,com.android.settings/.Settings"
+apps="NULL,com.android.browser/.BrowserActivity,Browser"
+apps="${apps} NULL,com.android.settings/.Settings,Settings"
+apps="${apps} 01-3D_Volcano_Island.apk,com.omnigsoft.volcanoislandjava/.App,3D_Volcano_Island"
+apps="${apps} 02-com.blong.jetboy_1.0.1.apk,com.blong.jetboy/.JetBoy,JetBoy"
+apps="${apps} 03-HelloEffects.apk,com.example.android.mediafx/.HelloEffects,HelloEffects"
+apps="${apps} 04-FREEdi_YouTube_Player_v2.2.apk,tw.com.freedi.youtube.player/.MainActivity,FREEdi_YouTube_Player"
+apps="${apps} 17-GooglePlayBooks.apk,com.google.android.apps.books/.app.BooksActivity,GooglePlayBooks"
+apps="${apps} 33-Pandora.apk,com.pandora.android/.Main,Pandora"
+apps="${apps} 46-Zedge.apk,net.zedge.android/.activity.ControllerActivity,Zedge"
+apps="${apps} 55-ShootBubbleDeluxe.apk,com.shootbubble.bubbledexlue/.FrozenBubble,ShootBubbleDeluxe"
+apps="${apps} 57-BarcodeScanner.apk,com.google.zxing.client.android/.CaptureActivity,BarcodeScanner"
+apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanager.PowerMgrTabActivity,DUBatterySaver"
 
 #01-Gmail.apk,com.google.android.gm/.welcome.WelcomeTourActivity \
 #20-GooglePlayMusic.apk,com.google.android.music/com.android.music.activitymanagement.TopLevelActivity \
@@ -58,12 +58,44 @@ function collect_raw_logcat_data(){
     adb logcat -d -b events -v time *:V >>logcat-events.log
     echo "===pid=${pid}, package=${app_package}, count=${count} start" >> "logcat-events.log"
 }
+
+function collect_streamline_data_before(){
+    app_name=$1 && shift
+    if [ -z "${app_name}" ];then
+        return
+    fi
+    adb shell rm -fr /data/local/tmp/streamline
+    adb shell mkdir /data/local/tmp/streamline
+    cat >session.xml <<__EOF__
+<?xml version="1.0" encoding="US-ASCII" ?>
+<session version="1" title="${app_name}" target_path="@F" call_stack_unwinding="yes" parse_debug_info="yes" high_resolution="no" buffer_mode="streaming" sample_rate="normal" duration="0">
+</session>
+__EOF__
+    adb push session.xml /data/local/tmp/streamline/session.xml
+    adb shell "su 0 gatord -s /data/local/tmp/streamline/session.xml -o /data/streamline/${app_name}.apc &"
+    adb shell sleep 2
+}
+
+function collect_streamline_data_post(){
+    ps_info=`adb shell ps -x | grep -E '\s+gatord\s+'`
+    ##TODO maybe have multiple lines here
+    pid=`echo $ps_info|cut -d \  -f 2|sed 's/\r//'`
+    if [ -n "${pid}" ]; then
+        adb shell kill $pid
+    fi
+    sleep 5
+    adb pull /data/local/tmp/streamline/${app_name}.apc streamline/${app_name}.apc
+    #streamline -analyze ${capture_dir}
+    #streamline -report -function ${apd_f} |tee ${parent_dir}/streamlineReport.txt
+}
+
 function collect_raw_data(){
     rm -fr "${f_starttime}" "${f_mem}" "${f_cpu}" "${f_procrank}" "${f_stat}" "${f_procmem}" "${f_procmem}_m" "${f_procmem}_p"
     for apk in ${apps}; do
         app_apk=$(echo $apk|cut -d, -f1)
         app_start_activity=$(echo $apk|cut -d, -f2)
         app_package=$(echo $app_start_activity|cut -d\/ -f1)
+        app_name=$(echo $apk|cut -d, -f3)
 
         if [ "X${app_apk}" != "XNULL" ];then
             adb uninstall $app_package
@@ -75,25 +107,35 @@ function collect_raw_data(){
         fi
         let -i count=0;
         while [ $count -lt ${NUM_COUNT} ]; do
+            # clean logcat
             adb logcat -c
             adb logcat -b events -c
             sleep 3
 
-            cpu_time_before=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
+            # install apk
             if [ "X${app_apk}" != "XNULL" ];then
                 adb install -r $app_apk
             fi
+
+            # catch the cpu information before start activity
+            cpu_time_before=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
+
+            # start activity
             adb shell am start $app_start_activity
+
+            # wait for activity to be displayed int logcat
             while ! adb logcat -d|grep -q "Displayed $app_start_activity"; do
                 sleep 1
             done
             sleep 30
+
             # get cpu information
             cpu_time_after=$(adb shell cat /proc/stat|grep 'cpu '|tr -d '\n')
-            echo "${app_package},${cpu_time_before},${cpu_time_after}" >>"${f_cpu}"
+            echo "${app_name},${cpu_time_before},${cpu_time_after}" >>"${f_cpu}"
+
             # get activity start time information
-            #time_info=$(adb logcat -d|grep -q "Displayed $app_start_activity")
             adb logcat -d|grep "Displayed ${app_start_activity}" >>"${f_starttime}"
+
             # get memory info
             adb shell ps|grep "${app_package}" >>"${f_mem}"
             adb shell su 0 procrank|grep "${app_package}" >> "${f_procrank}"
@@ -107,7 +149,7 @@ function collect_raw_data(){
 
                 collect_raw_procmem_data
             fi
-            # get screen shot
+            # capture screen shot
             adb shell screencap /data/local/tmp/app_screen.png
             adb pull /data/local/tmp/app_screen.png ${dir_screenshot}/${app_package}_${count}.png
 
@@ -215,9 +257,99 @@ function prepare(){
     svc power stayon true
 }
 
+function f_max(){
+    local val1=$1 && shift
+    local val2=$1 && shift
+    [ -z "$val1" ] && return $val2
+    [ -z "$val2" ] && return $val1
+
+    local compare=$(echo "$val1>$val2"|bc)
+    if [ "X$compare" = "X1" ];then
+        echo $val1
+    else
+        echo $val2
+    fi
+}
+
+function f_min(){
+    local val1=$1 && shift
+    local val2=$1 && shift
+    [ -z "$val1" ] && return $val1
+    [ -z "$val2" ] && return $val2
+
+    local compare=$(echo "$val1<$val2"|bc)
+    if [ "X$compare" = "X1" ];then
+        echo $val1
+    else
+        echo $val2
+    fi
+}
+
+function statistic(){
+    local f_data=$1 && shift
+    if ! [ -f "$f_data" ]; then
+        return
+    fi
+    local field_no=$1 && shift
+    if [ -z "$field_no" ]; then
+        field_no=2
+    fi
+    local total=0
+    local max=0
+    local min=0
+    local old_key=""
+    local new_key=""
+    local count=0
+    for line in $(cat "${f_data}"); do
+        if ! echo "$line"|grep -q ,; then
+            continue
+        fi
+        new_key=$(echo $line|cut -d, -f1)
+        value=$(echo $line|cut -d, -f${field_no})
+        if [ "X${new_key}" = "X${old_key}" ]; then
+            total=$(echo "scale=2; ${total}+${value}"|bc -s)
+            count=$(echo "$count + 1"|bc)
+            max=$(f_max "$max" "$value")
+            min=$(f_min "$min" "$value")
+        else
+            if [ "X${old_key}" != "X" ]; then
+                average=$(echo "scale=2; ($total-$max-$min)/($count-2)"|bc)
+                echo "$old_key=$average"
+            fi
+            total="${value}"
+            max="${value}"
+            min="${value}"
+            old_key="${new_key}"
+            count=1
+        fi
+    done
+    if [ "X${new_key}" != "X" ]; then
+        average=$(echo "scale=2; ($total-$max-$min)/($count-2)"|bc)
+        echo "$new_key=$average"
+    fi
+}
+
+function statistic_data(){
+    statistic "$f_res_starttime" 2|sed "s/^/starttime_/"
+    echo "--------------------------------"
+    statistic "${f_res_mem}" 2|sed "s/^/ps_vss_/"
+    echo "--------------------------------"
+    statistic "${f_res_mem}" 3|sed "s/^/ps_rss_/"
+    echo "--------------------------------"
+    statistic "${f_res_procrank}" 2|sed "s/^/proc_vss_/"
+    echo "--------------------------------"
+    statistic "${f_res_procrank}" 3|sed "s/^/proc_rss_/"
+    echo "--------------------------------"
+    statistic "${f_res_procrank}" 4|sed "s/^/proc_pss_/"
+    echo "--------------------------------"
+    statistic "${f_res_procrank}" 5|sed "s/^/proc_uss_/"
+}
+
 function main(){
+    prepare
     collect_raw_data
     format_raw_data
+    statistic_data
 }
 
 main "$@"
