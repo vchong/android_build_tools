@@ -1,5 +1,8 @@
 #!/bin/bash
 
+NUM_COUNT=12
+COLLECT_STREAMLINE="true"
+
 apps="NULL,com.android.browser/.BrowserActivity,Browser"
 apps="${apps} NULL,com.android.settings/.Settings,Settings"
 apps="${apps} 01-3D_Volcano_Island.apk,com.omnigsoft.volcanoislandjava/.App,3D_Volcano_Island"
@@ -7,11 +10,11 @@ apps="${apps} 02-com.blong.jetboy_1.0.1.apk,com.blong.jetboy/.JetBoy,JetBoy"
 apps="${apps} 03-HelloEffects.apk,com.example.android.mediafx/.HelloEffects,HelloEffects"
 apps="${apps} 04-FREEdi_YouTube_Player_v2.2.apk,tw.com.freedi.youtube.player/.MainActivity,FREEdi_YouTube_Player"
 apps="${apps} 17-GooglePlayBooks.apk,com.google.android.apps.books/.app.BooksActivity,GooglePlayBooks"
-apps="${apps} 33-Pandora.apk,com.pandora.android/.Main,Pandora"
 apps="${apps} 46-Zedge.apk,net.zedge.android/.activity.ControllerActivity,Zedge"
 apps="${apps} 55-ShootBubbleDeluxe.apk,com.shootbubble.bubbledexlue/.FrozenBubble,ShootBubbleDeluxe"
-apps="${apps} 57-BarcodeScanner.apk,com.google.zxing.client.android/.CaptureActivity,BarcodeScanner"
-apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanager.PowerMgrTabActivity,DUBatterySaver"
+#apps="${apps} 33-Pandora.apk,com.pandora.android/.Main,Pandora"
+#apps="${apps} 57-BarcodeScanner.apk,com.google.zxing.client.android/.CaptureActivity,BarcodeScanner"
+#apps="${apps} 70-DUBatterySaver.apk,com.dianxinos.dxbs/com.dianxinos.powermanager.PowerMgrTabActivity,DUBatterySaver"
 
 #01-Gmail.apk,com.google.android.gm/.welcome.WelcomeTourActivity \
 #20-GooglePlayMusic.apk,com.google.android.music/com.android.music.activitymanagement.TopLevelActivity \
@@ -32,7 +35,6 @@ f_res_cpu="activity_cpu.csv"
 f_res_procrank="activity_procrank.csv"
 
 dir_screenshot="screenshots"
-NUM_COUNT=12
 rm -fr ${dir_screenshot} logcat.log
 mkdir -p ${dir_screenshot}
 
@@ -67,7 +69,7 @@ function collect_streamline_data_before(){
     if [ -z "${app_name}" ];then
         return
     fi
-    adb shell rm -fr /data/local/tmp/streamline
+    adb shell su 0 rm -fr /data/local/tmp/streamline
     adb shell mkdir /data/local/tmp/streamline
     cat >session.xml <<__EOF__
 <?xml version="1.0" encoding="US-ASCII" ?>
@@ -97,6 +99,7 @@ function collect_streamline_data_post(){
         fi
     done
     sleep 5
+    adb shell su 0 chown -R shell:shell data/local/tmp/streamline
     adb pull /data/local/tmp/streamline/${app_name}.apc streamline/${app_name}.apc
     #streamline -analyze ${capture_dir}
     #streamline -report -function ${apd_f} |tee ${parent_dir}/streamlineReport.txt
