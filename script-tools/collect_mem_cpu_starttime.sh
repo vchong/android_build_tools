@@ -153,6 +153,7 @@ function collect_raw_data(){
             adb shell screencap /data/local/tmp/app_screen.png
             adb pull /data/local/tmp/app_screen.png ${dir_screenshot}/${app_package}_${count}.png
 
+            # uninstall or kill the app process
             if [ "X${app_apk}" != "XNULL" ];then
                 adb uninstall $app_package
             else
@@ -189,8 +190,42 @@ function format_mem_raw_data(){
     sed '/^\s*$/d' "${f_mem}" |tr -s ' '|tr -d '\r'|awk '{printf "%s,%s,%s\n", $9, $4, $5;}' >"${f_res_mem}"
 }
 
+function format_cputime(){
+    local f_data=$1 && shift
+    if ! [ -f "$f_data" ]; then
+        return
+    fi
+    rm -fr "${f_data}_2nd"
+    for line in $(cat "${f_data}"); do
+        if ! echo "$line"|grep -q ,; then
+            continue
+        fi
+        key=$(echo $line|cut -d, -f1)
+
+        val_user=$(calculate_field_value "$line" 2)
+        val_nice=$(calculate_field_value "$line" 3)
+
+        val_system=$(calculate_field_value "$line" 4)
+        val_idle=$(calculate_field_value "$line" 5)
+        val_io_wait=$(calculate_field_value "$line" 6)
+        val_irq=$(calculate_field_value "$line" 7)
+        val_softirq=$(calculate_field_value "$line" 8)
+
+        val_total_user=$(echo "scale=2; ${val_user}+${val_nice}"|bc)
+        val_total_system=$(echo "scale=2; ${val_system}+${val_irq}+${val_softirq}"|bc)
+        val_total_idle=$val_idle
+        val_total_iowait=$val_io_wait
+        val_total=$(echo "scale=2; ${val_total_system}+${val_total_user}+${val_total_idle}+${val_total_iowait}"|bc)
+        percent_user=$(echo "scale=2; $val_total_user*100/$val_total"|bc)
+        percent_sys=$(echo "scale=2; $val_total_system*100/$val_total"|bc)
+        percent_idle=$(echo "scale=2; $val_total_idle*100/$val_total"|bc)
+        echo "$key,$percent_user,$percent_sys,$percent_idle" >> "${f_data}_2nd"
+    done
+}
+
 function format_cpu_raw_data(){
     sed '/^\s*$/d' "${f_cpu}" |tr -d '\r'|tr -s ' '|tr ' ' ','|sed 's/cpu,//g' >"${f_res_cpu}"
+    format_cputime
 }
 
 function format_procrank_data(){
@@ -343,6 +378,12 @@ function statistic_data(){
     statistic "${f_res_procrank}" 4|sed "s/^/proc_pss_/"
     echo "--------------------------------"
     statistic "${f_res_procrank}" 5|sed "s/^/proc_uss_/"
+    echo "--------------------------------"
+    statistic "${f_res_cpu}_2nd" 2|sed "s/^/cpu_user_/"
+    echo "--------------------------------"
+    statistic "${f_res_cpu}_2nd" 3|sed "s/^/cpu_sys_/"
+    echo "--------------------------------"
+    statistic "${f_res_cpu}_2nd" 4|sed "s/^/cpu_idle_/"
 }
 
 function main(){
