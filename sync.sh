@@ -3,10 +3,12 @@ CPUS=$(grep processor /proc/cpuinfo |wc -l)
 
 export BASE=`pwd`
 export MIRROR="https://android.googlesource.com/platform/manifest"
-#export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
+export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
 #export MIRROR="/media/liuyq/ext4/android-mirror/aosp/platform/manifest.git"
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
+sync_linaro=true
+branch="android-5.0.2_r1"
 
 #export branch="studio-1.1-dev"
 
@@ -20,45 +22,46 @@ print_usage(){
     echo "\t -h|--help: print this usage"
 }
 
-sync_linaro=true
-branch="master"
-while [ -n "$1" ]; do
-    case "X$1" in
-        X-nl|X--nolinaro)
-            sync_linaro=false
-            shift
-            ;;
-        X-b|X--branch)
-            if [ -z "$2" ]; then
-                echo "Please specify the branch name for the -b|--branch option"
+function parseArgs(){
+    while [ -n "$1" ]; do
+        case "X$1" in
+            X-nl|X--nolinaro)
+                sync_linaro=false
+                shift
+                ;;
+            X-b|X--branch)
+                if [ -z "$2" ]; then
+                    echo "Please specify the branch name for the -b|--branch option"
+                    exit 1
+                fi
+                branch="$2"
+                shift
+                ;;
+            X-h|X--help)
+                print_usage
                 exit 1
-            fi
-            branch="$2"
-            shift
-            ;;
-        X-h|X--help)
-            print_usage
-            exit 1
-            ;;
-        X-*)
-            echo "Unknown option: $1"
-            print_usage
-            exit 1
-            ;;
-        X*)
-            echo "Unknown option: $1"
-            print_usage
-            exit 1
-            ;;
-    esac
-done
+                ;;
+            X-*)
+                echo "Unknown option: $1"
+                print_usage
+                exit 1
+                ;;
+            X*)
+                echo "Unknown option: $1"
+                print_usage
+                exit 1
+                ;;
+        esac
+    done
+}
 
-sync(){
-    
+sync_init(){
     while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url}; do
         sleep 30
     done
+}
 
+sync(){
     #Syncronize and check out
     while ! repo sync -j ${CPUS}; do
         sleep 30
@@ -95,9 +98,11 @@ juno_mali_binary(){
 }
 
 main(){
-    sync
+    parseArgs "$@"
+    sync_init
     if $sync_linaro; then
         sync_linaro
     fi
+    sync
 }
 main "$@"
