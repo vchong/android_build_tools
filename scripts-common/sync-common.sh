@@ -1,10 +1,6 @@
 #!/usr/bin/env sh
-CPUS=$(grep processor /proc/cpuinfo |wc -l)
-
 export BASE=`pwd`
 export MIRROR="https://android.googlesource.com/platform/manifest"
-export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
-#export MIRROR="/media/liuyq/ext4/android-mirror/aosp/platform/manifest.git"
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
 sync_linaro=true
@@ -63,6 +59,7 @@ sync_init(){
 
 sync(){
     #Syncronize and check out
+    CPUS=$(grep processor /proc/cpuinfo |wc -l)
     while ! repo sync -j ${CPUS}; do
         sleep 30
     done
@@ -105,4 +102,3 @@ main(){
     fi
     sync
 }
-main "$@"
