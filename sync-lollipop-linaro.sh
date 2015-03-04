@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
-export BASE=`pwd`
+#!/bin/bash
+export BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/sync-common.sh
 
