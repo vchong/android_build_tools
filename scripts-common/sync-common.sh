@@ -4,8 +4,10 @@ export MIRROR="https://android.googlesource.com/platform/manifest"
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
 sync_linaro=true
-branch="android-5.0.2_r1"
+branch="master"
 
+local_manifest="git://android.git.linaro.org/platform/manifest.git"
+local_manifest_branch="linaro_android_5.0.0"
 #export branch="studio-1.1-dev"
 
 print_usage(){
@@ -71,7 +73,7 @@ sync_linaro(){
         cd ./local_manifests;
         git pull
     else
-        git clone git://android.git.linaro.org/platform/manifest.git -b linaro_android_5.0.0 local_manifests
+        git clone ${local_manifest} -b ${local_manifest_branch} local_manifests
     fi
     cd ${BASE}
 

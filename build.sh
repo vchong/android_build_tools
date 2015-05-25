@@ -42,7 +42,7 @@ function clean_for_manta(){
 function build_flounder(){
     export TARGET_PREBUILT_KERNEL=device/htc/flounder-kernel/Image.gz-dtb
     targets=""
-    build aosp_flounder64
+    build aosp_flounder
     unset TARGET_PREBUILT_KERNEL
     targets="selinuxtarballs"
 }
