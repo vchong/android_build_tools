@@ -6,8 +6,8 @@ export base_manifest="default.xml"
 sync_linaro=true
 branch="master"
 
-local_manifest="git://android.git.linaro.org/platform/manifest.git"
-local_manifest_branch="linaro_android_5.0.0"
+LOCAL_MANIFEST="git://android.git.linaro.org/platform/manifest.git"
+LOCAL_MANIFEST_BRANCH="linaro-master"
 #export branch="studio-1.1-dev"
 
 print_usage(){
@@ -73,7 +73,7 @@ sync_linaro(){
         cd ./local_manifests;
         git pull
     else
-        git clone ${local_manifest} -b ${local_manifest_branch} local_manifests
+        git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifests
     fi
     cd ${BASE}
 
