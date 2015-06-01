@@ -22,6 +22,12 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
+function build_hikey(){
+    targets="droidcore"
+    build hikey
+    targets="selinuxtarballs"
+}
+
 function build_manta(){
     #export WITH_DEXPREOPT=true
     export TARGET_PREBUILT_KERNEL=device/samsung/manta/kernel
@@ -78,6 +84,7 @@ function build_tools_ddmlib(){
 #build_vexpress
 #build juno
 #build fvp
+build_hikey
 # clean_for manta && build_manta
 #build_tools_ddmlib
-build_flounder
+#build_flounder
