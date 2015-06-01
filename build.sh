@@ -25,7 +25,7 @@ function build(){
 function build_manta(){
     #export WITH_DEXPREOPT=true
     export TARGET_PREBUILT_KERNEL=device/samsung/manta/kernel
-    targets=""
+    targets="droidcore"
     build aosp_manta
     unset TARGET_PREBUILT_KERNEL
     targets="selinuxtarballs"
@@ -41,7 +41,7 @@ function clean_for_manta(){
 
 function build_flounder(){
     export TARGET_PREBUILT_KERNEL=device/htc/flounder-kernel/Image.gz-dtb
-    targets=""
+    targets="droidcore"
     build aosp_flounder
     unset TARGET_PREBUILT_KERNEL
     targets="selinuxtarballs"
