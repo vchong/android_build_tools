@@ -88,7 +88,7 @@ sync_linaro(){
 }
 
 juno_mali_binary(){
-    b_name="juno_vendor.tar.bz2"
+    b_name="vendor.tar.bz2"
     if [ -f ./${b_name} ]; then
         return 
     fi
