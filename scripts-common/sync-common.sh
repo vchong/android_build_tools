@@ -98,6 +98,8 @@ juno_mali_binary(){
 }
 
 main(){
+    # update myself first
+    git pull
     parseArgs "$@"
     sync_init
     if $sync_linaro; then
