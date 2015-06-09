@@ -54,7 +54,8 @@ function parseArgs(){
 }
 
 sync_init(){
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url}; do
+    #while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} -g "default,-device,-non-default,hikey,flounder,-darwin,-mips,-x86" --depth=1 -p linux; do
+    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -p linux; do
         sleep 30
     done
 }
@@ -62,7 +63,7 @@ sync_init(){
 sync(){
     #Syncronize and check out
     CPUS=$(grep processor /proc/cpuinfo |wc -l)
-    while ! repo sync -j ${CPUS}; do
+    while ! repo sync -j ${CPUS} -c; do
         sleep 30
     done
 }
