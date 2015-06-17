@@ -3,7 +3,7 @@
 # Need to update according to your environment
 flexlm_account="yongqin.liu"
 RTSM_AEMv8_HOME="/opt/arm/FVP_Base_AEMv8A-AEMv8A/"
-LINARO_IMAGE_TOOLS_DIR="/backup/srv/linaro-image-tools"
+LINARO_IMAGE_TOOLS_DIR="/SATA3/srv/linaro-image-tools"
 USE_BRIDGE=false
 BRIDGE_IF="ARM${USER}"
 
@@ -70,7 +70,7 @@ function parseArgs(){
     if [ -z "${bz2_dir}" ]; then
         bz2_dir=$(pwd)
     else
-        bz2_dir=$(cd $(dirname $bz2_dir); pwd)
+        bz2_dir=$(cd $bz2_dir; pwd)
     fi
 
     checkFileExist "${bz2_dir}/boot.tar.bz2"
@@ -88,7 +88,6 @@ function installImage(){
         rm -fr "${bz2_dir}/mmc.bin"
         rm -fr "${bz2_dir}/boot"
     fi
-
     #cd ${image_tool_dir}
     #git pull
     #if [ $? -ne 0 ]; then

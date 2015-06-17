@@ -2,6 +2,7 @@
 CPUS=$(grep processor /proc/cpuinfo |wc -l)
 
 targets="selinuxtarballs"
+#targets="boottarball"
 variant="userdebug"
 
 export INIT_BOOTCHART=true
@@ -18,7 +19,7 @@ function build(){
 
     echo "Start to build:" >>time.log
     date +%Y-%m-%d-%H-%M >>time.log
-    make ${targets} -j${CPUS} showcommands 2>&1 |tee build-${product}.log
+    (time make ${targets} -j${CPUS} showcommands) 2>&1 |tee build-${product}.log
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
@@ -82,9 +83,9 @@ function build_tools_ddmlib(){
 }
 
 #build_vexpress
-#build fvp
+build fvp
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build_flounder
-build juno
-build_hikey
+#build juno
+#build_hikey
