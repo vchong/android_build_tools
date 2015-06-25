@@ -15,3 +15,5 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)
 LOCAL_SRC_FILES := adbroot.sh 
 LOCAL_MODULE_TAGS := debug
 include $(BUILD_PREBUILT)
+
+include $(LOCAL_PATH)/sl/Android.mk
