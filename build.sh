@@ -6,6 +6,7 @@ targets="selinuxtarballs"
 variant="userdebug"
 
 export INIT_BOOTCHART=true
+export USE_LINARO_TOOLCHAIN=true
 
 function build(){
     export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
