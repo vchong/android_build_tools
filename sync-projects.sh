@@ -9,12 +9,12 @@ LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifes
 LOCAL_MANIFEST_BRANCH="lor_ice_lolly_mr1"
 
 sync_init_with_depth(){
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1; do
+    while ! repo init --depth=1; do
         sleep 30
     done
 }
 sync_init_without_depth(){
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=0; do
+    while ! repo init --depth=0; do
         sleep 30
     done
 }
