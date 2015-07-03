@@ -78,6 +78,8 @@ sync_linaro(){
     fi
     cd ${BASE}
 
+    cp -uvf android-tools/liuyq.xml .repo/local_manifests/liuyq.xml
+
     if [ -d ./android-patchsets ]; then
         cd ./android-patchsets
         git pull

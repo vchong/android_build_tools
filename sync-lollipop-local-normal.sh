@@ -6,6 +6,6 @@ source ${BASE}/scripts-common/sync-common.sh
 export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
 branch="android-5.1.1_r4"
 LOCAL_MANIFEST="git://android.git.linaro.org/platform/manifest.git"
-LOCAL_MANIFEST_BRANCH="linaro_android_5.0.0_toolchains"
+LOCAL_MANIFEST_BRANCH="linaro-lollipop"
 
 main "$@"
