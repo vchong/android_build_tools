@@ -9,3 +9,14 @@ LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifes
 LOCAL_MANIFEST_BRANCH="linaro-lollipop"
 
 main "$@"
+
+${BASE}/sync-projects.sh  art \
+                          build \
+                          bionic \
+                          external/opencv-upstream \
+                          external/zlib \
+                          external/chromium_org
+
+./android-patchsets/LOLLIPOP-MLCR-PATCHSET
+#[ -f ./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET ] && ./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET
+./android-patchsets/nexus9-workarounds
