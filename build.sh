@@ -87,6 +87,6 @@ function build_tools_ddmlib(){
 #build fvp
 # clean_for manta && build_manta
 #build_tools_ddmlib
-build_flounder
 #build juno
-#build_hikey
+build_hikey
+build_flounder
