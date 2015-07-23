@@ -4,7 +4,7 @@ export BASE=$(cd $(dirname $0);pwd)
 source ${BASE}/scripts-common/sync-common.sh
 
 export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
-branch="android-5.1.1_r6"
+branch="android-5.1.1_r8"
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-lollipop"
 
@@ -18,5 +18,11 @@ ${BASE}/sync-projects.sh  art \
                           external/chromium_org
 
 ./android-patchsets/LOLLIPOP-MLCR-PATCHSET
-#[ -f ./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET ] && ./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET
 ./android-patchsets/nexus9-workarounds
+./android-patchsets/hikey-lcr-board-workaround
+
+
+cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
+./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
+
+./build.sh && adb reboot bootloader && ANDROID_PRODUCT_OUT=out/target/product/flounder/ fastboot -w flashall
