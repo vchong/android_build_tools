@@ -6,7 +6,7 @@ targets="selinuxtarballs"
 variant="userdebug"
 
 export INIT_BOOTCHART=true
-export USE_LINARO_TOOLCHAIN=true
+#export USE_LINARO_TOOLCHAIN=true
 
 function build(){
     export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
@@ -25,6 +25,8 @@ function build(){
 }
 
 function build_hikey(){
+    #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
+    #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
     targets="droidcore"
     build hikey
     targets="selinuxtarballs"
@@ -89,4 +91,4 @@ function build_tools_ddmlib(){
 #build_tools_ddmlib
 #build juno
 build_hikey
-build_flounder
+#build_flounder

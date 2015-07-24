@@ -10,12 +10,13 @@ LOCAL_MANIFEST_BRANCH="linaro-lollipop"
 
 main "$@"
 
-${BASE}/sync-projects.sh  art \
-                          build \
+${BASE}/sync-projects.sh  build \
                           bionic \
-                          external/opencv-upstream \
-                          external/zlib \
-                          external/chromium_org
+
+#                          art \
+#                          external/opencv-upstream \
+#                          external/zlib \
+#                          external/chromium_org
 
 ./android-patchsets/LOLLIPOP-MLCR-PATCHSET
 ./android-patchsets/nexus9-workarounds
@@ -25,4 +26,10 @@ ${BASE}/sync-projects.sh  art \
 cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 
-./build.sh && adb reboot bootloader && ANDROID_PRODUCT_OUT=out/target/product/flounder/ fastboot -w flashall
+cd device/linaro/build
+git fetch ssh://yongqin.liu@android-review.linaro.org:29418/device/linaro/common refs/changes/77/15977/1 && git cherry-pick FETCH_HEAD
+cd $BASE
+
+./build.sh
+#adb reboot bootloader
+#ANDROID_PRODUCT_OUT=out/target/product/flounder/ fastboot -w flashall
