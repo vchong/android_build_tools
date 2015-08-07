@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#kernel dtb=fvp-base-gicv2-psci.dtb initrd=ramdisk.img console=ttyAMA0 amba-clcd.mode=VGA
+#dtb=fdt.dtb initrd=ramdisk.img console=ttyAMA0 earlyprintk=pl011,0x1c090000 debug user_debug=31 loglevel=9 androidboot.hardware=fvpbase
+
 # Need to update according to your environment
 flexlm_account="yongqin.liu"
 RTSM_AEMv8_HOME="/opt/arm/FVP_Base_AEMv8A-AEMv8A/"
