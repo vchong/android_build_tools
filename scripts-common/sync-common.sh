@@ -63,7 +63,7 @@ sync_init(){
 sync(){
     #Syncronize and check out
     CPUS=$(grep processor /proc/cpuinfo |wc -l)
-    while ! repo sync -j ${CPUS} -c; do
+    while ! repo sync -j ${CPUS} -c --force-sync; do
         sleep 30
     done
 }
