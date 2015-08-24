@@ -19,16 +19,13 @@ ${BASE}/sync-projects.sh  build \
 #                          external/chromium_org
 
 ./android-patchsets/LOLLIPOP-MLCR-PATCHSET
+./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET
 ./android-patchsets/nexus9-workarounds
 ./android-patchsets/hikey-lcr-board-workaround
 
 
 cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
-
-cd device/linaro/build
-git fetch ssh://yongqin.liu@android-review.linaro.org:29418/device/linaro/common refs/changes/77/15977/1 && git cherry-pick FETCH_HEAD
-cd $BASE
 
 ./build.sh
 #adb reboot bootloader
