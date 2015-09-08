@@ -1,0 +1,4 @@
+http://builds.96boards.org/releases/hikey/linaro/aosp/latest/
+https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2
+https://github.com/96boards/documentation/wiki/HiKeyUEFI
+http://builds.96boards.org/snapshots/hikey/linaro/binaries/

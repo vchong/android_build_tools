@@ -96,7 +96,7 @@ juno_mali_binary(){
         return
     fi
     #curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20141112/vendor.tar.bz2 >${b_name}
-    curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20150612/vendor.tar.bz2 >${b_name}
+    curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20150904-members-only/vendor.tar.bz2 >${b_name}
     tar jxvf ${b_name}
 }
 

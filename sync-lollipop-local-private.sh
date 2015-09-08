@@ -12,6 +12,7 @@ main "$@"
 
 ${BASE}/sync-projects.sh  build \
                           bionic \
+                          android-patchsets \
 
 #                          art \
 #                          external/opencv-upstream \
@@ -27,6 +28,6 @@ ${BASE}/sync-projects.sh  build \
 cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 
-./build.sh
+#./build.sh
 #adb reboot bootloader
 #ANDROID_PRODUCT_OUT=out/target/product/flounder/ fastboot -w flashall
