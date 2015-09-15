@@ -76,27 +76,30 @@ sync_linaro(){
     else
         git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifests
     fi
+
     cd ${BASE}
 
     cp -uvf android-tools/liuyq.xml .repo/local_manifests/liuyq.xml
-
-    if [ -d ./android-patchsets ]; then
-        cd ./android-patchsets
-        git pull
-    else
-        git clone https://android.git.linaro.org/git/android-patchsets.git android-patchsets
-    fi
-    cd ${BASE}
     juno_mali_binary
+    hikey_mali_binary
 }
 
 juno_mali_binary(){
-    b_name="vendor.tar.bz2"
+    local b_name="juno-20150904-vendor.tar.bz2"
     if [ -f ./${b_name} ]; then
         return
     fi
     #curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20141112/vendor.tar.bz2 >${b_name}
     curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20150904-members-only/vendor.tar.bz2 >${b_name}
+    tar jxvf ${b_name}
+}
+
+hikey_mali_binary(){
+    local b_name="hikey-20150706-vendor.tar.bz2"
+    if [ -f ./${b_name} ]; then
+        return
+    fi
+    curl --fail --silent --show-error http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 >${b_name}
     tar jxvf ${b_name}
 }
 
