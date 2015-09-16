@@ -147,6 +147,7 @@ function startFvp(){
         -C bp.flashloader0.fname=fvp_fip.bin \
         -C bp.virtioblockdevice.image_path=${bz2_dir}/mmc.bin \
         -C bp.hostbridge.userNetworking=true \
+        -C bp.ve_sysregs.mmbSiteDefault=0 \
         -C bp.hostbridge.userNetPorts="${port}=${port}" \
         -C bp.smsc_91c111.enabled=1
         #-C bp.flashloader0.fname=uefi_fvp-base.bin \
@@ -162,6 +163,7 @@ function startFvp(){
         -C bp.flashloader0.fname=fvp_fip.bin \
         -C bp.virtioblockdevice.image_path=${bz2_dir}/mmc.bin \
         -C bp.hostbridge.interfaceName=${BRIDGE_IF} \
+        -C bp.ve_sysregs.mmbSiteDefault=0 \
         -C bp.smsc_91c111.enabled=true \
         -C bp.smsc_91c111.mac_address="8e:14:b0:c8:96:d1"
         #-C bp.smsc_91c111.mac_address=auto
