@@ -1,6 +1,7 @@
 metadata:
     name: shell_custom
     format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Run custom shell command"
     maintainer:
         - yongqin.liu@linaro.org
     os:
