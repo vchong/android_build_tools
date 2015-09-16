@@ -1,0 +1,6 @@
+https://source.android.com/source/build-numbers.html
+https://developers.google.com/android/nexus/blobs-preview
+Android Study:
+https://docs.google.com/document/d/1RAQLeZYSJWuYWt3cOBP7AoDTv3AJToISXBZSeJZTSkE/edit#
+Lava Training:
+https://docs.google.com/document/d/1nyPbITVxpw3igfrb_MXeJ2qPpUiSfXAzPIEBxhsptRc/edit

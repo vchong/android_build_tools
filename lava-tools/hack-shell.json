@@ -1,0 +1,17 @@
+        {
+            "command": "lava_test_shell",
+            "parameters": {
+                "lava_test_dir": "/data/local/tmp/lava",
+                "lava_test_results_dir": "/local/tmp/lava",
+                "testdef_repos": [
+                    {
+                        "git-repo": "git://git.linaro.org/people/yongqin.liu/public/android.git",
+                        "parameters": {
+                            "SHELL_COMMAND": "sleep 1800"
+                        },
+                        "testdef": "lava-tools/shell-custom.yaml"
+                    }
+                ],
+                "timeout": 3600
+            }
+        },

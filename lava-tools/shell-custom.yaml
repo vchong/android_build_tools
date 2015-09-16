@@ -1,0 +1,18 @@
+metadata:
+    name: shell_custom
+    format: "Lava-Test-Shell Test Definition 1.0"
+    maintainer:
+        - yongqin.liu@linaro.org
+    os:
+        - android
+    scope:
+        - functional
+    devices:
+        - wg
+
+params:
+    SHELL_COMMAND: "logcat -d"
+
+run:
+    steps:
+        - lava-test-case run-commands --shell $SHELL_COMMAND
