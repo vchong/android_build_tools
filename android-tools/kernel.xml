@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <project path="kernel/common" name="kernel/common" />
+  <project path="kernel/tegra" name="kernel/tegra" />
+  <project path="kernel/exynos" name="kernel/exynos" />
+  <project path="kernel/flo" name="kernel/flo" />
+
+</manifest>
