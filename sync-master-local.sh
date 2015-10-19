@@ -9,4 +9,5 @@ branch="master"
 LOCAL_MANIFEST=http://android.git.linaro.org/git/platform/manifest.git
 LOCAL_MANIFEST_BRANCH=linaro-master
 
+#cp -uvf android-tools/kernel.xml .repo/local_manifests/kernel.xml
 main "$@"
