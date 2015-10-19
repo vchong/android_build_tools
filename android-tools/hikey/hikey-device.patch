@@ -1,44 +1,30 @@
 diff --git a/grub.cfg b/grub.cfg
-index a0ae9ef..7044568 100644
+index 403aacb..3deae3a 100644
 --- a/grub.cfg
 +++ b/grub.cfg
-@@ -1,7 +1,7 @@
+@@ -1,17 +1,17 @@
  set default="0"
  set timeout=2
+ menuentry 'AOSP@720P' {
+-    linux /Image console=ttyAMA3,115200 androidboot.console=ttyAMA3 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:1280x720@60
++    linux /Image console=ttyAMA0,115200 androidboot.console=ttyAMA0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:1280x720@60
+     initrd /ramdisk.img
+     devicetree /hi6220-hikey.dtb
+ }
+ menuentry 'AOSP@SVGA' {
+-    linux /Image console=ttyAMA3,115200 androidboot.console=ttyAMA3 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60
++    linux /Image console=ttyAMA0,115200 androidboot.console=ttyAMA0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60
+     initrd /ramdisk.img
+     devicetree /hi6220-hikey.dtb
+ }
  menuentry 'AOSP' {
 -    linux /Image console=ttyAMA3,115200 androidboot.console=ttyAMA3 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime
 +    linux /Image console=ttyAMA0,115200 androidboot.console=ttyAMA0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime
      initrd /ramdisk.img
      devicetree /hi6220-hikey.dtb
  }
-diff --git a/init.hikey.rc b/init.hikey.rc
-index a7126cb..417df7a 100644
---- a/init.hikey.rc
-+++ b/init.hikey.rc
-@@ -197,12 +197,17 @@ service dhcpcd_wlan0 /system/bin/dhcpcd -dABKL
-      disabled
-      oneshot
- 
--service dhcpcd_eth0 /system/bin/dhcpcd -dABKL
--     group dhcp
--     disabled
--     oneshot
-+service dhcpcd_eth0 /system/bin/dhcpcd -aABDKL
-+    class late_start
-+    disabled
-+    oneshot
- 
- service dhcpcd_bt-pan /system/bin/dhcpcd -dABKL
-      group dhcp
-      disabled
-      oneshot
-+
-+service iprenew_eth0 /system/bin/dhcpcd -n
-+    class late_start
-+    disabled
-+    oneshot
 diff --git a/wifi_modules/Android.mk b/wifi_modules/Android.mk
-index d9c1edd..229fdbd 100755
+index d9c1edd..f9cfb51 100755
 --- a/wifi_modules/Android.mk
 +++ b/wifi_modules/Android.mk
 @@ -12,12 +12,12 @@ wifi_modules: android_kernel
@@ -46,15 +32,15 @@ index d9c1edd..229fdbd 100755
  	cd kernel/ &&\
  	rm -rf build-utilites &&\
 -	git clone --depth 1 https://github.com/96boards/wilink8-wlan_build-utilites.git build-utilites &&\
-+	git clone -v --depth 1 file:////SATA3/aosp-mirror/hikey/build-utilites/ build-utilites &&\
++	git clone --depth 1 file:////SATA3/aosp-mirror/hikey/build-utilites/ &&\
  	cp -a build-utilites/setup-env.sample build-utilites/setup-env &&\
  	sed -e "s|^export TOOLCHAIN_PATH=.*|export TOOLCHAIN_PATH=$(ANDROID_PRODUCT_OUT)/obj/wifi-build/${TOOLCHAIN_DIR}/bin|" -e "s|^export KERNEL_PATH=.*|export KERNEL_PATH=$(ANDROID_PRODUCT_OUT)/obj/wifi-build/kernel|" -e "s|^export CROSS_COMPILE=.*|export CROSS_COMPILE=aarch64-linux-gnu-|" -e "s|^export ARCH=.*|export ARCH=arm64|" -i build-utilites/setup-env &&\
 -	git clone -b hikey --depth 1 https://github.com/96boards/wilink8-wlan_wl18xx.git    build-utilites/src/driver &&\
 -	git clone -b R8.5  --depth 1 https://github.com/96boards/wilink8-wlan_wl18xx_fw.git build-utilites/src/fw_download &&\
 -	git clone -b hikey --depth 1 https://github.com/96boards/wilink8-wlan_backports.git build-utilites/src/backports &&\
-+	git clone -v -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx build-utilites/src/driver &&\
-+	git clone -v -b R8.5  --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx_fw/ build-utilites/src/fw_download &&\
-+	git clone -v -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_backports/ build-utilites/src/backports &&\
++	git clone -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx    build-utilites/src/driver &&\
++	git clone -b R8.5  --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx_fw build-utilites/src/fw_download &&\
++	git clone -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_backports build-utilites/src/backports &&\
  	cd build-utilites &&\
  	./build_wl18xx.sh modules &&\
  	mkdir -p $(ANDROID_PRODUCT_OUT)/system/modules/wifi
