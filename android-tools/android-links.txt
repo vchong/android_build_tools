@@ -4,3 +4,6 @@ Android Study:
 https://docs.google.com/document/d/1RAQLeZYSJWuYWt3cOBP7AoDTv3AJToISXBZSeJZTSkE/edit#
 Lava Training:
 https://docs.google.com/document/d/1nyPbITVxpw3igfrb_MXeJ2qPpUiSfXAzPIEBxhsptRc/edit
+Android Kernel:
+https://source.android.com/source/building-kernels.html
+

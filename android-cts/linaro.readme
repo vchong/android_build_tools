@@ -1,0 +1,27 @@
+1. repo init -u https://android.googlesource.com/platform/manifest -b studio-1.4
+2. apply patch
+3. build:
+    build_tools_ddmlib(){
+        #need to use with java6
+        export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
+        export PATH=${JAVA_HOME}/bin:$PATH
+        export ANDROID_HOME=/home/yongqin.liu/android-tools/android-sdk-linux
+        cd tools
+        ./gradlew prepareRepo copyGradleProperty
+        if [ $? -ne 0 ]; then
+            echo "Failed to run:./gradlew prepareRepo copyGradleProperty"
+            return
+        fi
+        ./gradlew assemble
+        if [ $? -ne 0 ]; then
+            ./gradlew clean assemble
+            if [ $? -ne 0 ]; then
+                echo "Failed to run:./gradlew clean assemble"
+                return
+            fi
+        fi
+        ./gradlew :base:ddmlib:build
+        unset JAVA_HOME
+    }
+4. scp hackbox://home/yongqin.liu/android-tools/out/build/base/ddmlib/build/classes/main/com/android/ddmlib/AdbHelper*.class com/android/ddmlib/
+5. jar -uvf tradefed-prebuilt.jar com/

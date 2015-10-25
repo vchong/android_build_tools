@@ -46,7 +46,7 @@ sudo umount "${d_raw}"
 rmdir "${d_raw}"
 rm "${f_raw_img}"
 
-#sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
+sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
 sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/' "${d_system}/build.prop"
 
 ${f_make_ext4fs} -s -T -1 -S ${f_file_contexts} -l "${system_size}" -J -a system "${f_system_img_new}" "${d_system}"
