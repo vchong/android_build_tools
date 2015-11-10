@@ -59,10 +59,18 @@ function build_flounder(){
     targets="selinuxtarballs"
 }
 
+function build_flo(){
+    export TARGET_PREBUILT_KERNEL=device/asus/flo-kernel/kernel
+    targets="droidcore"
+    build aosp_flo
+    unset TARGET_PREBUILT_KERNEL
+    targets="selinuxtarballs"
+}
+
 function build_vexpress(){
     export TARGET_UEFI_TOOLS=arm-eabi-
     build vexpress
-    unset TARGET_UEFI_TOOLS 
+    unset TARGET_UEFI_TOOLS
 }
 
 function build_tools_ddmlib(){
@@ -94,3 +102,4 @@ function build_tools_ddmlib(){
 #build juno
 build_hikey
 #build_flounder
+#build_flo
