@@ -85,21 +85,20 @@ sync_linaro(){
 }
 
 juno_mali_binary(){
-    local b_name="juno-20150904-vendor.tar.bz2"
+    local b_name="juno-20151111-vendor.tar.bz2"
     if [ -f ./${b_name} ]; then
         return
     fi
-    #curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20141112/vendor.tar.bz2 >${b_name}
-    curl --fail --silent --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20150904-members-only/vendor.tar.bz2 >${b_name}
+    curl --fail --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20151111-members-only/vendor.tar.bz2 >${b_name}
     tar jxvf ${b_name}
 }
 
 hikey_mali_binary(){
-    local b_name="hikey-20150706-vendor.tar.bz2"
+    local b_name="hikey-20150623-vendor.tar.bz2"
     if [ -f ./${b_name} ]; then
         return
     fi
-    curl --fail --silent --show-error http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 >${b_name}
+    curl --fail --show-error -b license_accepted_eee6ac0e05136eb58db516d8c9c80d6b=yes http://snapshots.linaro.org/android/binaries/hikey/20150623-members-only/vendor.tar.bz2 >${b_name}
     tar jxvf ${b_name}
 }
 

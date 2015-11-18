@@ -12,19 +12,20 @@ main "$@"
 
 ${BASE}/sync-projects.sh  build \
                           bionic \
+                          art \
                           android-patchsets \
 
+./android-patchsets/MARSHMALLOW-MLCR-PATCHSET
+./android-patchsets/hikey-m-workarounds
+./android-patchsets/juno-m-workarounds
+#./build.sh
 exit
 #                          art \
 #                          external/opencv-upstream \
 #                          external/zlib \
 #                          external/chromium_org
 
-./android-patchsets/LOLLIPOP-MLCR-PATCHSET
-./android-patchsets/LOLLIPOP-CHROMIUM-PATCHSET
 ./android-patchsets/nexus9-workarounds
-./android-patchsets/hikey-lcr-board-workaround
-
 
 cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
 ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET

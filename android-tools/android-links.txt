@@ -6,4 +6,5 @@ Lava Training:
 https://docs.google.com/document/d/1nyPbITVxpw3igfrb_MXeJ2qPpUiSfXAzPIEBxhsptRc/edit
 Android Kernel:
 https://source.android.com/source/building-kernels.html
-
+Getting Started:
+http://developer.android.com/intl/zh-cn/training/index.html

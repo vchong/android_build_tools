@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
+  <!--
   <remote name="linaro-android" fetch="git://android.git.linaro.org/" review="review.android.git.linaro.org" />
   <remote name="github4liuyq" fetch="http://github.com/" />
 
   <project path="packages/apps/AndroidTerm" name="platform/external/AndroidTerm" revision="linaro-master" remote="linaro-android"/>
   <project path="external/blitVH-test" name="platform/external/blitVH-test" revision="master" remote="linaro-android" />
   <project path="packages/inputmethods/hackerskeyboard" name="liuyq/hackerskeyboard" revision="master" remote="github4liuyq"/>
-
+-->
 <!--
   <project path="external/opencv-upstream" name="Itseez/opencv" revision="master" remote="github4liuyq" />
 -->
+  <!--
   <project path="external/opencv-upstream" name="liuyq/opencv" revision="master" remote="github4liuyq" />
 
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.1-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.1-linaro" />
+-->
 </manifest>
