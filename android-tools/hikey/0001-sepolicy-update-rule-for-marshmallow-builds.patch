@@ -1,0 +1,100 @@
+From 96cbda03b37ec6a74cb77e40264a6cd15adb31d8 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Fri, 20 Nov 2015 02:31:24 +0800
+Subject: [PATCH] sepolicy: update rule for marshmallow builds
+
+Change-Id: Id6d068cf84a8913541d3f24058b98ab184596283
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ sepolicy/file_contexts | 2 ++
+ sepolicy/hci_attach.te | 1 +
+ sepolicy/healthd.te    | 1 +
+ sepolicy/linaro.te     | 4 ++++
+ sepolicy/netd.te       | 1 +
+ sepolicy/shell.te      | 2 ++
+ sepolicy/toolbox.te    | 1 +
+ sepolicy/zygote.te     | 1 +
+ 8 files changed, 13 insertions(+)
+ create mode 100644 sepolicy/hci_attach.te
+ create mode 100644 sepolicy/healthd.te
+ create mode 100644 sepolicy/toolbox.te
+
+diff --git a/sepolicy/file_contexts b/sepolicy/file_contexts
+index 9de3217..fbccbdd 100644
+--- a/sepolicy/file_contexts
++++ b/sepolicy/file_contexts
+@@ -6,4 +6,6 @@
+ /dev/mali              u:object_r:gpu_device:s0
+ /dev/dri/card0         u:object_r:gpu_device:s0
+ /dev/hci_tty           u:object_r:hci_attach_dev:s0
++/dev/ttyAMA1           u:object_r:hci_attach_dev:s0
+ /system/bin/faketsd    u:object_r:linaro_exec:s0
++/system/bin/uim    u:object_r:hci_attach_exec:s0
+diff --git a/sepolicy/hci_attach.te b/sepolicy/hci_attach.te
+new file mode 100644
+index 0000000..08c3ebe
+--- /dev/null
++++ b/sepolicy/hci_attach.te
+@@ -0,0 +1 @@
++allow hci_attach self:capability dac_override;
+diff --git a/sepolicy/healthd.te b/sepolicy/healthd.te
+new file mode 100644
+index 0000000..5ae2745
+--- /dev/null
++++ b/sepolicy/healthd.te
+@@ -0,0 +1 @@
++allow healthd self:capability { dac_override dac_read_search sys_nice };
+diff --git a/sepolicy/linaro.te b/sepolicy/linaro.te
+index 7ed01fa..f84d7db 100644
+--- a/sepolicy/linaro.te
++++ b/sepolicy/linaro.te
+@@ -1,9 +1,13 @@
+ type linaro, domain, mlstrustedsubject;
+ type linaro_exec, exec_type, file_type;
+ 
++init_daemon_domain(linaro)
++
+ allow linaro sysfs:file write;
+ allow linaro proc:file write;
+ allow linaro system_file:file execute_no_trans;
+ allow linaro shell_exec:file rx_file_perms;
+ 
++allow linaro self:capability dac_override;
++
+ permissive linaro;
+diff --git a/sepolicy/netd.te b/sepolicy/netd.te
+index 42717f5..ee36425 100644
+--- a/sepolicy/netd.te
++++ b/sepolicy/netd.te
+@@ -1,3 +1,4 @@
++dontaudit netd self:capability sys_module;
+ allow netd usermodehelper:file r_file_perms;
+ allow netd debug_prop:property_service set;
+ allow netd kernel:system module_request;
+diff --git a/sepolicy/shell.te b/sepolicy/shell.te
+index f62b97a..696e36c 100644
+--- a/sepolicy/shell.te
++++ b/sepolicy/shell.te
+@@ -14,3 +14,5 @@ allow shell ctl_default_prop:property_service set;
+ allow shell unlabeled:file r_file_perms;
+ 
+ allow shell kernel:system module_request;
++
++allow shell debuggerd_exec:file rx_file_perms;
+diff --git a/sepolicy/toolbox.te b/sepolicy/toolbox.te
+new file mode 100644
+index 0000000..3709919
+--- /dev/null
++++ b/sepolicy/toolbox.te
+@@ -0,0 +1 @@
++allow toolbox self:capability { dac_override dac_read_search sys_nice };
+diff --git a/sepolicy/zygote.te b/sepolicy/zygote.te
+index 04fc7d3..d891909 100644
+--- a/sepolicy/zygote.te
++++ b/sepolicy/zygote.te
+@@ -1 +1,2 @@
+ allow zygote kernel:system module_request;
++allow zygote self:capability sys_nice;
+-- 
+1.9.1
+
