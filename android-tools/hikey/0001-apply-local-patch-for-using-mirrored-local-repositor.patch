@@ -1,0 +1,34 @@
+From dfa51950593d95292df2462a15eb5231ae181631 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Fri, 20 Nov 2015 14:05:04 +0800
+Subject: [PATCH] apply local patch for using mirrored local repositories
+
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ wifi_modules/Android.mk | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/wifi_modules/Android.mk b/wifi_modules/Android.mk
+index e2569bb..57e3af8 100755
+--- a/wifi_modules/Android.mk
++++ b/wifi_modules/Android.mk
+@@ -8,12 +8,12 @@ wifi_modules: android_kernel
+ 	cp -rf $(ANDROID_PRODUCT_OUT)/obj/kernel/. kernel/ &&\
+ 	cd kernel/ &&\
+ 	rm -rf build-utilites &&\
+-	git clone --depth 1 https://github.com/96boards/wilink8-wlan_build-utilites.git build-utilites &&\
++	git clone --depth 1 file:////SATA3/aosp-mirror/hikey/build-utilites/ &&\
+ 	cp -a build-utilites/setup-env.sample build-utilites/setup-env &&\
+ 	sed -e "s|^export TOOLCHAIN_PATH=.*|export TOOLCHAIN_PATH=$(ANDROID_PRODUCT_OUT)/obj/wifi-build/${TOOLCHAIN_DIR}/bin|" -e "s|^export KERNEL_PATH=.*|export KERNEL_PATH=$(ANDROID_PRODUCT_OUT)/obj/wifi-build/kernel|" -e "s|^export CROSS_COMPILE=.*|export CROSS_COMPILE=aarch64-linux-android-|" -e "s|^export ARCH=.*|export ARCH=arm64|" -i build-utilites/setup-env &&\
+-	git clone -b hikey --depth 1 https://github.com/96boards/wilink8-wlan_wl18xx.git    build-utilites/src/driver &&\
+-	git clone -b R8.5  --depth 1 https://github.com/96boards/wilink8-wlan_wl18xx_fw.git build-utilites/src/fw_download &&\
+-	git clone -b hikey --depth 1 https://github.com/96boards/wilink8-wlan_backports.git build-utilites/src/backports &&\
++	git clone -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx    build-utilites/src/driver &&\
++	git clone -b R8.5  --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_wl18xx_fw build-utilites/src/fw_download &&\
++	git clone -b hikey --depth 1 file:////SATA3/aosp-mirror/hikey/wilink8-wlan_backports build-utilites/src/backports &&\
+ 	cd build-utilites &&\
+ 	./build_wl18xx.sh modules &&\
+ 	mkdir -p $(ANDROID_PRODUCT_OUT)/system/modules/wifi
+-- 
+1.9.1
+

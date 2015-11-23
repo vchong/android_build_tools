@@ -20,15 +20,18 @@ ${BASE}/sync-projects.sh  build \
 ./android-patchsets/hikey-m-workarounds
 ./android-patchsets/juno-m-workarounds
 
+## apply temporary patches
 cp android-tools/hikey/0001-selinux-enabled-selinux-for-hikey-marshmallow-build.patch device/linaro/hikey/
 cd device/linaro/hikey/
 git am 0001-selinux-enabled-selinux-for-hikey-marshmallow-build.patch
 cd ../../../
 
-cp android-tools/hikey/0001-sepolicy-update-rule-for-marshmallow-builds.patch device/linaro/build
-cd device/linaro/build
-git am 0001-sepolicy-update-rule-for-marshmallow-builds.patch
+## apply local patch
+cp android-tools/hikey/0001-apply-local-patch-for-using-mirrored-local-repositor.patch device/linaro/hikey/
+cd device/linaro/hikey/
+git am 0001-apply-local-patch-for-using-mirrored-local-repositor.patch
 cd ../../../
+
 ./build.sh
 exit
 #                          art \

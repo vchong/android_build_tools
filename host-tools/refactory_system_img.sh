@@ -30,24 +30,30 @@ f_raw_img="${cur_dir}/raw.img"
 d_raw="${cur_dir}/raw"
 system_size="685768704"
 
-perl "${f_unpack_pl}" "${f_boot_img}"
+function extract_file_contexts(){
+    perl "${f_unpack_pl}" "${f_boot_img}"
 
-f_file_contexts="${cur_dir}/file_contexts"
-rm -f "${f_file_contexts}"
-cp -uvf "${f_boot_img}-ramdisk/file_contexts" "${f_file_contexts}"
-rm -vfr "${f_boot_img}-ramdisk" "${f_boot_img}-ramdisk.cpio.gz" "${f_boot_img}-kernel.gz"
+    f_file_contexts="${cur_dir}/file_contexts"
+    rm -f "${f_file_contexts}"
+    cp -uvf "${f_boot_img}-ramdisk/file_contexts" "${f_file_contexts}"
+    rm -vfr "${f_boot_img}-ramdisk" "${f_boot_img}-ramdisk.cpio.gz" "${f_boot_img}-kernel.gz"
+}
 
-rm -fr "${f_raw_img}" "${d_raw}" 
-"${f_simg2img}" "${f_system_img_old}" "${f_raw_img}"
-mkdir "${d_system}" "${d_raw}"
-sudo mount -t ext4 "${f_raw_img}" "${d_raw}"
-cp -ruvf ${d_raw}/* ${d_system}/
-sudo umount "${d_raw}"
-rmdir "${d_raw}"
-rm "${f_raw_img}"
+function refactory_sys_img(){
+    rm -fr "${f_raw_img}" "${d_raw}"
+    "${f_simg2img}" "${f_system_img_old}" "${f_raw_img}"
+    mkdir "${d_system}" "${d_raw}"
+    sudo mount -t ext4 "${f_raw_img}" "${d_raw}"
+    #cp -ruvf ${d_raw}/* ${d_system}/
+    sudo rm -fr ${d_raw}/priv-app/SetupWizard
+    sudo umount "${d_raw}"
+    rmdir "${d_raw}"
+    mv "${f_raw_img}" ${f_system_img_new}
+    #sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
+    #sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/' "${d_system}/build.prop"
 
-sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
-sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/' "${d_system}/build.prop"
+    #${f_make_ext4fs} -s -T -1 -S ${f_file_contexts} -l "${system_size}" -J -a system "${f_system_img_new}" "${d_system}"
+    #rm -fr "${d_system}" ${f_file_contexts}
+}
 
-${f_make_ext4fs} -s -T -1 -S ${f_file_contexts} -l "${system_size}" -J -a system "${f_system_img_new}" "${d_system}"
-rm -fr "${d_system}" ${f_file_contexts}
+refactory_sys_img
