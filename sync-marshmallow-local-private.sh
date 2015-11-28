@@ -21,9 +21,9 @@ ${BASE}/sync-projects.sh  build \
 ./android-patchsets/juno-m-workarounds
 
 ## apply temporary patches
-cp android-tools/hikey/0001-selinux-enabled-selinux-for-hikey-marshmallow-build.patch device/linaro/hikey/
-cd device/linaro/hikey/
-git am 0001-selinux-enabled-selinux-for-hikey-marshmallow-build.patch
+cp ./android-tools/0001-enable-bootchart-for-the-first-boot.patch device/linaro/build
+cd device/linaro/build/
+git am 0001-enable-bootchart-for-the-first-boot.patch
 cd ../../../
 
 ## apply local patch

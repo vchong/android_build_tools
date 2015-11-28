@@ -1,0 +1,33 @@
+From ba7913bf22cbc6384a72a4fa66c18e16c9639f0e Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Fri, 27 Nov 2015 16:03:50 +0800
+Subject: [PATCH 1/1] enable bootchart for the first boot
+
+Change-Id: I8c7c5701125fe52bfecc54a490c9025187e26124
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ extra-and-tests.mk              | 2 ++
+ extra-and-tests/bootchart_start | 1 +
+ 2 files changed, 3 insertions(+)
+ create mode 100644 extra-and-tests/bootchart_start
+
+diff --git a/extra-and-tests.mk b/extra-and-tests.mk
+index 1bdc9c1..f6f1003 100644
+--- a/extra-and-tests.mk
++++ b/extra-and-tests.mk
+@@ -30,3 +30,5 @@ PRODUCT_PACKAGES += bionic-benchmarks
+ PRODUCT_PACKAGES += bionic-unit-tests-static
+ 
+ PRODUCT_PACKAGES += perf
++
++PRODUCT_COPY_FILES += $(COMMON_EXTRA_TESTS_DIR)/bootchart_start:/data/bootchart/start
+diff --git a/extra-and-tests/bootchart_start b/extra-and-tests/bootchart_start
+new file mode 100644
+index 0000000..52bd8e4
+--- /dev/null
++++ b/extra-and-tests/bootchart_start
+@@ -0,0 +1 @@
++120
+-- 
+1.9.1
+

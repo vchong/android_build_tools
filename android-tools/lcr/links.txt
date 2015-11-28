@@ -1,0 +1,2 @@
+https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-Benchmarks
+https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-checklist#
