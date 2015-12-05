@@ -5,10 +5,9 @@ targets="selinuxtarballs"
 #targets="boottarball"
 variant="userdebug"
 
-export INIT_BOOTCHART=true
-#export USE_LINARO_TOOLCHAIN=true
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
+export TARGET_GCC_VERSION_EXP=5.2-linaro
 
 function build(){
     export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/

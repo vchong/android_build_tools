@@ -26,12 +26,6 @@ cd device/linaro/build/
 git am 0001-enable-bootchart-for-the-first-boot.patch
 cd ../../../
 
-## apply local patch
-cp android-tools/hikey/0001-apply-local-patch-for-using-mirrored-local-repositor.patch device/linaro/hikey/
-cd device/linaro/hikey/
-git am 0001-apply-local-patch-for-using-mirrored-local-repositor.patch
-cd ../../../
-
 ./build.sh
 exit
 #                          art \
