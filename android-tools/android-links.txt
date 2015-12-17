@@ -8,3 +8,11 @@ Android Kernel:
 https://source.android.com/source/building-kernels.html
 Getting Started:
 http://developer.android.com/intl/zh-cn/training/index.html
+
+Memory related tools and links:
+http://developer.android.com/intl/zh-cn/tools/performance/comparison.html
+http://tools.android.com/tips/lint
+android-developers.blogspot.com/2009/02/track-memory-allocations.html
+https://source.android.com/devices/tech/debug/index.html "Debugging Native Android Platform Code" 
+https://source.android.com/devices/tech/debug/procstats.html
+https://source.android.com/devices/tech/debug/native-memory.html

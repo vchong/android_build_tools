@@ -16,4 +16,4 @@ if ! [ -d "$AOSP" ] && ! [ -d "$AOSP/bionic" ] && [ -d "$AOSP"/build ]; then
 fi
 
 # changes to make chromium_org to use the system libz.so and libz_minizip.so
-#apply --linaro device/linaro/build 15977/1
+apply --linaro device/linaro/build 16439/1
