@@ -25,8 +25,7 @@ ${BASE}/sync-projects.sh  build \
 ./android-patchsets/marshmallow-gcc5-patchset
 
 #./android-patchsets/nexus9-workarounds
-cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
-./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
+./android-patchsets/LIUYQ-PATCHSET
 
-#./build.sh
+./build.sh
 exit

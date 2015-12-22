@@ -79,7 +79,10 @@ sync_linaro(){
 
     cd ${BASE}
 
-    cp -uvf android-tools/liuyq.xml .repo/local_manifests/liuyq.xml
+    cp -uvf liuyq-patches/liuyq.xml .repo/local_manifests/liuyq.xml
+    if [ -d android-patchsets ]; then
+        cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets/liuyq.xml
+    fi
     juno_mali_binary
     hikey_mali_binary
 }
