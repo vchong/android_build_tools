@@ -19,13 +19,35 @@ ${BASE}/sync-projects.sh  build \
 
 #                          external/opencv-upstream \
 
+export http_proxy=127.0.0.1:8087
+export https_proxy=127.0.0.1:8087
 ./android-patchsets/MARSHMALLOW-MLCR-PATCHSET
+if [ $? -ne 0 ]; then
+    echo "Failed to run MARSHMALLOW-MLCR-PATCHSET"
+    exit 1
+fi
 ./android-patchsets/hikey-m-workarounds
+if [ $? -ne 0 ]; then
+    echo "Failed to run hikey-m-workarounds"
+    exit 1
+fi
 ./android-patchsets/juno-m-workarounds
+if [ $? -ne 0 ]; then
+    echo "Failed to run juno-m-workarounds"
+    exit 1
+fi
 ./android-patchsets/marshmallow-gcc5-patchset
+if [ $? -ne 0 ]; then
+    echo "Failed to run marshmallow-gcc5-patchset"
+    exit 1
+fi
 
 #./android-patchsets/nexus9-workarounds
-./android-patchsets/LIUYQ-PATCHSET
+[ -f ./android-patchsets/LIUYQ-PATCHSET ] && ./android-patchsets/LIUYQ-PATCHSET
+if [ $? -ne 0 ]; then
+    echo "Failed to run LIUYQ-PATCHSET"
+    exit 1
+fi
 
 ./build.sh
 exit

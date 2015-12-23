@@ -81,7 +81,7 @@ sync_linaro(){
 
     cp -uvf liuyq-patches/liuyq.xml .repo/local_manifests/liuyq.xml
     if [ -d android-patchsets ]; then
-        cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets/liuyq.xml
+        cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets
     fi
     juno_mali_binary
     hikey_mali_binary
