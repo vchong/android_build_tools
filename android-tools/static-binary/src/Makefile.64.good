@@ -2,14 +2,13 @@ BASE=/data/armv8/marshmallow/
 NDK=/SATA3/android-ndk-r10e/
 
 SYSROOT=$(NDK)/platforms/android-21/arch-arm64/
-
 TOOLCHAIN_GOOGLE_64=$(BASE)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/
 INCLUDE_GOOGLE_64=$(OOLCHAIN_GOOGLE_64)/lib/gcc/aarch64-linux-android/4.9.x-google/include
-CC_google_64=$(TOOLCHAIN_GOOGLE_64)/bin/aarch64-linux-android-gcc
+CC_google_64=$(TOOLCHAIN_GOOGLE_64)/bin/aarch64-linux-android-g++
 
 TOOLCHAIN_LINARO_64=$(BASE)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.3-linaro/
 INCLUDE_LINARO_64=$(OOLCHAIN_LINARO_64)/lib/gcc/aarch64-linux-android/5.3.0/include
-CC_linaro_64=$(TOOLCHAIN_LINARO_64)/bin/aarch64-linux-android-gcc
+CC_linaro_64=$(TOOLCHAIN_LINARO_64)/bin/aarch64-linux-android-g++
 
 CFLAGS_INCLUDES := \
     -isystem $(BASE)/bionic/libc/arch-arm64/include \
@@ -43,6 +42,7 @@ CFLAGS_OPTIONS_GOOD := \
     -std=c11 \
     -O2
 
+# not really necessry but help on more check
 CFLAGS_OPTIONS_EXTRA := \
     -fno-exceptions \
     -Wno-multichar \
@@ -57,7 +57,6 @@ CFLAGS_OPTIONS_EXTRA := \
     -Werror=non-virtual-dtor \
     -Werror=address \
     -Werror=sequence-point \
-    -DNDEBUG \
     -g \
     -Wstrict-aliasing=2 \
     -fgcse-after-reload \
@@ -65,7 +64,6 @@ CFLAGS_OPTIONS_EXTRA := \
     -frename-registers \
     -DNDEBUG \
     -UDEBUG   \
-    -fpie \
     -D_USING_LIBCXX   \
     -Werror=int-to-pointer-cast \
     -Werror=pointer-to-int-cast  \
@@ -82,15 +80,6 @@ LDFLAGS_OPTIONS_GOOD := \
     -Wl,--fix-cortex-a53-843419 \
     -Wl,--allow-shlib-undefined \
     -Wl,--no-undefined \
-
-LDFLAGS_OPTIONS_EXTRA := \
-    -Wl,--gc-sections \
-
-all: strcpy_test_linaro \
-     strcpy_test_linaro_static \
-     strcpy_test_google \
-     strcpy_test_google_static \
-     move
 
 #############################################################################
 ############## meanings of GCC options ######################################
@@ -136,9 +125,11 @@ all: strcpy_test_linaro \
 
 # -msoft-float
 #   Use library routines for floating-point operations.
+#   Not supported by aarch64 gcc
 
 # -mhard-float
 #   Use hardware instructions for floating-point operations.
+#   Not supported by aarch64 gcc
 
 # -static
 #   On systems that support dynamic linking, this prevents linking with the shared libraries.
@@ -163,46 +154,48 @@ all: strcpy_test_linaro \
 #   Produce a position independent executable on targets that support it.
 #   For predictable results, you must also specify the same set of options used for compilation (-fpie, -fPIE, or model suboptions) when you specify this linker option.
 
-#src := main_strcpy.c Makefile.64 string_copy_linaro_wrapper.S string_copy_linaro.S string_copy_google_wrapper.S string_copy_google.S
 src := main_strcpy.c string_copy_linaro_wrapper.S string_copy_google_wrapper.S
-#src += asm/asm.h asm/bionic_asm.h asm/bitsperlong.h asm/unistd.h
+# no need to list asm source files that is included in the .S file
+# src += asm/asm.h asm/bionic_asm.h asm/bitsperlong.h asm/unistd.h
 
-## -mfloat-abi=softfp and -mhard-float are not supported by aarch64 gcc
+## -Wl,--gc-sections -Wl,--whole-archive -Wl,--no-whole-archive and -D_USING_LIBCXX help on building the static link binary
+all: strcpy_test_linaro \
+     strcpy_test_linaro_static \
+     strcpy_test_google \
+     strcpy_test_google_static \
+     move
+
 strcpy_test_linaro_static: $(src)
-	$(CC_linaro_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(LDFLAGS_OPTIONS_GOOD) \
-       -nostdlib -static -Bstatic -static-libgcc -static-libstdc++ -lgcc\
-       $^ -o $@ \
-       /SATA3/android-ndk-r10e/platforms/android-21/arch-arm64/usr/lib/crtbegin_static.o \
-       -pie \
-       -Wl,--start-group $(BASE)/development/ndk/platforms/android-21/arch-arm64/lib/libc.a \
-       $(TOOLCHAIN_LINARO_64)/lib/gcc/aarch64-linux-android/5.3.0/libgcc.a \
-       -Wl,--end-group $(BASE)/development/ndk/platforms/android-21/arch-arm64/lib-bootstrap/crtend_android.o \
+	$(CC_linaro_64) \
+        $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(CFLAGS_OPTIONS_EXTRA) $(LDFLAGS_OPTIONS_GOOD) \
+        -nostdlib -static -Bstatic -D_USING_LIBCXX -Wl,--gc-sections -Wl,--whole-archive -Wl,--no-whole-archive \
+        -o $@ $^ $(SYSROOT)/usr/lib/crtbegin_static.o \
+        -Wl,--start-group $(SYSROOT)/usr/lib/libc.a $(TOOLCHAIN_LINARO_64)/lib/gcc/aarch64-linux-android/5.3.0/libgcc.a \
+	    -Wl,--end-group $(SYSROOT)/usr/lib/crtend_android.o
 
 strcpy_test_google_static: $(src)
-	$(CC_google_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(LDFLAGS_OPTIONS_GOOD) \
-        -nostdlib -static -Bstatic -static-libgcc -static-libstdc++ -lgcc\
-	    $^ -o $@ \
-        /SATA3/android-ndk-r10e/platforms/android-21/arch-arm64/usr/lib/crtbegin_static.o \
-        -fPIE -pie \
-        -Wl,--start-group $(BASE)/development/ndk/platforms/android-21/arch-arm64/lib/libc.a \
-        $(TOOLCHAIN_GOOGLE_64)/aarch64-linux-android/lib64/libatomic.a $(TOOLCHAIN_GOOGLE_64)/lib/gcc/aarch64-linux-android/4.9.x-google/libgcc.a \
-        -Wl,--end-group $(BASE)/development/ndk/platforms/android-21/arch-arm64/lib-bootstrap/crtend_android.o \
+	$(CC_google_64) \
+        $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(CFLAGS_OPTIONS_EXTRA)  $(LDFLAGS_OPTIONS_GOOD) \
+        -nostdlib -static -Bstatic -D_USING_LIBCXX -Wl,--gc-sections -Wl,--whole-archive -Wl,--no-whole-archive \
+        -o $@ $^ $(SYSROOT)/usr/lib/crtbegin_static.o \
+        -Wl,--start-group $(SYSROOT)/usr/lib/libc.a $(TOOLCHAIN_GOOGLE_64)/lib/gcc/aarch64-linux-android/4.9.x-google/libgcc.a \
+	    -Wl,--end-group $(SYSROOT)/usr/lib/crtend_android.o
 
 strcpy_test_linaro:  $(src)
-	$(CC_linaro_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(LDFLAGS_OPTIONS_GOOD) \
+	$(CC_linaro_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(CFLAGS_OPTIONS_EXTRA) $(LDFLAGS_OPTIONS_GOOD) \
        --sysroot=$(SYSROOT) \
        -fPIE -pie \
 	    $^ -o $@
 
 strcpy_test_google: $(src)
-	$(CC_google_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(LDFLAGS_OPTIONS_GOOD) \
+	$(CC_google_64) $(CFLAGS_INCLUDES) $(CFLAGS_OPTIONS_GOOD) $(CFLAGS_OPTIONS_EXTRA) $(LDFLAGS_OPTIONS_GOOD) \
        --sysroot=$(SYSROOT) \
        -fPIE -pie \
 	   $^ -o $@
 
 move:
 	@mkdir -p bin/
-	@mv strcpy_test* bin/
+	@mv -v strcpy_test* bin/
 
 clean:
-	rm -f bin/strcpy_test*
+	rm -vf bin/strcpy_test*

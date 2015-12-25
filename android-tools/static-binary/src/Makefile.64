@@ -89,7 +89,6 @@ CFLAGS_OPTIONS_EXTRA := \
     -frename-registers \
     -DNDEBUG \
     -UDEBUG   \
-    -fpie \
     -D_USING_LIBCXX   \
     -Werror=int-to-pointer-cast \
     -Werror=pointer-to-int-cast  \
