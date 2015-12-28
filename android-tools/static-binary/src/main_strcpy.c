@@ -4,8 +4,8 @@
 #include <sys/time.h>
 
 // need to be defined without [ extern "C" ] when compile with gcc
-extern "C" void *strcpy_google(void *dest, const void *src);
-extern "C" void *strcpy_linaro(void *dest, const void *src);
+void *strcpy_google(void *dest, const void *src);
+void *strcpy_linaro(void *dest, const void *src);
 
 #define START gettimeofday(&tv1, 0);
 #define END(x) gettimeofday(&tv2, 0); t1 = ((double)tv1.tv_sec)+((double)tv1.tv_usec)/1000000.0; t2 = ((double)tv2.tv_sec)+((double)tv2.tv_usec)/1000000.0; printf("%s: %f seconds\n", x, t2-t1)
@@ -29,16 +29,16 @@ int main() {
 	END("1000000 * strcpy_google of 15000 bytes");
 
 	START;
-	for(int i=0; i<100000000; i++) {
-		strcpy_google(tmp, s);
-	}
-	END("100000000 * strcpy_google of 15 bytes");
-
-	START;
 	for(int i=0; i<1000000; i++) {
 		strcpy_linaro(tmp, l);
 	}
 	END("1000000 * strcpy_linaro of 15000 bytes");
+
+	START;
+	for(int i=0; i<100000000; i++) {
+		strcpy_google(tmp, s);
+	}
+	END("100000000 * strcpy_google of 15 bytes");
 
 	START;
 	for(int i=0; i<100000000; i++) {

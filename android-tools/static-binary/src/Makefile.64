@@ -4,11 +4,11 @@ NDK=/SATA3/android-ndk-r10e/
 SYSROOT=$(NDK)/platforms/android-21/arch-arm64/
 TOOLCHAIN_GOOGLE_64=$(BASE)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/
 INCLUDE_GOOGLE_64=$(OOLCHAIN_GOOGLE_64)/lib/gcc/aarch64-linux-android/4.9.x-google/include
-CC_google_64=$(TOOLCHAIN_GOOGLE_64)/bin/aarch64-linux-android-g++
+CC_google_64=$(TOOLCHAIN_GOOGLE_64)/bin/aarch64-linux-android-gcc
 
 TOOLCHAIN_LINARO_64=$(BASE)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.3-linaro/
 INCLUDE_LINARO_64=$(OOLCHAIN_LINARO_64)/lib/gcc/aarch64-linux-android/5.3.0/include
-CC_linaro_64=$(TOOLCHAIN_LINARO_64)/bin/aarch64-linux-android-g++
+CC_linaro_64=$(TOOLCHAIN_LINARO_64)/bin/aarch64-linux-android-gcc
 
 CFLAGS_INCLUDES := \
     -isystem $(BASE)/bionic/libc/arch-arm64/include \

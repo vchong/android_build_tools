@@ -1,25 +1,118 @@
 ======= Start test for strcpy_test_linaro =================
-1000000 * strcpy_google of 15000 bytes: 1.978911 seconds
-100000000 * strcpy_google of 15 bytes: 0.964675 seconds
-1000000 * strcpy_linaro of 15000 bytes: 1.961538 seconds
-100000000 * strcpy_linaro of 15 bytes: 0.334581 seconds
+1000000 * strcpy_google of 15000 bytes: 1.999116 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.867722 seconds
+100000000 * strcpy_google of 15 bytes: 0.919690 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.313454 seconds
 ======= End test for strcpy_test_linaro =================
 ======= Start test for strcpy_test_google =================
-1000000 * strcpy_google of 15000 bytes: 1.981997 seconds
-100000000 * strcpy_google of 15 bytes: 0.970816 seconds
-1000000 * strcpy_linaro of 15000 bytes: 1.966611 seconds
-100000000 * strcpy_linaro of 15 bytes: 0.263881 seconds
+1000000 * strcpy_google of 15000 bytes: 1.876463 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.883328 seconds
+100000000 * strcpy_google of 15 bytes: 0.923468 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.312442 seconds
 ======= End test for strcpy_test_google =================
 ======= Start test for strcpy_test_linaro_static =================
-1000000 * strcpy_google of 15000 bytes: 1.998843 seconds
-100000000 * strcpy_google of 15 bytes: 0.974423 seconds
-1000000 * strcpy_linaro of 15000 bytes: 1.972505 seconds
-100000000 * strcpy_linaro of 15 bytes: 0.560453 seconds
+1000000 * strcpy_google of 15000 bytes: 1.912096 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.909330 seconds
+100000000 * strcpy_google of 15 bytes: 0.968491 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.330528 seconds
 ======= End test for strcpy_test_linaro_static =================
 ======= Start test for strcpy_test_google_static =================
-1000000 * strcpy_google of 15000 bytes: 1.980395 seconds
-100000000 * strcpy_google of 15 bytes: 0.921233 seconds
-1000000 * strcpy_linaro of 15000 bytes: 1.873095 seconds
-100000000 * strcpy_linaro of 15 bytes: 0.319051 seconds
+1000000 * strcpy_google of 15000 bytes: 1.926709 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.893056 seconds
+100000000 * strcpy_google of 15 bytes: 0.934200 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.537363 seconds
 ======= End test for strcpy_test_google_static =================
-
+======= Start test for strcpy_test_linaro =================
+1000000 * strcpy_google of 15000 bytes: 1.902512 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.885220 seconds
+100000000 * strcpy_google of 15 bytes: 0.928882 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.538953 seconds
+======= End test for strcpy_test_linaro =================
+======= Start test for strcpy_test_google =================
+1000000 * strcpy_google of 15000 bytes: 1.899437 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.883578 seconds
+100000000 * strcpy_google of 15 bytes: 0.940844 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.317077 seconds
+======= End test for strcpy_test_google =================
+======= Start test for strcpy_test_linaro_static =================
+1000000 * strcpy_google of 15000 bytes: 1.913967 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.876286 seconds
+100000000 * strcpy_google of 15 bytes: 0.925260 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.308428 seconds
+======= End test for strcpy_test_linaro_static =================
+======= Start test for strcpy_test_google_static =================
+1000000 * strcpy_google of 15000 bytes: 1.889965 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.875313 seconds
+100000000 * strcpy_google of 15 bytes: 0.925597 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.528462 seconds
+======= End test for strcpy_test_google_static =================
+======= Start test for strcpy_test_linaro =================
+1000000 * strcpy_google of 15000 bytes: 1.903056 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.908748 seconds
+100000000 * strcpy_google of 15 bytes: 0.938575 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.318743 seconds
+======= End test for strcpy_test_linaro =================
+======= Start test for strcpy_test_google =================
+1000000 * strcpy_google of 15000 bytes: 1.937524 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.885369 seconds
+======= End test for strcpy_test_google =================
+======= Start test for strcpy_test_linaro_static =================
+1000000 * strcpy_google of 15000 bytes: 1.898408 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.981369 seconds
+100000000 * strcpy_google of 15 bytes: 0.966102 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.321927 seconds
+======= End test for strcpy_test_linaro_static =================
+======= Start test for strcpy_test_google_static =================
+1000000 * strcpy_google of 15000 bytes: 1.990753 seconds
+1000000 * strcpy_linaro of 15000 bytes: 2.034256 seconds
+100000000 * strcpy_google of 15 bytes: 0.972545 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.554747 seconds
+======= End test for strcpy_test_google_static =================
+======= Start test for strcpy_test_linaro =================
+1000000 * strcpy_google of 15000 bytes: 1.965775 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.974137 seconds
+100000000 * strcpy_google of 15 bytes: 0.973483 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.267212 seconds
+======= End test for strcpy_test_linaro =================
+======= Start test for strcpy_test_google =================
+1000000 * strcpy_google of 15000 bytes: 1.989458 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.973354 seconds
+100000000 * strcpy_google of 15 bytes: 0.973208 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.292583 seconds
+======= End test for strcpy_test_google =================
+======= Start test for strcpy_test_linaro_static =================
+1000000 * strcpy_google of 15000 bytes: 2.007854 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.977602 seconds
+100000000 * strcpy_google of 15 bytes: 0.967541 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.325212 seconds
+======= End test for strcpy_test_linaro_static =================
+======= Start test for strcpy_test_google_static =================
+1000000 * strcpy_google of 15000 bytes: 1.981750 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.961036 seconds
+100000000 * strcpy_google of 15 bytes: 0.973528 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.553320 seconds
+======= End test for strcpy_test_google_static =================
+======= Start test for strcpy_test_linaro =================
+1000000 * strcpy_google of 15000 bytes: 1.968332 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.967035 seconds
+100000000 * strcpy_google of 15 bytes: 0.971154 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.334478 seconds
+======= End test for strcpy_test_linaro =================
+======= Start test for strcpy_test_google =================
+1000000 * strcpy_google of 15000 bytes: 2.017407 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.968357 seconds
+100000000 * strcpy_google of 15 bytes: 0.969793 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.333027 seconds
+======= End test for strcpy_test_google =================
+======= Start test for strcpy_test_linaro_static =================
+1000000 * strcpy_google of 15000 bytes: 1.982838 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.961640 seconds
+100000000 * strcpy_google of 15 bytes: 0.967267 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.322775 seconds
+======= End test for strcpy_test_linaro_static =================
+======= Start test for strcpy_test_google_static =================
+1000000 * strcpy_google of 15000 bytes: 1.976444 seconds
+1000000 * strcpy_linaro of 15000 bytes: 1.960328 seconds
+100000000 * strcpy_google of 15 bytes: 0.991322 seconds
+100000000 * strcpy_linaro of 15 bytes: 0.570604 seconds
+======= End test for strcpy_test_google_static =================

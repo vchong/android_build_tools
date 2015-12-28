@@ -11,7 +11,10 @@ function echo_and_run(){
     adb shell /data/local/tmp/bin/$cmd
     echo ======= End test for $cmd =================
 }
-echo_and_run strcpy_test_linaro
-echo_and_run strcpy_test_google
-echo_and_run strcpy_test_linaro_static
-echo_and_run strcpy_test_google_static
+
+for i in {1..5..1}; do
+    echo_and_run strcpy_test_linaro
+    echo_and_run strcpy_test_google
+    echo_and_run strcpy_test_linaro_static
+    echo_and_run strcpy_test_google_static
+done
