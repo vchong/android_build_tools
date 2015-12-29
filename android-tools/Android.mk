@@ -18,3 +18,4 @@ include $(BUILD_PREBUILT)
 
 -include $(LOCAL_PATH)/sl/Android.mk
 -include $(LOCAL_PATH)/static-binary/src/Android.mk
+-include $(LOCAL_PATH)/apks/Android.mk
