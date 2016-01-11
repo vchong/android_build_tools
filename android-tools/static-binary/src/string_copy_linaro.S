@@ -129,28 +129,12 @@ ENTRY(strcpy)
 
 .Lpage_cross_ok:
 	ldp	data1, data2, [srcin]
-#ifdef __AARCH64EB__
-	/* Because we expect the end to be found within 16 characters
-	   (profiling shows this is the most common case), it's worth
-	   swapping the bytes now to save having to recalculate the
-	   termination syndrome later.  We preserve data1 and data2
-	   so that we can re-use the values later on.  */
-	rev	tmp2, data1
-	sub	tmp1, tmp2, zeroones
-	orr	tmp2, tmp2, #REP8_7f
-	bics	has_nul1, tmp1, tmp2
-	b.ne	.Lfp_le8
-	rev	tmp4, data2
-	sub	tmp3, tmp4, zeroones
-	orr	tmp4, tmp4, #REP8_7f
-#else
 	sub	tmp1, data1, zeroones
 	orr	tmp2, data1, #REP8_7f
 	bics	has_nul1, tmp1, tmp2
 	b.ne	.Lfp_le8
 	sub	tmp3, data2, zeroones
 	orr	tmp4, data2, #REP8_7f
-#endif
 	bics	has_nul2, tmp3, tmp4
 	b.eq	.Lbulk_entry
 
@@ -163,11 +147,7 @@ ENTRY(strcpy)
 	mov	tmp2, #56
 	add	dst, dstin, pos, lsr #3		/* Bits to bytes.  */
 	sub	pos, tmp2, pos
-#ifdef __AARCH64EB__
-	lsr	data2, data2, pos
-#else
 	lsl	data2, data2, pos
-#endif
 	str	data2, [dst, #1]
 	str	data1, [dstin]
 #ifdef STPCPY
@@ -181,14 +161,7 @@ ENTRY(strcpy)
 	add	dst, dstin, pos, lsr #3		/* Bits to bytes.  */
 	subs	tmp2, pos, #24			/* Pos in bits. */
 	b.lt	.Lfp_lt4
-#ifdef __AARCH64EB__
-	mov	tmp2, #56
-	sub	pos, tmp2, pos
-	lsr	data2, data1, pos
-	lsr	data1, data1, #32
-#else
 	lsr	data2, data1, tmp2
-#endif
 	/* 4->7 bytes to copy.  */
 	str	data2w, [dst, #-3]
 	str	data1w, [dstin]
@@ -199,9 +172,6 @@ ENTRY(strcpy)
 .Lfp_lt4:
 	cbz	pos, .Lfp_lt2
 	/* 2->3 bytes to copy.  */
-#ifdef __AARCH64EB__
-	lsr	data1, data1, #48
-#endif
 	strh	data1w, [dstin]
 	/* Fall-through, one byte (max) to go.  */
 .Lfp_lt2:
@@ -243,19 +213,7 @@ ENTRY(strcpy)
 	   to deal with the tail is to determine the location of the
 	   trailing NUL, then (re)copy the 16 bytes leading up to that.  */
 	cmp	has_nul1, #0
-#ifdef __AARCH64EB__
-	/* For big-endian, carry propagation (if the final byte in the
-	   string is 0x01) means we cannot use has_nul directly.  The
-	   easiest way to get the correct byte is to byte-swap the data
-	   and calculate the syndrome a second time.  */
-	csel	data1, data1, data2, ne
-	rev	data1, data1
-	sub	tmp1, data1, zeroones
-	orr	tmp2, data1, #REP8_7f
-	bic	has_nul1, tmp1, tmp2
-#else
 	csel	has_nul1, has_nul1, has_nul2, ne
-#endif
 	rev	has_nul1, has_nul1
 	clz	pos, has_nul1
 	add	tmp1, pos, #72
@@ -279,11 +237,7 @@ ENTRY(strcpy)
 	lsl	tmp1, tmp1, #3	/* Bytes beyond alignment -> bits.  */
 	tst	to_align, #7
 	csetm	tmp2, ne
-#ifdef __AARCH64EB__
-	lsl	tmp2, tmp2, tmp1	/* Shift (tmp1 & 63).  */
-#else
 	lsr	tmp2, tmp2, tmp1	/* Shift (tmp1 & 63).  */
-#endif
 	orr	data1, data1, tmp2
 	orr	data2a, data2, tmp2
 	cmp	to_align, #8
@@ -301,20 +255,7 @@ ENTRY(strcpy)
 	   loaded directly from srcin.  Do a rotate on the 128-bit value.  */
 	lsl	tmp1, to_align, #3	/* Bytes->bits.  */
 	neg	tmp2, to_align, lsl #3
-#ifdef __AARCH64EB__
-	lsl	data1a, data1, tmp1
-	lsr	tmp4, data2, tmp2
-	lsl	data2, data2, tmp1
-	orr	tmp4, tmp4, data1a
-	cmp	to_align, #8
-	csel	data1, tmp4, data2, lt
-	rev	tmp2, data1
-	rev	tmp4, data2
-	sub	tmp1, tmp2, zeroones
-	orr	tmp2, tmp2, #REP8_7f
-	sub	tmp3, tmp4, zeroones
-	orr	tmp4, tmp4, #REP8_7f
-#else
+
 	lsr	data1a, data1, tmp1
 	lsl	tmp4, data2, tmp2
 	lsr	data2, data2, tmp1
@@ -325,7 +266,7 @@ ENTRY(strcpy)
 	orr	tmp2, data1, #REP8_7f
 	sub	tmp3, data2, zeroones
 	orr	tmp4, data2, #REP8_7f
-#endif
+
 	bic	has_nul1, tmp1, tmp2
 	cbnz	has_nul1, .Lfp_le8
 	bic	has_nul2, tmp3, tmp4
