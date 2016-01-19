@@ -80,9 +80,10 @@ sync_linaro(){
     cd ${BASE}
 
     cp -uvf liuyq-patches/liuyq.xml .repo/local_manifests/liuyq.xml
-    if [ -d android-patchsets ]; then
-        cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets
+    if [ ! -d android-patchsets ]; then
+        mkdir -p android-patchsets
     fi
+    cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets
     juno_mali_binary
     hikey_mali_binary
 }
@@ -109,9 +110,9 @@ main(){
     # update myself first
     git pull
     parseArgs "$@"
-    sync_init
     if $sync_linaro; then
         sync_linaro
     fi
+    sync_init
     sync
 }

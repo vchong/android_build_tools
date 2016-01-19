@@ -4,7 +4,7 @@ export BASE=$(cd $(dirname $0);pwd)
 source ${BASE}/scripts-common/sync-common.sh
 
 export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
-branch="android-6.0.1_r3"
+branch="android-6.0.1_r10"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"
@@ -22,9 +22,9 @@ ${BASE}/sync-projects.sh  build \
 ./android-patchsets/juno-m-workarounds
 ./android-patchsets/marshmallow-gcc5-patchset
 
-#./android-patchsets/nexus9-workarounds
-cp host-tools/LOLLIPOP-LIUYQ-PATCHSET ./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
-./android-patchsets/LOLLIPOP-LIUYQ-PATCHSET
+cd device/linaro/build
+git fetch ssh://yongqin.liu@android-review.linaro.org:29418/device/linaro/common refs/changes/39/16439/1 && git cherry-pick FETCH_HEAD
+cd ../../../
 
 #./build.sh
 exit
