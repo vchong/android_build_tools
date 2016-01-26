@@ -40,20 +40,23 @@ function extract_file_contexts(){
 }
 
 function refactory_sys_img(){
-    rm -fr "${f_raw_img}" "${d_raw}"
+    sudo rm -fr "${f_raw_img}" "${d_raw}" "${d_system}"
     "${f_simg2img}" "${f_system_img_old}" "${f_raw_img}"
-    mkdir "${d_system}" "${d_raw}"
+    mkdir -p "${d_system}" "${d_raw}"
     sudo mount -t ext4 "${f_raw_img}" "${d_raw}"
-    #cp -ruvf ${d_raw}/* ${d_system}/
-    sudo rm -fr ${d_raw}/priv-app/SetupWizard
+    sudo cp -ruf ${d_raw}/* ${d_system}/
+    #sudo rm -fr ${d_raw}/priv-app/SetupWizard
     sudo umount "${d_raw}"
-    rmdir "${d_raw}"
-    mv "${f_raw_img}" ${f_system_img_new}
-    #sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
-    #sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/' "${d_system}/build.prop"
+    rm -fr "${d_raw}" "${f_raw_img}"
+    #mv "${f_raw_img}" ${f_system_img_new}
+    sed -i /ro.setupwizard.enterprise_mode=1/d "${d_system}/build.prop"
+    sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/' "${d_system}/build.prop"
 
-    #${f_make_ext4fs} -s -T -1 -S ${f_file_contexts} -l "${system_size}" -J -a system "${f_system_img_new}" "${d_system}"
+    sudo ${f_make_ext4fs} -l ${system_size} -s -T -1 -S ${f_file_contexts} -J -a system "${f_system_img_new}" "${d_system}"
+
+    #sudo rm -fr ${d_system}/priv-app/SetupWizard
     #rm -fr "${d_system}" ${f_file_contexts}
 }
 
+extract_file_contexts
 refactory_sys_img

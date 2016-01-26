@@ -17,6 +17,8 @@ int main() {
 	char * const l = (char * const) malloc(15001);
 	char * const tmp = (char * const) malloc(15001);
 
+    printf("s=%p, l=%p, tmp=%p\n", s, l, tmp);
+
     memset(s, 'a', 15);
 	s[15]=0;
     memset(l, 'a', 15000);

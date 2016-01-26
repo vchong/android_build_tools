@@ -30,3 +30,6 @@ tools
 uefi
 vendor
 vexpress-firmware
+android-tools/apks
+android-tools/static-binary/src/bin
+build*.log
