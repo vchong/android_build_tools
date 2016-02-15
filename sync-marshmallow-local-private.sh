@@ -4,7 +4,8 @@ export BASE=$(cd $(dirname $0);pwd)
 source ${BASE}/scripts-common/sync-common.sh
 
 export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
-branch="android-6.0.1_r10"
+#branch="android-6.0.0_r26"
+branch="android-6.0.1_r16"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"
@@ -13,14 +14,15 @@ main "$@"
 
 ${BASE}/sync-projects.sh  build \
                           bionic \
-                          art \
                           android-patchsets \
                           device/linaro/hikey \
 
+#                          kernel/linaro/hisilicon/ \
+#                          art \
 #                          external/opencv-upstream \
 
-export http_proxy=127.0.0.1:8087
-export https_proxy=127.0.0.1:8087
+#export http_proxy=192.168.0.102:37586
+#export https_proxy=192.168.0.102:37586
 ./android-patchsets/MARSHMALLOW-MLCR-PATCHSET
 if [ $? -ne 0 ]; then
     echo "Failed to run MARSHMALLOW-MLCR-PATCHSET"
@@ -49,5 +51,5 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-./build.sh
+#./build.sh
 exit

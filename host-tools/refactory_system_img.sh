@@ -28,7 +28,8 @@ f_system_img_new="${cur_dir}/system_new.img"
 d_system="${cur_dir}/system"
 f_raw_img="${cur_dir}/raw.img"
 d_raw="${cur_dir}/raw"
-system_size="685768704"
+system_size="685768704" #Nexus10
+system_size="880803840" #Nexus7
 
 function extract_file_contexts(){
     perl "${f_unpack_pl}" "${f_boot_img}"

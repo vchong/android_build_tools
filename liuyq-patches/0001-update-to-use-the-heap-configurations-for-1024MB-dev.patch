@@ -1,0 +1,28 @@
+From c7fdb76b9b4a9401a59cd528e589542fcfdd9291 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Tue, 12 Jan 2016 02:39:58 +0800
+Subject: [PATCH 1/1] update to use the heap configurations for 1024MB devices
+
+since we have hikey version which only have 1024MB ram
+
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ device.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/device.mk b/device.mk
+index d84e596..6a14d80 100644
+--- a/device.mk
++++ b/device.mk
+@@ -15,7 +15,7 @@
+ #
+ 
+ # Adjust the dalvik heap to be appropriate for a tablet.
+-$(call inherit-product-if-exists, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
++$(call inherit-product-if-exists, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
+ 
+ PRODUCT_COPY_FILES += $(call add-to-product-copy-files-if-exists,\
+ 			$(LOCAL_PATH)/fstab.hikey:root/fstab.hikey \
+-- 
+1.9.1
+

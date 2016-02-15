@@ -16,3 +16,7 @@ android-developers.blogspot.com/2009/02/track-memory-allocations.html
 https://source.android.com/devices/tech/debug/index.html "Debugging Native Android Platform Code" 
 https://source.android.com/devices/tech/debug/procstats.html
 https://source.android.com/devices/tech/debug/native-memory.html
+https://source.android.com/devices/tech/config/kernel.html
+https://source.android.com/devices/tech/config/low-ram.html
+
+https://developer.android.com/training/index.html

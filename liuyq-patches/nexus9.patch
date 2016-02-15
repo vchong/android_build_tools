@@ -1,0 +1,58 @@
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 1d17f66..f3ba211 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -51,7 +51,7 @@ TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
+ 
+ TARGET_USERIMAGES_USE_EXT4 := true
+ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2782920704
+-# BOARD_USERDATAIMAGE_PARTITION_SIZE := 13287555072
++BOARD_USERDATAIMAGE_PARTITION_SIZE := 11865686016
+ BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
+ BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+ BOARD_FLASH_BLOCK_SIZE := 4096
+@@ -91,6 +91,8 @@ WIFI_DRIVER_FW_PATH_STA     := "/vendor/firmware/fw_bcmdhd.bin"
+ WIFI_DRIVER_FW_PATH_AP      := "/vendor/firmware/fw_bcmdhd_apsta.bin"
+ 
+ BOARD_SEPOLICY_DIRS += device/htc/flounder/sepolicy
++BOARD_SEPOLICY_UNION += \
++        shell.te \
+ 
+ TARGET_USES_64_BIT_BCMDHD := true
+ TARGET_USES_64_BIT_BINDER := true
+diff --git a/device.mk b/device.mk
+index 5511410..da1a245 100644
+--- a/device.mk
++++ b/device.mk
+@@ -30,13 +30,13 @@ else
+ LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+ endif
+ 
+-BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
++#BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
+ 
+ # This ensures the needed build tools are available.
+ # TODO: make non-linux builds happy with external/f2fs-tool; system/extras/f2fs_utils
+-ifeq ($(HOST_OS),linux)
+-TARGET_USERIMAGES_USE_F2FS := true
+-endif
++#ifeq ($(HOST_OS),linux)
++#TARGET_USERIMAGES_USE_F2FS := true
++#endif
+ 
+ LOCAL_FSTAB := $(LOCAL_PATH)/fstab.flounder
+ 
+@@ -284,3 +284,6 @@ $(call inherit-product-if-exists, vendor/htc/flounder/audio/tfa/device-vendor-tf
+ # Add dependency of the proprietary keystore.flounder module.
+ PRODUCT_PACKAGES += \
+     libkeymaster_messages
++
++##### following are changes by Linaro
++$(call inherit-product-if-exists, device/linaro/build/common-device.mk)
+diff --git a/sepolicy/shell.te b/sepolicy/shell.te
+new file mode 100644
+index 0000000..64e1511
+--- /dev/null
++++ b/sepolicy/shell.te
+@@ -0,0 +1 @@
++allow shell su_exec:file x_file_perms;

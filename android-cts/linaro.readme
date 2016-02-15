@@ -25,3 +25,5 @@
     }
 4. scp hackbox://home/yongqin.liu/android-tools/out/build/base/ddmlib/build/classes/main/com/android/ddmlib/AdbHelper*.class com/android/ddmlib/
 5. jar -uvf tradefed-prebuilt.jar com/
+
+https://android.googlesource.com/platform/cts/+/d8972ff/tools/tradefed-host/src/com/android/cts/tradefed/targetprep/HostPreconditionPreparer.java

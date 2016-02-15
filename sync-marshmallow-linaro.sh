@@ -4,7 +4,7 @@ export BASE=$(cd $(dirname $0);pwd)
 source ${BASE}/scripts-common/sync-common.sh
 
 export MIRROR="http://android.git.linaro.org/git/platform/manifest.git"
-branch="android-6.0.1_r10"
+branch="android-6.0.1_r16"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"

@@ -94,16 +94,16 @@ juno_mali_binary(){
         return
     fi
     curl --fail --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20151111-members-only/vendor.tar.bz2 >${b_name}
-    tar jxvf ${b_name}
+    tar xavf ${b_name}
 }
 
 hikey_mali_binary(){
-    local b_name="hikey-20150623-vendor.tar.bz2"
+    local b_name="hikey-20160113-vendor.tar.bz2"
     if [ -f ./${b_name} ]; then
         return
     fi
-    curl --fail --show-error -b license_accepted_eee6ac0e05136eb58db516d8c9c80d6b=yes http://snapshots.linaro.org/android/binaries/hikey/20150623-members-only/vendor.tar.bz2 >${b_name}
-    tar jxvf ${b_name}
+    curl --fail --show-error -b license_accepted_eee6ac0e05136eb58db516d8c9c80d6b=yes http://snapshots.linaro.org/android/binaries/hikey/20160113/vendor.tar.bz2 >${b_name}
+    tar xavf ${b_name}
 }
 
 main(){
