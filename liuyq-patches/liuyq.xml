@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <remote name="linaro-android" fetch="git://android-git.linaro.org/" review="android-review.linaro.org" />
   <remote name="github4liuyq" fetch="https://github.com/" />
   <remote name="local" fetch="file:////SATA3/aosp-mirror/hikey/" />
 

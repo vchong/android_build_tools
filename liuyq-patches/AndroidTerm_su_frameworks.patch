@@ -1,0 +1,52 @@
+diff --git a/cmds/app_process/app_main.cpp b/cmds/app_process/app_main.cpp
+index 2e02382..7be3126 100644
+--- a/cmds/app_process/app_main.cpp
++++ b/cmds/app_process/app_main.cpp
+@@ -185,6 +185,7 @@ static const char ZYGOTE_NICE_NAME[] = "zygote";
+ 
+ int main(int argc, char* const argv[])
+ {
++/*
+     if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+         // Older kernels don't understand PR_SET_NO_NEW_PRIVS and return
+         // EINVAL. Don't die on such kernels.
+@@ -193,7 +194,7 @@ int main(int argc, char* const argv[])
+             return 12;
+         }
+     }
+-
++*/
+     AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
+     // Process command line arguments
+     // ignore argv[0]
+diff --git a/core/jni/com_android_internal_os_Zygote.cpp b/core/jni/com_android_internal_os_Zygote.cpp
+index b431a3f..55ecb45 100644
+--- a/core/jni/com_android_internal_os_Zygote.cpp
++++ b/core/jni/com_android_internal_os_Zygote.cpp
+@@ -220,7 +220,7 @@ static void EnableKeepCapabilities(JNIEnv* env) {
+     RuntimeAbort(env);
+   }
+ }
+-
++/*
+ static void DropCapabilitiesBoundingSet(JNIEnv* env) {
+   for (int i = 0; prctl(PR_CAPBSET_READ, i, 0, 0, 0) >= 0; i++) {
+     int rc = prctl(PR_CAPBSET_DROP, i, 0, 0, 0);
+@@ -235,7 +235,7 @@ static void DropCapabilitiesBoundingSet(JNIEnv* env) {
+     }
+   }
+ }
+-
++*/
+ static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
+   __user_cap_header_struct capheader;
+   memset(&capheader, 0, sizeof(capheader));
+@@ -467,7 +467,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
+       EnableKeepCapabilities(env);
+     }
+ 
+-    DropCapabilitiesBoundingSet(env);
++    //DropCapabilitiesBoundingSet(env);
+ 
+     bool use_native_bridge = !is_system_server && (instructionSet != NULL)
+         && android::NativeBridgeAvailable();

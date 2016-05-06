@@ -1,2 +1,11 @@
 https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-Benchmarks
 https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-checklist#
+https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-Java-app-data
+https://docs.google.com/spreadsheets/d/1HcwCS97b-PYeqO68csvYzER9fxQ8vEgV3HtR_DZRtmc/edit#gid=1814354945
+
+For juno instructions
+http://releases.linaro.org/members/arm/android/images/armv8-android-juno-lsk/latest/
+
+https://ci.linaro.org/job/android-lcr-member-juno-m/
+https://ci.linaro.org/job/android-lcr-reference-juno-m/
+https://ci.linaro.org/job/android-lcr-member-hikey-m/

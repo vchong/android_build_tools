@@ -1,0 +1,11 @@
+# ramdisk.img from a specified directory
+find ./  |sed -e's%\./%%'|grep -v '^$' |cpio -o -H newc | gzip > ../ramdisk_new.img
+
+# get the files list in a cpio file
+cpio -i t -F ../ramdisk_new.cpio
+
+# decompress the files in a cpio file
+cpio -i -F ../ramdisk_new.cpio
+
+# decompress an ramdisk.img file
+gunzip -c ramdisk.img | cpio -i

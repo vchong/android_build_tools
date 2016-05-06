@@ -1,0 +1,15 @@
+diff --git a/app.te b/app.te
+index 40de074..a858ab2 100644
+--- a/app.te
++++ b/app.te
+@@ -213,8 +213,8 @@ selinux_check_context(appdomain)
+ 
+ # Superuser capabilities.
+ # bluetooth requires net_admin and wake_alarm.
+-neverallow { appdomain -bluetooth } self:capability *;
+-neverallow { appdomain -bluetooth } self:capability2 *;
++neverallow { appdomain -bluetooth -shell } self:capability *;
++neverallow { appdomain -bluetooth -shell } self:capability2 *;
+ 
+ # Block device access.
+ neverallow appdomain dev_type:blk_file { read write };

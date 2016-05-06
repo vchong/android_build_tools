@@ -27,3 +27,7 @@
 5. jar -uvf tradefed-prebuilt.jar com/
 
 https://android.googlesource.com/platform/cts/+/d8972ff/tools/tradefed-host/src/com/android/cts/tradefed/targetprep/HostPreconditionPreparer.java
+/sdcard/test/bbb_short/
+/sdcard/test/bbb_full/
+
+--local-media-path

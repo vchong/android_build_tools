@@ -1,5 +1,6 @@
 #!/bin/bash
 CPUS=$(grep processor /proc/cpuinfo |wc -l)
+#CPUS=1
 
 targets="selinuxtarballs"
 #targets="boottarball"
@@ -9,6 +10,8 @@ variant="userdebug"
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
 export TARGET_GCC_VERSION_EXP=5.3-linaro
 export WITH_DEXPREOPT=true
+#export MALLOC_IMPL=dlmalloc
+#export MALLOC_IMPL_MUSL=true
 
 function build(){
     export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
@@ -30,6 +33,10 @@ function build_hikey(){
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
     targets="droidcore"
+    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+#    export TARGET_USERDATAIMAGE_4GB=true
+    export TARGET_BUILD_KERNEL=true
+#    export TARGET_KERNEL_USE_4_1=true
     build hikey
     targets="selinuxtarballs"
 }

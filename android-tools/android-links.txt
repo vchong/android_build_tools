@@ -19,4 +19,7 @@ https://source.android.com/devices/tech/debug/native-memory.html
 https://source.android.com/devices/tech/config/kernel.html
 https://source.android.com/devices/tech/config/low-ram.html
 
+# for app developers
 https://developer.android.com/training/index.html
+# for platform developers
+https://android.googlesource.com/

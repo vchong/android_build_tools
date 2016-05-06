@@ -5,7 +5,7 @@ source ${BASE}/scripts-common/sync-common.sh
 
 export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
 #branch="android-6.0.0_r26"
-branch="android-6.0.1_r16"
+branch="android-6.0.1_r43"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"
@@ -23,33 +23,33 @@ ${BASE}/sync-projects.sh  build \
 
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
-./android-patchsets/MARSHMALLOW-MLCR-PATCHSET
-if [ $? -ne 0 ]; then
-    echo "Failed to run MARSHMALLOW-MLCR-PATCHSET"
-    exit 1
-fi
-./android-patchsets/hikey-m-workarounds
-if [ $? -ne 0 ]; then
-    echo "Failed to run hikey-m-workarounds"
-    exit 1
-fi
-./android-patchsets/juno-m-workarounds
-if [ $? -ne 0 ]; then
-    echo "Failed to run juno-m-workarounds"
-    exit 1
-fi
-./android-patchsets/marshmallow-gcc5-patchset
-if [ $? -ne 0 ]; then
-    echo "Failed to run marshmallow-gcc5-patchset"
-    exit 1
-fi
+function apply_patch(){
+    local patch_name=$1
+    if [ -z "${patch_name}" ]; then
+        return
+    fi
 
-#./android-patchsets/nexus9-workarounds
-[ -f ./android-patchsets/LIUYQ-PATCHSET ] && ./android-patchsets/LIUYQ-PATCHSET
-if [ $? -ne 0 ]; then
-    echo "Failed to run LIUYQ-PATCHSET"
-    exit 1
-fi
+    if [ ! -f "./android-patchsets/${patch_name}" ]; then
+        return
+    fi
+
+    ./android-patchsets/${patch_name}
+    if [ $? -ne 0 ]; then
+        echo "Failed to run ${patch_name}"
+        exit 1
+    fi
+
+}
+
+apply_patch MARSHMALLOW-MLCR-PATCHSET
+apply_patch juno-m-workarounds
+apply_patch marshmallow-gcc5-patchset
+apply_patch hikey-m-workarounds
+apply_patch hikey-optee
+apply_patch hikey-optee-kernel-4.4
+#apply_patch nexus9-workarounds
+
+apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit

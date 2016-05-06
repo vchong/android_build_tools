@@ -4,7 +4,7 @@ http://builds.96boards.org/snapshots/hikey/linaro/uefi/latest/
 
 http://builds.96boards.org/snapshots/hikey/linaro/binaries/
 
-https://ci.linaro.org/view/96boards/job/96boards-reference-platform-aosp/35/
+https://ci.linaro.org/view/96boards/job/96boards-reference-platform-aosp-hikey/
 http://builds.96boards.org/snapshots/reference-platform/aosp/hikey
 http://builds.96boards.org/releases/hikey/linaro/aosp/latest/
 
