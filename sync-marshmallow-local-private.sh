@@ -48,6 +48,7 @@ apply_patch hikey-m-workarounds
 apply_patch hikey-optee
 apply_patch hikey-optee-kernel-4.4
 #apply_patch nexus9-workarounds
+apply_patch get-hikey-blobs
 
 apply_patch LIUYQ-PATCHSET
 

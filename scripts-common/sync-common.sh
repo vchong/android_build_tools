@@ -84,8 +84,8 @@ sync_linaro(){
         mkdir -p android-patchsets
     fi
     cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets
-    juno_mali_binary
-    hikey_mali_binary
+    #juno_mali_binary
+    #hikey_mali_binary
 }
 
 juno_mali_binary(){
