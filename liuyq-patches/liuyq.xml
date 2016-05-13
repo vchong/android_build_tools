@@ -25,7 +25,4 @@
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.3-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.3-linaro"  />
   -->
-
-  <remove-project name="linux" remote="github-hikey"/>
-  <project path="kernel/linaro/hisilicon" name="linux" revision="android-hikey-linaro-4.1" remote="local"/>
 </manifest>
