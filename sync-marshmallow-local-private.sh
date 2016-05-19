@@ -16,8 +16,8 @@ ${BASE}/sync-projects.sh  build \
                           bionic \
                           android-patchsets \
                           device/linaro/hikey \
+                          kernel/linaro/hisilicon/ \
 
-#                          kernel/linaro/hisilicon/ \
 #                          art \
 #                          external/opencv-upstream \
 
@@ -45,8 +45,8 @@ apply_patch MARSHMALLOW-MLCR-PATCHSET
 apply_patch juno-m-workarounds
 apply_patch marshmallow-gcc5-patchset
 apply_patch hikey-m-workarounds
-apply_patch hikey-optee
-apply_patch hikey-optee-kernel-4.4
+#apply_patch hikey-optee
+#apply_patch hikey-optee-kernel-4.4
 #apply_patch nexus9-workarounds
 apply_patch get-hikey-blobs
 
