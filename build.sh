@@ -37,6 +37,7 @@ function build_hikey(){
 #    export TARGET_USERDATAIMAGE_4GB=true
     export TARGET_BUILD_KERNEL=true
 #    export TARGET_KERNEL_USE_4_1=true
+    export TARGET_BOOTIMAGE_USE_FAT=true
     build hikey
     targets="selinuxtarballs"
 }

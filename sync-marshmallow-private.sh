@@ -3,9 +3,16 @@ export BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/sync-common.sh
 
-export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
+if [ -d /SATA3/aosp-mirror/platform/manifest.git ]; then
+    export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
+elif [ -d /home/yongqin.liu/aosp-mirror/platform/manifest.git ]; then
+    export MIRROR="/home/yongqin.liu/aosp-mirror/platform/manifest.git"
+else
+    echo "Please specify value for MIRROR"
+fi
+
 #branch="android-6.0.0_r26"
-branch="android-6.0.1_r43"
+branch="android-6.0.1_r46"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"

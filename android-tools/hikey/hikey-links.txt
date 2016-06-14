@@ -8,3 +8,8 @@ https://ci.linaro.org/view/96boards/job/96boards-reference-platform-aosp-hikey/
 http://builds.96boards.org/snapshots/reference-platform/aosp/hikey
 http://builds.96boards.org/releases/hikey/linaro/aosp/latest/
 
+
+sudo fastboot oem led1 on /$sudo fastboot oem led1 off
+All four leds could be controlled by fastboot command. They are from led1 to led4.
+
+sudo fastboot oem serialno set {serialno string, 16 characters long}
