@@ -68,7 +68,8 @@ sync(){
     done
 }
 
-sync_linaro(){
+func_sync_linaro(){
+    mkdir -p .repo
     cd .repo
     if [ -d ./local_manifests ]; then
         cd ./local_manifests;
@@ -111,7 +112,7 @@ main(){
     git pull
     parseArgs "$@"
     if $sync_linaro; then
-        sync_linaro
+        func_sync_linaro
     fi
     sync_init
     sync

@@ -8,11 +8,10 @@
 <!--
   <project path="external/opencv-upstream" name="Itseez/opencv" revision="master" remote="github4liuyq" />
   <project path="external/ncurses" name="platform/external/ncurses" revision="linaro" groups="common" remote="linaro-android"/>
--->
   <project path="external/opencv-upstream" name="liuyq/opencv" revision="master" remote="github4liuyq" />
+-->
   <!--
   https://code.videolan.org/videolan/vlc-android.git
-  -->
   <project path="android-tools/apks" name="liuyq/apks" revision="master" remote="github4liuyq" />
 
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro" />
@@ -21,6 +20,7 @@
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.1-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.2-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.2-linaro" />
+  -->
   <!--
   <remove-project name="platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.3-linaro" />
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.3-linaro"  />
