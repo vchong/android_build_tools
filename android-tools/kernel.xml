@@ -4,6 +4,9 @@
   <project path="kernel/common" name="kernel/common" />
   <project path="kernel/tegra" name="kernel/tegra" />
   <project path="kernel/exynos" name="kernel/exynos" />
+<!--
   <project path="kernel/flo" name="kernel/flo" />
+-->
+  <project path="kernel/msm" name="kernel/msm" />
 
 </manifest>

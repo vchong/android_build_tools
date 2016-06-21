@@ -9,3 +9,6 @@ http://releases.linaro.org/members/arm/android/images/armv8-android-juno-lsk/lat
 https://ci.linaro.org/job/android-lcr-member-juno-m/
 https://ci.linaro.org/job/android-lcr-reference-juno-m/
 https://ci.linaro.org/job/android-lcr-member-hikey-m/
+https://ci.linaro.org/view/96boards/job/96boards-reference-platform-aosp-hikey/
+
+https://android-qa-reports.linaro.org/

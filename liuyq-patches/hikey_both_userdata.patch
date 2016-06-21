@@ -1,0 +1,67 @@
+diff --git a/build/tasks/boot_fat.mk b/build/tasks/boot_fat.mk
+index b0c340e..253f4f3 100644
+--- a/build/tasks/boot_fat.mk
++++ b/build/tasks/boot_fat.mk
+@@ -1,11 +1,5 @@
+ ifneq ($(filter hikey%, $(TARGET_DEVICE)),)
+ 
+-ifeq ($(TARGET_BUILD_KERNEL), true)
+-$(PRODUCT_OUT)/hi6220-hikey.dtb: all_dtbs
+-	cp $(PRODUCT_OUT)/obj/kernel/arch/arm64/boot/hi6220-hikey.dtb $(PRODUCT_OUT)/hi6220-hikey.dtb
+-
+-endif
+-
+ $(PRODUCT_OUT)/boot_fat.uefi.img: $(INSTALLED_KERNEL_TARGET) $(INSTALLED_RAMDISK_TARGET) $(PRODUCT_OUT)/hi6220-hikey.dtb
+ # $@ is referring to $(PRODUCT_OUT)/boot_fat.uefi.img
+ 	dd if=/dev/zero of=$@ bs=512 count=98304
+diff --git a/build/tasks/build-kernel.mk b/build/tasks/build-kernel.mk
+new file mode 100644
+index 0000000..44d5014
+--- /dev/null
++++ b/build/tasks/build-kernel.mk
+@@ -0,0 +1,9 @@
++ifneq ($(filter hikey%, $(TARGET_DEVICE)),)
++
++ifeq ($(TARGET_BUILD_KERNEL), true)
++$(PRODUCT_OUT)/hi6220-hikey.dtb: all_dtbs
++	cp $(PRODUCT_OUT)/obj/kernel/arch/arm64/boot/hi6220-hikey.dtb $(PRODUCT_OUT)/hi6220-hikey.dtb
++
++endif
++
++endif
+diff --git a/build/tasks/userdata_4g.mk b/build/tasks/userdata_4g.mk
+new file mode 100644
+index 0000000..3e26757
+--- /dev/null
++++ b/build/tasks/userdata_4g.mk
+@@ -0,0 +1,30 @@
++ifneq ($(filter hikey%, $(TARGET_DEVICE)),)
++
++INSTALLED_USERDATAIMAGE_TARGET_4GB := $(PRODUCT_OUT)/userdata-4g.img
++$(INSTALLED_USERDATAIMAGE_TARGET_4GB): $(INSTALLED_USERDATAIMAGE_TARGET) \
++                                       $(INTERNAL_USERIMAGES_DEPS) \
++                                       $(INTERNAL_USERDATAIMAGE_FILES)
++	$(build-userdataimage-target)
++
++
++define build-userdataimage-target-4g
++  $(call pretty,"Target userdata fs image: $(INSTALLED_USERDATAIMAGE_TARGET_4GB)")
++  @mkdir -p $(TARGET_OUT_DATA)
++  @mkdir -p $(userdataimage_intermediates) && rm -rf $(userdataimage_intermediates)/userdata_image_info.txt
++  BOARD_USERDATAIMAGE_PARTITION_SIZE := $()
++  $(call generate-userimage-prop-dictionary, $(userdataimage_intermediates)/userdata_image_info.txt, skip_fsck=true)
++
++  $(hide) PATH=$(foreach p,$(INTERNAL_USERIMAGES_BINARY_PATHS),$(p):)$$PATH \
++      ./build/tools/releasetools/build_image.py \
++      $(TARGET_OUT_DATA) $(userdataimage_intermediates)/userdata_image_info.txt $(INSTALLED_USERDATAIMAGE_TARGET) $(TARGET_OUT)
++  $(hide) $(call assert-max-image-size,$(INSTALLED_USERDATAIMAGE_TARGET),$(BOARD_USERDATAIMAGE_PARTITION_SIZE_4GB))
++endef
++
++.PHONY: userdataimage-nodeps-4gb
++userdataimage-nodeps-4gb: | $(INTERNAL_USERIMAGES_DEPS)
++	$(build-userdataimage-target-4g)
++
++
++droidcore: $(INSTALLED_USERDATAIMAGE_TARGET_4GB)
++
++endif
