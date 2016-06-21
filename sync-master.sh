@@ -17,3 +17,6 @@ LOCAL_MANIFEST_BRANCH=linaro-master
 
 #cp -uvf android-tools/kernel.xml .repo/local_manifests/kernel.xml
 main "$@"
+
+#apply_patch nexus9-workarounds
+func_apply_patch get-hikey-blobs

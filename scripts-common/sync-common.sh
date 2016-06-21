@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 export BASE=`pwd`
 export MIRROR="https://android.googlesource.com/platform/manifest"
 repo_url="git://android.git.linaro.org/tools/repo"
@@ -116,4 +116,22 @@ main(){
     fi
     sync_init
     sync
+}
+
+function func_apply_patch(){
+    local patch_name=$1
+    if [ -z "${patch_name}" ]; then
+        return
+    fi
+
+    if [ ! -f "./android-patchsets/${patch_name}" ]; then
+        return
+    fi
+
+    ./android-patchsets/${patch_name}
+    if [ $? -ne 0 ]; then
+        echo "Failed to run ${patch_name}"
+        exit 1
+    fi
+
 }

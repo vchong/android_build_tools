@@ -30,34 +30,17 @@ ${BASE}/sync-projects.sh  build \
 
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
-function apply_patch(){
-    local patch_name=$1
-    if [ -z "${patch_name}" ]; then
-        return
-    fi
 
-    if [ ! -f "./android-patchsets/${patch_name}" ]; then
-        return
-    fi
+func_apply_patch MARSHMALLOW-MLCR-PATCHSET
+func_apply_patch juno-m-workarounds
+func_apply_patch marshmallow-gcc5-patchset
+func_apply_patch hikey-m-workarounds
+#func_apply_patch hikey-optee
+#func_apply_patch hikey-optee-kernel-4.4
+#func_apply_patch nexus9-workarounds
+func_apply_patch get-hikey-blobs
 
-    ./android-patchsets/${patch_name}
-    if [ $? -ne 0 ]; then
-        echo "Failed to run ${patch_name}"
-        exit 1
-    fi
-
-}
-
-apply_patch MARSHMALLOW-MLCR-PATCHSET
-apply_patch juno-m-workarounds
-apply_patch marshmallow-gcc5-patchset
-apply_patch hikey-m-workarounds
-#apply_patch hikey-optee
-#apply_patch hikey-optee-kernel-4.4
-#apply_patch nexus9-workarounds
-apply_patch get-hikey-blobs
-
-apply_patch LIUYQ-PATCHSET
+func_apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit

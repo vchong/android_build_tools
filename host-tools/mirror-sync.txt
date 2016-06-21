@@ -1,0 +1,1 @@
+repo init -u /home/yongqin.liu/aosp-mirror/platform/manifest.git/ -b master --depth=1 -p linux -g default,-device,-notdefault,-darwin,-mips,-x86,hikey

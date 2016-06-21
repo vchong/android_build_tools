@@ -1,6 +1,10 @@
 https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-Benchmarks
 https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-checklist#
 https://validation.linaro.org/dashboard/image-charts/Marshmallow-LCR-Java-app-data
+https://validation.linaro.org/dashboard/image-charts/low-RAM_trends
+https://validation.linaro.org/scheduler/device_type/juno
+https://validation.linaro.org/scheduler/device_type/hi6220-hikey
+
 https://docs.google.com/spreadsheets/d/1HcwCS97b-PYeqO68csvYzER9fxQ8vEgV3HtR_DZRtmc/edit#gid=1814354945
 
 For juno instructions
