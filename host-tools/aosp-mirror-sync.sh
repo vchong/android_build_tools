@@ -122,10 +122,48 @@ __EOF__
     echo "IRC Notify Finished"
 }
 
+dir_aosp_master="/home/yongqin.liu/aosp-master"
+function change_log(){
+	export old_tag="$1"
+	export new_tag="$2"
+	if [ -z "${old_tag}" ] || [ -z "${new_tag}" ]; then
+		return
+	fi
+	local changelog_file="${3}"
+	if [ - z "${changelog_file}" ]; then
+		return
+	fi
+	cd ${dir_aosp_master}
+	repo sync -j4
+	repo forall -c ' \
+	        diff_commits=$(git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null|wc -l)
+	        if [ ${diff_commits} -gt 0 ]; then \
+		    echo ========${REPO_PROJECT} between ${old_tag}..${new_tag}=========
+                    git diff --stat ${old_tag} ${new_tag}
+                    git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null
+		    echo ""
+		fi;
+               '|tee ${changelog_file}.tmp
+
+	total_line=$(grep -e 'file changed' -e "files changed" ${changelog_file}.tmp|awk 'BEGIN { file_changed=0; insertions=0; deletions=0} { file_changed=file_changed+$1; insertions=insertions+$4; deletions=deletions+$6} END { printf("%d file changed, %d insertions(+), %d deletions(-)\n", file_changed, insertions, deletions)}')
+	echo "***************************************************************"  >${changelog_file}
+	echo "***************************************************************"  >>${changelog_file}
+	echo "  ${total_line}"  >>${changelog_file}
+	echo "***************************************************************"  >>${changelog_file}
+	echo "***************************************************************"  >>${changelog_file}
+	cat ${changelog_file}.tmp >>${changelog_file}
+	scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
+}
+
 function main(){
     sync_aosp_mirror
     if has_new_tags; then
-        local message="There are new tags released. The latest AOSP tag is: $(get_latest_tag_for_aosp)"
+	local old_tag="$(get_latest_tag_for_lcr)"
+	local new_tag="$(get_latest_tag_for_aosp)"
+	local changelog_file="ChangeLog-${old_tag}-${new_tag}-$(date +%Y-%m-%d-%H-%M-%S).txt"
+	change_log ${old_tag} ${new_tag} "${changelog_file}"
+        local message="There are new tags released. The latest AOSP tag is: ${new_tag}."
+        message="${message} Please check the change log here: http://people.linaro.org/~yongqin.liu/ChangeLogs/${changelog_file}"
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
