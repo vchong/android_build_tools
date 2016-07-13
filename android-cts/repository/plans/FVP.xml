@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TestPlan version="1.0">
-  <Entry exclude="android.app.cts.ProgressDialogTest#testShow1;android.app.cts.ProgressDialogTest#testShow2;android.app.cts.ProgressDialogTest#testShow3;android.app.cts.ProgressDialogTest#testShow4" name="android.app"/>
-  <Entry name="android.bionic"/>
-  <Entry name="android.content"/>
-  <Entry name="android.view"/>
-  <Entry name="android.core.tests.libcore.package.dalvik"/>
-</TestPlan>

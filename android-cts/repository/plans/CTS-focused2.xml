@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestPlan version="1.0">
+  <Entry name="android.core.vm-tests-tf"/>
+  <Entry name="android.view"/>
+  <Entry name="android.webkit"/>
+</TestPlan>

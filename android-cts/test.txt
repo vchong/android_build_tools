@@ -1,0 +1,17 @@
+ time for "pm path android" should be return in 10 seconds
+tools/tradefederation/src/com/android/tradefed/device/DeviceStateMonitor.java
+
+
+tools/base/ddmlib/src/main/java/com/android/ddmlib/AdbHelper.java
+defines implementation of executeRemoteCommand 
+
+
+tools/tradefederation/src/com/android/tradefed/device/DeviceManager.java
+DdmPreferences.setTimeOut(30*1000);
+install timeout problem
+
+
+run cts --package android.app --emulator --shell-wait-time 600000 --available-timeout 600000 --disable-reboot --log-level VERBOSE --log-level-display VERBOSE --skip-device-info --serial emulator-5554
+
+
+run cts --plan app --shell-wait-time 600000 --available-timeout 600000 --disable-reboot --log-level VERBOSE --log-level-display VERBOSE --skip-device-info --serial emulator-5554 --force-abi 64

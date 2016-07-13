@@ -1,0 +1,8 @@
+1. increase timeout value for classes in ddmlib:
+   ddmlib/src/main/java/com/android/ddmlib/AdbHelper.java
+   ddmlib/src/main/java/com/android/ddmlib/DdmPreferences.java
+   ddmlib/src/main/java/com/android/ddmlib/Device.java
+2. add app test plan
+   exlcude following test method:
+   android.app.cts.ProgressDialogTest#testShow3
+   android.app.cts.ProgressDialogTest#testShow4
