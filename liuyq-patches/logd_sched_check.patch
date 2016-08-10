@@ -1,0 +1,172 @@
+diff --git a/libcutils/sched_policy.c b/libcutils/sched_policy.c
+index 7bb8223..97b30e2 100644
+--- a/libcutils/sched_policy.c
++++ b/libcutils/sched_policy.c
+@@ -43,7 +43,7 @@ static inline SchedPolicy _policy(SchedPolicy p)
+ #include <sched.h>
+ #include <sys/prctl.h>
+ 
+-#define POLICY_DEBUG 0
++#define POLICY_DEBUG 1
+ 
+ // This prctl is only available in Android kernels.
+ #define PR_SET_TIMERSLACK_PID 41
+@@ -88,6 +88,12 @@ static int add_tid_to_cgroup(int tid, int fd)
+     }
+ 
+     if (write(fd, ptr, end - ptr) < 0) {
++        char buf[1024];
++        int size;
++        char fd_path[1024];
++        sprintf(fd_path, "/proc/self/fd/%d", fd);
++        size = readlink(fd_path, buf, 1024);
++
+         /*
+          * If the thread is in the process of exiting,
+          * don't flag an error
+@@ -96,6 +102,9 @@ static int add_tid_to_cgroup(int tid, int fd)
+                 return 0;
+         SLOGW("add_tid_to_cgroup failed to write '%s' (%s); fd=%d\n",
+               ptr, strerror(errno), fd);
++        if(size > 0){
++            SLOGW("FD=%d, file path=%s, uid=%d, euid=%d, gid=%d, egid=%d\n", fd, buf, getuid(), geteuid(), getgid(), getegid());
++        }
+         errno = EINVAL;
+         return -1;
+     }
+@@ -105,7 +114,14 @@ static int add_tid_to_cgroup(int tid, int fd)
+ 
+ static void __initialize(void) {
+     char* filename;
++    int fdDmesg = open("/dev/kmsg", O_WRONLY);
++    char logBuffer[1024];
++    sprintf(logBuffer, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
++    errno = 0;
+     if (!access("/dev/cpuctl/tasks", F_OK)) {
++        sprintf(logBuffer, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d, error=%s\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid(), strerror(errno));
++        write(fdDmesg, logBuffer, strlen(logBuffer));
+         __sys_supports_schedgroups = 1;
+ 
+         filename = "/dev/cpuctl/tasks";
+@@ -120,8 +136,14 @@ static void __initialize(void) {
+             SLOGE("open of %s failed: %s\n", filename, strerror(errno));
+         }
+     } else {
++        SLOGW("%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, %s\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), strerror(errno));
++        sprintf(logBuffer, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d, error=%s\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid(), strerror(errno));
++        write(fdDmesg, logBuffer, strlen(logBuffer));
+         __sys_supports_schedgroups = 0;
+     }
++    SLOGW("%s, %d, uid=%d, euid=%d, gid=%d, egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    sprintf(logBuffer, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
+ 
+ #ifdef USE_CPUSETS
+     if (!access("/dev/cpuset/tasks", F_OK)) {
+@@ -250,6 +272,7 @@ int get_sched_policy(int tid, SchedPolicy *policy)
+ 
+ int set_cpuset_policy(int tid, SchedPolicy policy)
+ {
++    SLOGW("================================%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
+     // in the absence of cpusets, use the old sched policy
+ #ifndef USE_CPUSETS
+     return set_sched_policy(tid, policy);
+@@ -294,6 +317,12 @@ int set_cpuset_policy(int tid, SchedPolicy policy)
+ 
+ int set_sched_policy(int tid, SchedPolicy policy)
+ {
++    SLOGW("================================%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++    int fdDmesg = open("/dev/kmsg", O_WRONLY);
++    char logBuffer[1024];
++    sprintf(logBuffer, "%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
++
+     if (tid == 0) {
+         tid = gettid();
+     }
+@@ -342,6 +371,9 @@ int set_sched_policy(int tid, SchedPolicy policy)
+ #endif
+ 
+     if (__sys_supports_schedgroups) {
++        SLOGW("%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++        sprintf(logBuffer, "%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++        write(fdDmesg, logBuffer, strlen(logBuffer));
+         int fd;
+         switch (policy) {
+         case SP_BACKGROUND:
+@@ -357,12 +389,17 @@ int set_sched_policy(int tid, SchedPolicy policy)
+             break;
+         }
+ 
+-
+         if (add_tid_to_cgroup(tid, fd) != 0) {
++            sprintf(logBuffer, "%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d, error=%s\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid(), strerror(errno));
++            write(fdDmesg, logBuffer, strlen(logBuffer));
++            SLOGW("%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, tid=%d, %s\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid(), strerror(errno));
+             if (errno != ESRCH && errno != ENOENT)
+                 return -errno;
+         }
+     } else {
++        SLOGW("%s, %d, uid=%d, euid=%d, gid=%d, egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++        sprintf(logBuffer, "%s %d, uid=%d, euid=%d, gid=%d,egid=%d, tid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid(), gettid());
++        write(fdDmesg, logBuffer, strlen(logBuffer));
+         struct sched_param param;
+ 
+         param.sched_priority = 0;
+diff --git a/logd/main.cpp b/logd/main.cpp
+index 3095f7f..354cd09 100644
+--- a/logd/main.cpp
++++ b/logd/main.cpp
+@@ -51,6 +51,8 @@
+ #include "LogKlog.h"
+ #include "LogUtils.h"
+ 
++static int fdDmesg = -1;
++
+ #define KMSG_PRIORITY(PRI)                            \
+     '<',                                              \
+     '0' + LOG_MAKEPRI(LOG_DAEMON, LOG_PRI(PRI)) / 10, \
+@@ -89,10 +91,16 @@
+ static int drop_privs() {
+     struct sched_param param;
+     memset(&param, 0, sizeof(param));
+-
++    char logBuffer[1024];
++    sprintf(logBuffer, "before set_sched_policy in drop_privs:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
+     if (set_sched_policy(0, SP_BACKGROUND) < 0) {
++        sprintf(logBuffer, "error set_sched_policy in drop_privs:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++        write(fdDmesg, logBuffer, strlen(logBuffer));
+         return -1;
+     }
++    sprintf(logBuffer, "after set_sched_policy in drop_privs:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
+ 
+     if (sched_setscheduler((pid_t) 0, SCHED_BATCH, &param) < 0) {
+         return -1;
+@@ -211,7 +219,6 @@ bool property_get_bool(const char *key, int flag) {
+     return (flag & BOOL_DEFAULT_FLAG_TRUE_FALSE) != BOOL_DEFAULT_FALSE;
+ }
+ 
+-static int fdDmesg = -1;
+ void inline android::prdebug(const char *fmt, ...) {
+     if (fdDmesg < 0) {
+         return;
+@@ -262,7 +269,15 @@ static bool package_list_parser_cb(pkg_info *info, void * /* userdata */) {
+ 
+ static void *reinit_thread_start(void * /*obj*/) {
+     prctl(PR_SET_NAME, "logd.daemon");
+-    set_sched_policy(0, SP_BACKGROUND);
++    char logBuffer[1024];
++    sprintf(logBuffer, "before set_sched_policy in reinit_thread_start:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
++    if (set_sched_policy(0, SP_BACKGROUND) < 0) {
++        sprintf(logBuffer, "error set_sched_policy in reinit_thread_start:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++        write(fdDmesg, logBuffer, strlen(logBuffer));
++    }
++    sprintf(logBuffer, "after set_sched_policy in reinit_thread_start:%s %d, uid=%d, euid=%d, gid=%d,egid=%d\n", __FILE__, __LINE__, getuid(), geteuid(), getgid(), getegid());
++    write(fdDmesg, logBuffer, strlen(logBuffer));
+     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_BACKGROUND);
+ 
+     // If we are AID_ROOT, we should drop to AID_SYSTEM, if we are anything

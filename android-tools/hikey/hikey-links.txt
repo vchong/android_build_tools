@@ -13,3 +13,10 @@ sudo fastboot oem led1 on /$sudo fastboot oem led1 off
 All four leds could be controlled by fastboot command. They are from led1 to led4.
 
 sudo fastboot oem serialno set {serialno string, 16 characters long}
+
+
+HDMI audio support
+https://warmcat.com/hardware%20design/hdmi/linux/96boards/2015/11/23/hdmi-hikey-audio.html
+
+Various topics about Android
+http://www.efalk.org/Docs/Android/index.html

@@ -1,0 +1,11 @@
+https://www.gnu.org/software/make/manual/html_node/index.html#SEC_Contents
+
+$(if condition,then-part[,else-part])
+
+$(filter pattern…,text)
+
+    Returns all whitespace-separated words in text that do match any of the pattern words, removing any words that do not match. The patterns are written using ‘%’, just like the patterns used in the patsubst function above. 
+
+$(filter-out pattern…,text)
+
+    Returns all whitespace-separated words in text that do not match any of the pattern words, removing the words that do match one or more. This is the exact opposite of the filter function. 

@@ -1,0 +1,94 @@
+How to check why the specified module is integrated into the build.
+
+base_rules.mk is include in following make files:
+    build/core/binary.mk:9:include $(BUILD_SYSTEM)/base_rules.mk
+    build/core/host_java_library.mk:45:include $(BUILD_SYSTEM)/base_rules.mk
+    build/core/host_dalvik_java_library.mk:57:include $(BUILD_SYSTEM)/base_rules.mk
+    build/core/dynamic_binary.mk:17:# know its results before base_rules.mk is included.
+    build/core/java.mk:322:include $(BUILD_SYSTEM)/base_rules.mk
+    build/core/phony_package.mk:8:include $(BUILD_SYSTEM)/base_rules.mk
+    build/core/prebuilt_internal.mk:117:  include $(BUILD_SYSTEM)/base_rules.mk
+
+and in build/core/base_rules.mk
+# Add this module name to the tag list of each specified tag.
+    $(foreach tag,$(my_module_tags),\
+        $(eval ALL_MODULE_NAME_TAGS.$(tag) += $(my_register_name)))
+
+will add this module to ALL_MODULE_NAME_TAGS.$(tag).
+
+Like if LOCAL_MODULE_TAGS is set to debug and tests in the Android.mk
+for that module, then ALL_MODULE_NAME_TAGS.debug and ALL_MODULE_NAME_TAGS.tests
+will be appended with the this module name:
+    ALL_MODULE_NAME_TAGS.debug += $(my_register_name)))
+    ALL_MODULE_NAME_TAGS.tests += $(my_register_name)))
+
+
+We can use LOCAL_UNINSTALLABLE_MODULE to make module not installed
+and following lines in base_rules.mk will help to control which will be installed:
+
+    ALL_MODULES.$(my_register_name).INSTALLED := \
+        $(strip $(ALL_MODULES.$(my_register_name).INSTALLED) \
+        $(LOCAL_INSTALLED_MODULE) $(my_init_rc_installed) $(my_installed_symlinks))
+    ALL_MODULES.$(my_register_name).BUILT_INSTALLED := \
+        $(strip $(ALL_MODULES.$(my_register_name).BUILT_INSTALLED) \
+        $(LOCAL_BUILT_MODULE):$(LOCAL_INSTALLED_MODULE) \
+        $(my_init_rc_pairs))
+
+in the above lines, as you can see there might be multiple files installed for one module
+
+
+In build/core/main.mk, the modules to be installed are composited as following:
+    modules_to_install := $(sort \
+        $(ALL_DEFAULT_INSTALLED_MODULES) \
+        $(product_FILES) \
+        $(foreach tag,$(tags_to_install),$($(tag)_MODULES)) \
+        $(CUSTOM_MODULES) \
+      )
+
+and modules for each tag are gotten like this:
+    debug_MODULES := $(sort \
+            $(call get-tagged-modules,debug) \
+            $(call module-installed-files, $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_PACKAGES_DEBUG)) \
+        )
+which will use the value set in base_rules.mk
+
+in build/core/definitions.mk, get-tagged-modules are defined as following:
+
+    ###########################################################
+
+    # Given a list of tags, return the targets that specify
+    # any of those tags.
+    # $(1): tag list
+    define modules-for-tag-list
+    $(sort $(foreach tag,$(1),$(foreach m,$(ALL_MODULE_NAME_TAGS.$(tag)),$(ALL_MODULES.$(m).INSTALLED))))
+    endef
+
+    # Given an accept and reject list, find the matching
+    # set of targets.  If a target has multiple tags and
+    # any of them are rejected, the target is rejected.
+    # Reject overrides accept.
+    # $(1): list of tags to accept
+    # $(2): list of tags to reject
+    #TODO(dbort): do $(if $(strip $(1)),$(1),$(ALL_MODULE_TAGS))
+    #TODO(jbq): as of 20100106 nobody uses the second parameter
+    define get-tagged-modules
+    $(filter-out \
+        $(call modules-for-tag-list,$(2)), \
+            $(call modules-for-tag-list,$(1)))
+    endef
+
+BTW, there we can use LOCAL_OVERRIDES_PACKAGES to overide some packages.
+
+
+And since
+    build/core/base_rules.mk
+is included in
+    build/core/binary.mk
+which is included in
+    build/core/host_executable_internal.mk
+which is included in
+    build/core/host_executable.mk
+
+so the LOCAL_MODULE_TAGS set for BUILD_HOST_EXECUTABLE will affect the modules
+of BUILD_EXECUTABLE with the same name.
+This is a bug, like the memory_replay set in system/extras/memory_replay/Android.mk

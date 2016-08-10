@@ -1,0 +1,331 @@
+diff --git a/fs/namei.c b/fs/namei.c
+index 209ca77..500d9d4 100644
+--- a/fs/namei.c
++++ b/fs/namei.c
+@@ -293,14 +293,35 @@ static int acl_permission_check(struct inode *inode, int mask)
+ 	if (likely(uid_eq(current_fsuid(), inode->i_uid)))
+ 		mode >>= 6;
+ 	else {
++        if( 1 == inode->i_ino){
++            if (IS_POSIXACL(inode)){
++                printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid);
++            }
++            //if (mode & S_IRWXG){
++            //    printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid);
++            //}
++        }
+ 		if (IS_POSIXACL(inode) && (mode & S_IRWXG)) {
++            if( 1 == inode->i_ino){
++                printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid);
++            }
+ 			int error = check_acl(inode, mask);
+-			if (error != -EAGAIN)
++			if (error != -EAGAIN){
++                if (error) printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, error=%d\n", __FILE__, __LINE__, inode->i_ino, mask, error);
+ 				return error;
++            }else{
++                if( 1 == inode->i_ino){
++                    printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid);
++                }
++            }
+ 		}
+ 
+-		if (in_group_p(inode->i_gid))
+-			mode >>= 3;
++		if (in_group_p(inode->i_gid)){
++            if( 1 == inode->i_ino){
++                printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid);
++            }
++            mode >>= 3;
++        }
+ 	}
+ 
+ 	/*
+@@ -308,7 +329,11 @@ static int acl_permission_check(struct inode *inode, int mask)
+ 	 */
+ 	if ((mask & ~mode & (MAY_READ | MAY_WRITE | MAY_EXEC)) == 0)
+ 		return 0;
+-	return -EACCES;
++
++    if( 1 == inode->i_ino){
++        printk(KERN_ERR "%s %d i_ino=%lu, mask=%d, mode=%d, inode->i_mode=%d, current_fsuid=%d, inode->i_uid=%d, IS_POSIXACL(inode)=%d, in_group_p(inode->i_gid=%d, check_acl(inode, mask)=%d\n", __FILE__, __LINE__, inode->i_ino, mask, mode, inode->i_mode, current_fsuid(), inode->i_uid, IS_POSIXACL(inode), in_group_p(inode->i_gid), check_acl(inode, mask));
++	}
++    return -EACCES;
+ }
+ 
+ /**
+@@ -336,6 +361,7 @@ int generic_permission(struct inode *inode, int mask)
+ 	if (ret != -EACCES)
+ 		return ret;
+ 
++    //printk(KERN_ERR "%s %d i_ino=%lu\n", __FILE__, __LINE__, inode->i_ino);
+ 	if (S_ISDIR(inode->i_mode)) {
+ 		/* DACs are overridable for directories */
+ 		if (capable_wrt_inode_uidgid(inode, CAP_DAC_OVERRIDE))
+@@ -344,6 +370,7 @@ int generic_permission(struct inode *inode, int mask)
+ 			if (capable_wrt_inode_uidgid(inode,
+ 						     CAP_DAC_READ_SEARCH))
+ 				return 0;
++        printk(KERN_ERR "%s %d i_ino=%lu, mask=%d\n", __FILE__, __LINE__, inode->i_ino, mask);
+ 		return -EACCES;
+ 	}
+ 	/*
+@@ -355,6 +382,7 @@ int generic_permission(struct inode *inode, int mask)
+ 		if (capable_wrt_inode_uidgid(inode, CAP_DAC_OVERRIDE))
+ 			return 0;
+ 
++    //printk(KERN_ERR "%s %d i_ino=%lu\n", __FILE__, __LINE__, inode->i_ino);
+ 	/*
+ 	 * Searching includes executable on directories, else just read.
+ 	 */
+@@ -363,6 +391,7 @@ int generic_permission(struct inode *inode, int mask)
+ 		if (capable_wrt_inode_uidgid(inode, CAP_DAC_READ_SEARCH))
+ 			return 0;
+ 
++    //printk(KERN_ERR "%s %d i_ino=%lu\n", __FILE__, __LINE__, inode->i_ino);
+ 	return -EACCES;
+ }
+ EXPORT_SYMBOL(generic_permission);
+@@ -407,17 +436,23 @@ int __inode_permission(struct inode *inode, int mask)
+ 		/*
+ 		 * Nobody gets write access to an immutable file.
+ 		 */
+-		if (IS_IMMUTABLE(inode))
++		if (IS_IMMUTABLE(inode)){
++            printk(KERN_ERR "%s %d\n", __FILE__, __LINE__);
+ 			return -EACCES;
++        }
+ 	}
+ 
+ 	retval = do_inode_permission(inode, mask);
+-	if (retval)
++	if (retval){
++        //printk(KERN_ERR "%s %d: err=%d, i_ino=%lu\n", __FILE__, __LINE__, retval, inode->i_ino);
+ 		return retval;
++   }
+ 
+ 	retval = devcgroup_inode_permission(inode, mask);
+-	if (retval)
++	if (retval){
++        printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, retval);
+ 		return retval;
++    }
+ 
+ 	return security_inode_permission(inode, mask);
+ }
+@@ -460,8 +495,10 @@ int inode_permission(struct inode *inode, int mask)
+ 	int retval;
+ 
+ 	retval = sb_permission(inode->i_sb, inode, mask);
+-	if (retval)
++	if (retval){
++        printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, retval);
+ 		return retval;
++    }
+ 	return __inode_permission(inode, mask);
+ }
+ EXPORT_SYMBOL(inode_permission);
+@@ -1644,10 +1681,14 @@ static inline int may_lookup(struct nameidata *nd)
+ {
+ 	if (nd->flags & LOOKUP_RCU) {
+ 		int err = inode_permission(nd->inode, MAY_EXEC|MAY_NOT_BLOCK);
+-		if (err != -ECHILD)
++		if (err != -ECHILD){
++            if(err) printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
+ 			return err;
+-		if (unlazy_walk(nd, NULL, 0))
++        }
++		if (unlazy_walk(nd, NULL, 0)){
++            printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
+ 			return -ECHILD;
++       }
+ 	}
+ 	return inode_permission(nd->inode, MAY_EXEC);
+ }
+@@ -1908,9 +1949,10 @@ static int link_path_walk(const char *name, struct nameidata *nd)
+ 		int type;
+ 
+ 		err = may_lookup(nd);
+- 		if (err)
++ 		if (err) {
++            printk(KERN_ERR "%s %d: err=%d, name=%s\n", __FILE__, __LINE__, err, name);
+ 			return err;
+-
++        }
+ 		hash_len = hash_name(name);
+ 
+ 		type = LAST_NORM;
+@@ -1930,8 +1972,10 @@ static int link_path_walk(const char *name, struct nameidata *nd)
+ 			if (unlikely(parent->d_flags & DCACHE_OP_HASH)) {
+ 				struct qstr this = { { .hash_len = hash_len }, .name = name };
+ 				err = parent->d_op->d_hash(parent, &this);
+-				if (err < 0)
++				if (err < 0){
++                    printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
+ 					return err;
++                }
+ 				hash_len = this.hash_len;
+ 				name = this.name;
+ 			}
+@@ -1965,12 +2009,15 @@ OK:
+ 		} else {
+ 			err = walk_component(nd, WALK_GET);
+ 		}
+-		if (err < 0)
++		if (err < 0){
++            printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
+ 			return err;
++        }
+ 
+ 		if (err) {
+ 			const char *s = get_link(nd);
+ 
++            //printk(KERN_ERR "%s %d: err=%d, s=%s\n", __FILE__, __LINE__, err, s);
+ 			if (IS_ERR(s))
+ 				return PTR_ERR(s);
+ 			err = 0;
+@@ -2125,10 +2172,24 @@ static int path_lookupat(struct nameidata *nd, unsigned flags, struct path *path
+ 	const char *s = path_init(nd, flags);
+ 	int err;
+ 
+-	if (IS_ERR(s))
++	if (IS_ERR(s)){
+ 		return PTR_ERR(s);
+-	while (!(err = link_path_walk(s, nd))
+-		&& ((err = lookup_last(nd)) > 0)) {
++    }
++//    while (!(err = link_path_walk(s, nd))
++//                   ) {
++
++	while (1) {
++        err = link_path_walk(s, nd);
++        if (err){
++            printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
++            break;
++        }
++        err = lookup_last(nd);
++        if (! (err > 0)){
++        //    printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, err);
++            break;
++        }
++
+ 		s = trailing_symlink(nd);
+ 		if (IS_ERR(s)) {
+ 			err = PTR_ERR(s);
+diff --git a/fs/open.c b/fs/open.c
+index 157b994..d9afb64 100644
+--- a/fs/open.c
++++ b/fs/open.c
+@@ -336,6 +336,7 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
+  */
+ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
+ {
++    printk(KERN_ERR "%s %d\n", __FILE__, __LINE__);
+ 	const struct cred *old_cred;
+ 	struct cred *override_cred;
+ 	struct path path;
+@@ -366,6 +367,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
+ 	old_cred = override_creds(override_cred);
+ retry:
+ 	res = user_path_at(dfd, filename, lookup_flags, &path);
++    printk(KERN_ERR "%s %d: file=%s mode=%d, res=%d\n", __FILE__, __LINE__, filename, mode, res);
+ 	if (res)
+ 		goto out;
+ 
+@@ -377,11 +379,13 @@ retry:
+ 		 * with the "noexec" flag.
+ 		 */
+ 		res = -EACCES;
++        printk(KERN_ERR "%s %d: file=%s mode=%d\n", __FILE__, __LINE__, filename, mode);
+ 		if (path_noexec(&path))
+ 			goto out_path_release;
+ 	}
+ 
+ 	res = inode_permission(inode, mode | MAY_ACCESS);
++    printk(KERN_ERR "%s %d: file=%s mode=%d, res=%d\n", __FILE__, __LINE__, filename, mode, res);
+ 	/* SuS v2 requires we report a read only fs too */
+ 	if (res || !(mode & S_IWOTH) || special_file(inode->i_mode))
+ 		goto out_path_release;
+@@ -398,6 +402,7 @@ retry:
+ 	if (__mnt_is_readonly(path.mnt))
+ 		res = -EROFS;
+ 
++    printk(KERN_ERR "%s %d: file=%s mode=%d, res=%d\n", __FILE__, __LINE__, filename, mode, res);
+ out_path_release:
+ 	path_put(&path);
+ 	if (retry_estale(res, lookup_flags)) {
+@@ -407,6 +412,7 @@ out_path_release:
+ out:
+ 	revert_creds(old_cred);
+ 	put_cred(override_cred);
++    printk(KERN_ERR "%s %d: file=%s mode=%d, res=%d\n", __FILE__, __LINE__, filename, mode, res);
+ 	return res;
+ }
+ 
+diff --git a/kernel/cgroup.c b/kernel/cgroup.c
+index 47851db..46849b9 100644
+--- a/kernel/cgroup.c
++++ b/kernel/cgroup.c
+@@ -2684,8 +2684,11 @@ int subsys_cgroup_allow_attach(struct cgroup_taskset *tset)
+ 		tcred = __task_cred(task);
+ 
+ 		if (current != task && !uid_eq(cred->euid, tcred->uid) &&
+-		    !uid_eq(cred->euid, tcred->suid))
++		    !uid_eq(cred->euid, tcred->suid)) {
++
++	        printk(KERN_INFO "=================%s %d\n", __FILE__, __LINE__);
+ 			return -EACCES;
++            }
+ 	}
+ 
+ 	return 0;
+@@ -2703,6 +2706,7 @@ static int cgroup_allow_attach(struct cgroup *cgrp, struct cgroup_taskset *tset)
+ 			if (ret)
+ 				return ret;
+ 		} else {
++	        printk(KERN_INFO "=================%s %d\n", __FILE__, __LINE__);
+ 			return -EACCES;
+ 		}
+ 	}
+@@ -2739,8 +2743,10 @@ static int cgroup_procs_write_permission(struct task_struct *task,
+ 		list_add(&cset->mg_node, &tset.src_csets);
+ 		ret = cgroup_allow_attach(dst_cgrp, &tset);
+ 		list_del(&tset.src_csets);
+-		if (ret)
++		if (ret){
++	        printk(KERN_INFO "=================%s %d\n", __FILE__, __LINE__);
+ 			ret = -EACCES;
++       }
+ 	}
+ 
+ 	if (!ret && cgroup_on_dfl(dst_cgrp)) {
+diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
+index 94a0bfc..69b5f17 100644
+--- a/security/selinux/hooks.c
++++ b/security/selinux/hooks.c
+@@ -2917,12 +2917,22 @@ static int selinux_inode_permission(struct inode *inode, int mask)
+ 	audited = avc_audit_required(perms, &avd, rc,
+ 				     from_access ? FILE__AUDIT_ACCESS : 0,
+ 				     &denied);
+-	if (likely(!audited))
+-		return rc;
++	if (likely(!audited)){
++	    if (rc){
++            printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, rc);
++		}
++        return rc;
++    }
+ 
+ 	rc2 = audit_inode_permission(inode, perms, audited, denied, rc, flags);
+-	if (rc2)
++	if (rc2){
++        printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, rc2);
+ 		return rc2;
++    }
++	if (rc){
++        printk(KERN_ERR "%s %d: err=%d\n", __FILE__, __LINE__, rc);
++		return rc;
++    }
+ 	return rc;
+ }
+ 

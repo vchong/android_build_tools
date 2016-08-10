@@ -1,0 +1,4 @@
+gdb out/target/product/hikey/obj/kernel/vmlinux
+(gdb) list  *(0xffffffc000085cb0)
+
+printk(KERN_ERR "RPC: failed to unregister %s cache\n", cd->name);

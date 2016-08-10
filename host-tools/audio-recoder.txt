@@ -1,0 +1,7 @@
+$ sudo add-apt-repository ppa:osmoma/audio-recorder
+$ sudo apt-get update
+$ sudo apt-get install audio-recorder
+
+https://code.launchpad.net/~audio-recorder/audio-recorder/trunk
+
+https://launchpad.net/audio-recorder
