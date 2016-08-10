@@ -1,3 +1,17 @@
+diff --git a/device.mk b/device.mk
+index 7c9aa8f..29ff4aa 100644
+--- a/device.mk
++++ b/device.mk
+@@ -41,6 +41,9 @@ DEVICE_PACKAGE_OVERLAYS := device/linaro/hikey/overlay
+ # Add openssh support for remote debugging and job submission
+ PRODUCT_PACKAGES += ssh sftp scp sshd ssh-keygen sshd_config start-ssh uim
+ 
++# Add package for btrfs
++PRODUCT_PACKAGES += mkfs.btrfs btrfs-convert
++
+ # Add wifi-related packages
+ PRODUCT_PACKAGES += libwpa_client wpa_supplicant hostapd
+ PRODUCT_PROPERTY_OVERRIDES += wifi.interface=wlan0 \
 diff --git a/fstab.hikey b/fstab.hikey
 index a2458eb..a773725 100644
 --- a/fstab.hikey
