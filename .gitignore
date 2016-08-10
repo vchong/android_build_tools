@@ -20,6 +20,7 @@ libcore
 libnativehelper
 Makefile
 ndk
+optee
 out
 packages
 pdk
