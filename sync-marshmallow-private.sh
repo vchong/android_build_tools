@@ -12,18 +12,22 @@ else
 fi
 
 #branch="android-6.0.0_r26"
-branch="android-6.0.1_r46"
+#branch="android-6.0.1_r24"
+branch="android-6.0.1_r63"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-marshmallow"
 
 main "$@"
 
-${BASE}/sync-projects.sh  build \
+${BASE}/sync-projects.sh  \
+                          system/gatekeeper \
+                          build \
                           bionic \
                           android-patchsets \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
+                          frameworks/base \
 
 #                          art \
 #                          external/opencv-upstream \
@@ -34,11 +38,12 @@ ${BASE}/sync-projects.sh  build \
 func_apply_patch MARSHMALLOW-MLCR-PATCHSET
 func_apply_patch juno-m-workarounds
 func_apply_patch marshmallow-gcc5-patchset
+#func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-m-workarounds
-#func_apply_patch hikey-optee
-#func_apply_patch hikey-optee-kernel-4.4
+func_apply_patch hikey-optee
+func_apply_patch hikey-optee-kernel-4.4
 #func_apply_patch nexus9-workarounds
-func_apply_patch get-hikey-blobs
+#func_apply_patch get-hikey-blobs
 
 func_apply_patch LIUYQ-PATCHSET
 

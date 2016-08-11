@@ -8,6 +8,7 @@ IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
 
 BASE_DIR=$(cd $(dirname $0); pwd)
+export PATH=${BASE_DIR}:${PATH}
 cd ${BASE_DIR}
 #rm -fr .repo
 
