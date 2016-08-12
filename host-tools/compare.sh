@@ -8,6 +8,7 @@ function change_log(){
 	fi
 	changelog_file="ChangeLog-${old_tag}-${new_tag}-$(date +%Y-%m-%d-%H-%M-%S).txt"
 	cd ${dir_aosp_master}
+	repo init -b ${new_tag}
 	repo sync -j4
 	repo forall -c ' \
 	        diff_commits=$(git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null|wc -l)
@@ -28,7 +29,10 @@ function change_log(){
 	#scp ${changelog_file} people:/home/yongqin.liu/public_html/ChangeLogs
 }
 
-change_log android-6.0.1_r25 android-6.0.1_r26
-change_log android-6.0.1_r25 android-6.0.1_r45
-change_log android-6.0.1_r26 android-6.0.1_r45
-change_log android-6.0.1_r45 android-6.0.1_r46
+change_log android-6.0.1_r46 android-6.0.1_r55
+#change_log android-6.0.1_r52 android-6.0.1_r55
+#change_log android-6.0.1_r52 android-6.0.1_r54
+#change_log android-6.0.1_r25 android-6.0.1_r26
+#change_log android-6.0.1_r25 android-6.0.1_r45
+#change_log android-6.0.1_r26 android-6.0.1_r45
+#change_log android-6.0.1_r45 android-6.0.1_r46

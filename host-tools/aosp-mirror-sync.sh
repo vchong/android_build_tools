@@ -135,6 +135,7 @@ function change_log(){
 		return
 	fi
 	cd ${dir_aosp_master}
+	repo init -b ${new_tag}
 	repo sync -j4
 	repo forall -c ' \
 	        diff_commits=$(git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null|wc -l)
