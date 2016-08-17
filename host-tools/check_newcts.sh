@@ -99,7 +99,9 @@ __EOF__
 
 function main(){
     if has_new; then
-        local message="There are new cts package released. The latest AOSP tag is: $(get_latest_cts)"
+        local new_cts_version=$(get_latest_cts)
+        local message="There are new cts package released. The latest AOSP tag is: ${new_cts_version}"
+        message="${message},  https://dl.google.com/dl/android/cts/android-cts-${new_cts_version}-linux_x86-arm.zip"
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
