@@ -64,7 +64,7 @@ function has_new_tags(){
     local latest_branch_aosp=$(get_latest_tag_for_aosp ${manifest_git})
     local latest_branch_lcr=$(get_latest_tag_for_lcr)
 
-    if [ -n "${latest_branch_lcr}" ] && [ -n "${latest_branch_lcr}" ]; then
+    if [ -n "${latest_branch_aosp}" ] && [ -n "${latest_branch_lcr}" ]; then
         echo "AOSP: ${latest_branch_aosp}"
         echo "LCR: ${latest_branch_lcr}"
         if [ "${latest_branch_aosp}" \> "${latest_branch_lcr}" ]; then
