@@ -1,0 +1,4 @@
+# check for aosp
+0 */6     * * *     yongqin.liu   /home/yongqin.liu/aosp-mirror/aosp-mirror-sync.sh
+# check for cts version
+0 */10     * * *     yongqin.liu   /home/yongqin.liu/aosp-mirror/check_newcts.sh
