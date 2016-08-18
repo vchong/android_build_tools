@@ -1,0 +1,24 @@
+bl1.bin --- soc rom l-loader.bin是bl1的wrapper， 有armv7转化为armv8
+
+
+bl2.bin --- secure world的bootloader
+            normal world和secure world 是时分复用
+            
+
+el3用来在secure world和normal world之间切换， context保存回复 是ATF完成的
+
+bl31.bin runtime 
+
+bl32.bin： secure world os
+bl33.bin： normal world bootloader
+
+fip.bin 是所有bl2.bin bl32.bin, bl33.bin(uefi, uboot)的集合，方便一次性烧写到板子上上或者内存上。
+   fip.bin包含了数字签名
+
+CPU 默认32bit： soc设计灵活，板子设计可能限制。 hikey和 juno不同。
+
+
+
+te.bin
+
+fastboot 

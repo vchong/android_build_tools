@@ -1,0 +1,110 @@
+From 12cff3c5eb3d605dcd37560dbb8f56911e27cf79 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Mon, 15 Aug 2016 11:50:15 +0800
+Subject: [PATCH 1/1] btrfs support changes
+
+Change-Id: Ieae1741322edaffc5fb975d79b4605a9eee4d394
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ bootloader/EFI/BOOT/grub.cfg |  4 ++--
+ device.mk                    |  3 +++
+ fstab.hikey                  | 10 ++++++++--
+ init.hikey.rc                |  2 ++
+ sepolicy/btrfs.te            |  6 ++++++
+ sepolicy/file_contexts       |  2 ++
+ 6 files changed, 23 insertions(+), 4 deletions(-)
+ create mode 100644 sepolicy/btrfs.te
+
+diff --git a/bootloader/EFI/BOOT/grub.cfg b/bootloader/EFI/BOOT/grub.cfg
+index 95c7dcc..b322491 100644
+--- a/bootloader/EFI/BOOT/grub.cfg
++++ b/bootloader/EFI/BOOT/grub.cfg
+@@ -1,4 +1,4 @@
+-set default="0"
++set default="4"
+ set timeout=1
+ menuentry 'AOSP' {
+     search.fs_label boot root
+@@ -31,7 +31,7 @@ menuentry 'AOSP@720P' {
+ menuentry 'AOSP@SVGA' {
+     search.fs_label boot root
+     set root=($root)
+-    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60
++    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60 androidboot.selinux=permissive
+     initrd /ramdisk.img
+     devicetree /hi6220-hikey.dtb
+ }
+diff --git a/device.mk b/device.mk
+index 1993a50..2d21b03 100644
+--- a/device.mk
++++ b/device.mk
+@@ -50,6 +50,9 @@ DEVICE_PACKAGE_OVERLAYS := device/linaro/hikey/overlay
+ # Add openssh support for remote debugging and job submission
+ PRODUCT_PACKAGES += ssh sftp scp sshd ssh-keygen sshd_config start-ssh uim
+ 
++# Add package for btrfs
++PRODUCT_PACKAGES += mkfs.btrfs btrfs-convert
++
+ # Add wifi-related packages
+ PRODUCT_PACKAGES += libwpa_client wpa_supplicant hostapd
+ PRODUCT_PROPERTY_OVERRIDES += wifi.interface=wlan0 \
+diff --git a/fstab.hikey b/fstab.hikey
+index a2458eb..842cd95 100644
+--- a/fstab.hikey
++++ b/fstab.hikey
+@@ -3,9 +3,15 @@
+ # The filesystem that contains the filesystem checker binary (typically /system) cannot
+ # specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
+ 
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             squashfs  ro                                                                   wait
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             btrfs  ro,compress=lzo                                                                   wait
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             btrfs  ro,compress=zlib                                                                 wait
++/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             btrfs  ro                                                                 wait
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             ext4      ro                                                                   wait
+-/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             squashfs  ro                                                                   wait
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/cache       /cache              ext4      discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1    wait
+-/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               ext4      discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1    wait
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               ext4      discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1    wait
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               btrfs     defaults,compress=lzo   wait
++#/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               btrfs     defaults,compress   wait
++/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               btrfs     defaults   wait
+ /devices/platform/soc/f723e000.dwmmc1/mmc_host/mmc*                   auto               auto      defaults  voldmanaged=sdcard1:auto,encryptable=userdata
+ /devices/platform/soc/f72c0000.usb/usb*               auto               auto      defaults  voldmanaged=usbdisk:auto,encryptable=userdata
+diff --git a/init.hikey.rc b/init.hikey.rc
+index fa1056e..3fa86f8 100644
+--- a/init.hikey.rc
++++ b/init.hikey.rc
+@@ -12,6 +12,8 @@ on init
+     write /proc/sys/kernel/randomize_va_space 0
+ 
+ on fs
++    exec u:r:btrfs:s0 root -- /sbin/btrfs-convert /dev/block/platform/soc/f723d000.dwmmc0/by-name/system
++    exec u:r:btrfs:s0 root -- /sbin/mkfs.btrfs /dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata
+     mount_all /fstab.hikey
+     setprop ro.crypto.fuse_sdcard false
+ 
+diff --git a/sepolicy/btrfs.te b/sepolicy/btrfs.te
+new file mode 100644
+index 0000000..2eae812
+--- /dev/null
++++ b/sepolicy/btrfs.te
+@@ -0,0 +1,6 @@
++type btrfs, domain;
++type btrfs_exec, exec_type, file_type;
++
++init_daemon_domain(btrfs)
++
++permissive btrfs;
+diff --git a/sepolicy/file_contexts b/sepolicy/file_contexts
+index ca71136..8ed5253 100644
+--- a/sepolicy/file_contexts
++++ b/sepolicy/file_contexts
+@@ -1,3 +1,5 @@
++/sbin/btrfs-convert         u:object_r:btrfs_exec:s0
++/sbin/mkfs.btrfs         u:object_r:btrfs_exec:s0
+ /dev/ttyAMA0           u:object_r:console_device:s0
+ /dev/ttyAMA3           u:object_r:console_device:s0
+ /dev/ttyFIQ0           u:object_r:console_device:s0
+-- 
+1.9.1
+

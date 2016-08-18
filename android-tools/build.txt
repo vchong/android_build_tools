@@ -36,7 +36,6 @@ and following lines in base_rules.mk will help to control which will be installe
 
 in the above lines, as you can see there might be multiple files installed for one module
 
-
 In build/core/main.mk, the modules to be installed are composited as following:
     modules_to_install := $(sort \
         $(ALL_DEFAULT_INSTALLED_MODULES) \
@@ -50,7 +49,7 @@ and modules for each tag are gotten like this:
             $(call get-tagged-modules,debug) \
             $(call module-installed-files, $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_PACKAGES_DEBUG)) \
         )
-which will use the value set in base_rules.mk
+which will use the value set in base_rules.mk mentioned above.
 
 in build/core/definitions.mk, get-tagged-modules are defined as following:
 
@@ -80,7 +79,7 @@ in build/core/definitions.mk, get-tagged-modules are defined as following:
 BTW, there we can use LOCAL_OVERRIDES_PACKAGES to overide some packages.
 
 
-And since
+And as
     build/core/base_rules.mk
 is included in
     build/core/binary.mk
@@ -88,7 +87,8 @@ which is included in
     build/core/host_executable_internal.mk
 which is included in
     build/core/host_executable.mk
+too,
 
-so the LOCAL_MODULE_TAGS set for BUILD_HOST_EXECUTABLE will affect the modules
+the LOCAL_MODULE_TAGS set for BUILD_HOST_EXECUTABLE will affect the modules
 of BUILD_EXECUTABLE with the same name.
 This is a bug, like the memory_replay set in system/extras/memory_replay/Android.mk

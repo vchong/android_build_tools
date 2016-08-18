@@ -1,0 +1,187 @@
+In init.rc, there are following settings related cpuctl
+    # Create cgroup mount points for process groups
+    mkdir /dev/cpuctl
+    mount cgroup none /dev/cpuctl cpu
+    chown system system /dev/cpuctl
+    chown system system /dev/cpuctl/tasks
+    chmod 0666 /dev/cpuctl/tasks
+    write /dev/cpuctl/cpu.shares 1024
+    write /dev/cpuctl/cpu.rt_runtime_us 800000
+    write /dev/cpuctl/cpu.rt_period_us 1000000
+
+    mkdir /dev/cpuctl/bg_non_interactive
+    chown system system /dev/cpuctl/bg_non_interactive/tasks
+    chmod 0666 /dev/cpuctl/bg_non_interactive/tasks
+    # 5.0 %
+    write /dev/cpuctl/bg_non_interactive/cpu.shares 52
+    write /dev/cpuctl/bg_non_interactive/cpu.rt_runtime_us 700000
+    write /dev/cpuctl/bg_non_interactive/cpu.rt_period_us 1000000
+
+
+In Documentation/scheduler/sched-rt-group.txt, cpu.rt_runtime_us is described as following:
+    2.3 Basis for grouping tasks
+    ----------------------------
+
+    Enabling CONFIG_RT_GROUP_SCHED lets you explicitly allocate real
+    CPU bandwidth to task groups.
+
+    This uses the cgroup virtual file system and "<cgroup>/cpu.rt_runtime_us"
+    to control the CPU time reserved for each control group.
+
+    For more information on working with control groups, you should read
+    Documentation/cgroups/cgroups.txt as well.
+
+    Group settings are checked against the following limits in order to keep the 
+    configuration schedulable:
+
+       \Sum_{i} runtime_{i} / global_period <= global_runtime / global_period
+
+    For now, this can be simplified to just the following (but see Future plans):
+
+        \Sum_{i} runtime_{i} <= global_runtime
+
+In Documentation/scheduler/sched-rt-group.txt, cpu.rt_period_us is described as following:
+    3. Future plans
+    ===============
+
+    There is work in progress to make the scheduling period for each group
+    ("<cgroup>/cpu.rt_period_us") configurable as well.
+
+    The constraint on the period is that a subgroup must have a smaller or
+    equal period to its parent. But realistically its not very useful _yet_
+    as its prone to starvation without deadline scheduling.
+
+    Consider two sibling groups A and B; both have 50% bandwidth, but A's 
+    period is twice the length of B's.
+
+    * group A: period=100000us, runtime=10000us
+        - this runs for 0.01s once every 0.1s
+
+    * group B: period= 50000us, runtime=10000us
+        - this runs for 0.01s twice every 0.1s (or once every 0.05 sec).
+
+    This means that currently a while (1) loop in A will run for the full period of
+    B and can starve B's tasks (assuming they are of lower priority) for a whole
+    period.
+
+
+In Documentation/scheduler/sched-design-CFS.txt, cpu.shares is described as following:
+    When CONFIG_FAIR_GROUP_SCHED is defined, a "cpu.shares" file is created for each
+    group created using the pseudo filesystem.  See example steps below to create
+    task groups and modify their CPU share using the "cgroups" pseudo filesystem.
+
+        # mount -t tmpfs cgroup_root /sys/fs/cgroup
+        # mkdir /sys/fs/cgroup/cpu
+        # mount -t cgroup -ocpu none /sys/fs/cgroup/cpu
+        # cd /sys/fs/cgroup/cpu
+
+        # mkdir multimedia  # create "multimedia" group of tasks
+        # mkdir browser     # create "browser" group of tasks
+
+        # #Configure the multimedia group to receive twice the CPU bandwidth
+        # #that of browser group
+
+        # echo 2048 > multimedia/cpu.shares
+        # echo 1024 > browser/cpu.shares
+
+        # firefox & # Launch firefox and move it to "browser" group
+        # echo <firefox_pid> > browser/tasks
+
+        # #Launch gmplayer (or your favourite movie player)
+        # echo <movie_player_pid> > multimedia/tasks
+
+
+
+In system/core/libcutils/sched_policy.c:
+
+    int set_sched_policy(int tid, SchedPolicy policy)
+    {
+        if (tid == 0) {
+            tid = gettid();
+        }
+        policy = _policy(policy);
+        pthread_once(&the_once, __initialize);
+        .....
+        if (__sys_supports_schedgroups) {
+            int fd;
+            switch (policy) {
+                case SP_BACKGROUND:
+                    fd = bg_cgroup_fd;
+                    break;
+                case SP_FOREGROUND:
+                case SP_AUDIO_APP:
+                case SP_AUDIO_SYS:
+                    fd = fg_cgroup_fd;
+                    break;
+                default:
+                    fd = -1;
+                    break;
+            }
+
+            if (add_tid_to_cgroup(tid, fd) != 0) {
+                if (errno != ESRCH && errno != ENOENT) return -errno;
+            }
+        } else {
+            struct sched_param param;
+
+            param.sched_priority = 0;
+            sched_setscheduler(tid, (policy == SP_BACKGROUND) ? SCHED_BATCH : SCHED_NORMAL, &param);
+        }
+
+        prctl(PR_SET_TIMERSLACK_PID, policy == SP_BACKGROUND ? TIMER_SLACK_BG : TIMER_SLACK_FG, tid);
+
+        return 0;
+    }
+
+SP_BACKGROUND will be set to the background group,
+and the SP_FOREGROUND/SP_AUDIO_APP/SP_AUDIO_SYS will be set to foreground group
+
+And set_sched_policy is only used in set_cpuset_policy when ENABLE_CPUSETS  is set:
+   int set_cpuset_policy(int tid, SchedPolicy policy)
+   {
+       // in the absence of cpusets, use the old sched policy
+   #ifndef USE_CPUSETS
+       return set_sched_policy(tid, policy);
+   #else
+       ....
+   }
+
+
+Following are the places where set_sched_policy is called:
+12:03:08 liuyq: marshmallow$ grep -rn set_sched_policy system/
+system/bt/utils/src/bt_utils.c:127:        // set_sched_policy does not support tid == 0
+system/bt/utils/src/bt_utils.c:128:        rc = set_sched_policy(tid, SP_AUDIO_SYS);
+system/core/logd/main.cpp:90:    if (set_sched_policy(0, SP_BACKGROUND) < 0) {
+system/core/logd/main.cpp:170:    set_sched_policy(0, SP_BACKGROUND);
+system/core/include/cutils/sched_policy.h:29:    SP_SYSTEM     = 2,  // can't be used with set_sched_policy()
+system/core/include/cutils/sched_policy.h:45:extern int set_sched_policy(int tid, SchedPolicy policy);
+system/core/logcat/logcat.cpp:216:        if (set_sched_policy(0, SP_BACKGROUND) < 0) {
+system/core/libutils/Threads.cpp:89:            set_sched_policy(0, SP_BACKGROUND);
+system/core/libutils/Threads.cpp:91:            set_sched_policy(0, SP_FOREGROUND);
+    Called in androidCreateThreadEtc, androidCreateRawThreadEtc when Thread initialized with canCallJava
+system/core/libutils/Threads.cpp:313:        rc = set_sched_policy(tid, SP_BACKGROUND);
+system/core/libutils/Threads.cpp:315:        rc = set_sched_policy(tid, SP_FOREGROUND);
+    Called in functions in androidSetThreadPriority
+        called by android_os_Process_setThreadPriority in frameworks/base/core/jni/android_util_Process.cpp
+        others are called by media projects
+system/core/libcutils/sched_policy.c:245:    return set_sched_policy(tid, policy);
+system/core/libcutils/sched_policy.c:277:int set_sched_policy(int tid, SchedPolicy policy)
+system/core/libcutils/sched_policy.c:367:int set_sched_policy(int tid UNUSED, SchedPolicy policy UNUSED)
+12:03:13 liuyq: marshmallow$ grep -rn set_sched_policy frameworks/
+frameworks/av/media/libmedia/AudioTrack.cpp:581:            set_sched_policy(0, mPreviousSchedulingGroup);
+frameworks/av/media/libmedia/AudioTrack.cpp:621:        set_sched_policy(0, mPreviousSchedulingGroup);
+frameworks/av/media/libmedia/AudioRecord.cpp:359:        set_sched_policy(0, mPreviousSchedulingGroup);
+frameworks/av/media/libmedia/IMediaMetadataRetriever.cpp:54:    set_sched_policy(gettid(), policy);
+frameworks/av/media/libmedia/IMediaMetadataRetriever.cpp:58:    set_sched_policy(gettid(), SP_FOREGROUND);
+frameworks/base/core/jni/com_android_internal_os_Zygote.cpp:259:  errno = -set_sched_policy(0, SP_DEFAULT);
+frameworks/base/core/jni/com_android_internal_os_Zygote.cpp:261:    ALOGE("set_sched_policy(0, SP_DEFAULT) failed");
+frameworks/base/core/jni/android_util_Process.cpp:170:    int res = set_sched_policy(tid, sp);
+frameworks/base/core/jni/android_util_Process.cpp:272:        err = set_sched_policy(t_pid, sp);
+frameworks/native/libs/binder/IPCThreadState.cpp:447:        set_sched_policy(mMyThreadId, SP_FOREGROUND);
+frameworks/native/libs/binder/IPCThreadState.cpp:486:    set_sched_policy(mMyThreadId, SP_FOREGROUND);
+frameworks/native/libs/binder/IPCThreadState.cpp:1066:                    set_sched_policy(mMyThreadId, SP_BACKGROUND);
+frameworks/native/services/surfaceflinger/main_surfaceflinger.cpp:42:    set_sched_policy(0, SP_FOREGROUND);
+frameworks/native/cmds/installd/commands.cpp:1086:        if (set_sched_policy(0, SP_BACKGROUND) < 0) {
+frameworks/native/cmds/installd/commands.cpp:1087:            ALOGE("set_sched_policy failed: %s\n", strerror(errno));
+12:04:01 liuyq: marshmallow$ 
+
