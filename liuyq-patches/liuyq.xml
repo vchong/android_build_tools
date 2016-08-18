@@ -8,6 +8,12 @@
   <project path="packages/inputmethods/hackerskeyboard" name="liuyq/hackerskeyboard" revision="master" remote="github4liuyq"/>
   <project path="external/lzo" name="android-lzo.git" revision="master" remote="lzo"/>
   <project path="external/btrfs-progs" name="liuyq/btrfs-progs" revision="android-btrfs" remote="github4liuyq"/>
+  <!-- https://android-git.linaro.org/git/platform/external/iozone.git -->
+  <project path="external/iozone" name="platform/external/iozone.git" revision="iozone3_434" remote="linaro-android"/>
+  <project path="packages/apps/0xbench" name="platform/packages/apps/0xbench.git" revision="linaro-master" remote="linaro-android"/>
+  <!-- https://git.linaro.org/people/satish.patel/android-bonnie.git -->
+  <project path="external/bonnie" name="people/satish.patel/android-bonnie.git" revision="master" remote="linaro-other"/>
+
 <!--
   <project path="external/opencv-upstream" name="Itseez/opencv" revision="master" remote="github4liuyq" />
   <project path="external/ncurses" name="platform/external/ncurses" revision="linaro" groups="common" remote="linaro-android"/>
