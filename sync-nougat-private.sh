@@ -35,13 +35,13 @@ ${BASE}/sync-projects.sh  \
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-#func_apply_patch NOUGAT-MLCR-PATCHSET
+func_apply_patch NOUGAT-MLCR-PATCHSET
 #func_apply_patch juno-m-workarounds
 #func_apply_patch marshmallow-gcc5-patchset
 #func_apply_patch marshmallow-gcc6-patchset
-#func_apply_patch hikey-n-workarounds
-#func_apply_patch hikey-optee
-#func_apply_patch hikey-optee-kernel-4.4
+func_apply_patch hikey-n-workarounds
+func_apply_patch hikey-optee-n
+func_apply_patch hikey-optee-kernel-4.4
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
 

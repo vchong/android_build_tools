@@ -9,9 +9,24 @@ if ! [ -d ${img_dir} ]; then
     echo "The specified path is not a directory:${img_dir}"
     exit 1
 fi
-fastboot flash -u boot ${img_dir}/boot_fat.uefi.img
-#fastboot flash -u boot ${img_dir}/boot.img
-fastboot flash -u system ${img_dir}/system.img
-fastboot flash -u cache ${img_dir}/cache.img
-fastboot flash -u userdata ${img_dir}/userdata.img
+
+function flash_image(){
+    local partition=$1
+    local file_img=$2
+    if [ -z "${partition}" ] || [ -z "${file_img}" ]; then
+        return
+    fi
+
+    fastboot flash -u ${partition} ${file_img}
+    if [ $? -ne 0 ]; then
+        echo "Failed to deploy ${file_img}"
+        exit 1
+    fi
+}
+
+flash_image boot ${img_dir}/boot_fat.uefi.img
+#flash_image boot ${img_dir}/boot.img
+flash_image system ${img_dir}/system.img
+flash_image cache ${img_dir}/cache.img
+flash_image userdata ${img_dir}/userdata.img
 fastboot reboot

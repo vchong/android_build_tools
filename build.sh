@@ -8,13 +8,13 @@ variant="userdebug"
 
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
-export TARGET_GCC_VERSION_EXP=5.3-linaro
+#export TARGET_GCC_VERSION_EXP=5.3-linaro
 export WITH_DEXPREOPT=true
 #export MALLOC_IMPL=dlmalloc
 #export MALLOC_IMPL_MUSL=true
 
 function build(){
-    export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
     export PATH=${JAVA_HOME}/bin:$PATH
     product="${1}"
     if [ -z "${product}" ]; then
