@@ -1,0 +1,38 @@
+diff --git a/EmulatedVolume.cpp b/EmulatedVolume.cpp
+index 80ef3e2..fc00890 100644
+--- a/EmulatedVolume.cpp
++++ b/EmulatedVolume.cpp
+@@ -97,12 +97,12 @@ status_t EmulatedVolume::doMount() {
+         PLOG(ERROR) << getId() << " failed to fork";
+         return -errno;
+     }
+-
++/*
+     while (before == GetDevice(mFuseWrite)) {
+         LOG(VERBOSE) << "Waiting for FUSE to spin up...";
+         usleep(50000); // 50ms
+     }
+-
++*/
+     return OK;
+ }
+ 
+diff --git a/PublicVolume.cpp b/PublicVolume.cpp
+index eb550c3..cb25eec 100644
+--- a/PublicVolume.cpp
++++ b/PublicVolume.cpp
+@@ -180,12 +180,12 @@ status_t PublicVolume::doMount() {
+         PLOG(ERROR) << getId() << " failed to fork";
+         return -errno;
+     }
+-
++/*
+     while (before == GetDevice(mFuseWrite)) {
+         LOG(VERBOSE) << "Waiting for FUSE to spin up...";
+         usleep(50000); // 50ms
+     }
+-
++*/
+     return OK;
+ }
+ 

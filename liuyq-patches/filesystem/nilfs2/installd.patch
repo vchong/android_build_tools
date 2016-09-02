@@ -1,0 +1,15 @@
+diff --git a/cmds/installd/installd.cpp b/cmds/installd/installd.cpp
+index f67e838..b051dec 100644
+--- a/cmds/installd/installd.cpp
++++ b/cmds/installd/installd.cpp
+@@ -680,7 +680,9 @@ int main(const int argc __unused, char *argv[]) {
+ 
+     if (initialize_directories() < 0) {
+         ALOGE("Could not create directories; exiting.\n");
+-        exit(1);
++        if (security_getenforce()){
++            exit(1);
++        }
+     }
+ 
+     if (selinux_enabled && selinux_status_open(true) < 0) {
