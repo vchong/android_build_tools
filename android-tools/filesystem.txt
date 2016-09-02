@@ -1,0 +1,106 @@
+How to test new file system types
+
+1. create new file sytem types image on host, like
+    dd if=/dev/zero of=nilfs.img bs=1M count=1024
+    mkfs.nilfs2 nilfs.img
+
+2. push this image file into device
+    adb push nilfs.img /data/local/tmp
+
+3. on device side, try to mount it
+    losetup /dev/block/loop7 nilfs.img
+    mount -t nilfs2 /dev/block/loop7 nilfs
+
+   if it's failed to mount that file system type,
+   then you need to check the kernel side to make the mount supported
+   like add following kernel config:
+    CONFIG_NILFS2_FS=y
+
+4. edit fstab to enabled mount with new types for boot
+   since entries in fstab.xxx will be tried till the first line that partition
+   is mounted successfully, so we can write multiple lines for the same
+   partition there with different file system types and mount options
+   like:
+       /dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               nilfs2    defaults    wait
+
+5. since selinux is enabled by default, and we probably will have selinux
+   problem with the new file system type.
+   TODO: details on selinux enabling for new file system type
+
+   add "androidboot.selinux=permissive" to the boot parameters to use permissive mode
+
+4. get raw type image file, and see if the device could boot up with the new file sytem type
+
+   since file system image file flashing needs to be the same size as the device,
+   so it would be better to use the original generated work image files.
+
+   Like for the userdata partition:
+   1). get the raw userdata image file:
+       sepcified TARGET_USERIMAGES_SPARSE_EXT_DISABLED to true before
+       start building will generate the raw type userdata image file
+   2). use simg2img command
+       ./out/host/linux-x86/bin/simg2img out/target/product/hikey/userdata.img out/target/product/hikey/userdata-raw.img
+
+5. format the raw image file with new file system type for userdata partition
+    mkfs.nilfs2 out/target/product/hikey/userdata-raw.img
+
+   This is only for experiment. For real product, the userdata.img or system.img
+   should have prebuilt files in it, and have permission, selinux settings set.
+
+8. generate sparse image file for the new file system type image file
+   1) use img2simg
+   out/host/linux-x86/bin/img2simg out/target/product/hikey/userdata-raw.img out/target/product/hikey/userdata-nilfs.img
+
+   2) since hikey fastboot does not support FILL type chunk in the sparse image file,
+   so we need to add the following patch
+
+        12:22:27 liuyq: core$ git diff
+        diff --git a/libsparse/backed_block.c b/libsparse/backed_block.c
+        index 794cd6b..ecf7d6b 100644
+        --- a/libsparse/backed_block.c
+        +++ b/libsparse/backed_block.c
+        @@ -25,7 +25,7 @@
+         
+         struct backed_block {
+                unsigned int block;
+        -       unsigned int len;
+        +       int64_t len;
+                enum backed_block_type type;
+                union {
+                        struct {
+        diff --git a/libsparse/sparse_read.c b/libsparse/sparse_read.c
+        index dbb4dab..c00a686 100644
+        --- a/libsparse/sparse_read.c
+        +++ b/libsparse/sparse_read.c
+        @@ -363,7 +363,7 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+                int64_t offset = 0;
+                unsigned int to_read;
+                unsigned int i;
+        -       bool sparse_block;
+        +       bool sparse_block = false;
+         
+                if (!buf) {
+                        return -ENOMEM;
+        @@ -377,7 +377,7 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+                                free(buf);
+                                return ret;
+                        }
+        -
+        +/*
+                        if (to_read == s->block_size) {
+                                sparse_block = true;
+                                for (i = 1; i < s->block_size / sizeof(uint32_t); i++) {
+        @@ -386,9 +386,9 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+                                                break;
+                                        }
+                                }
+        -               } else {
+        +               } else { */
+                                sparse_block = false;
+        -               }
+        +       /*      }*/
+         
+                        if (sparse_block) {
+                                /* TODO: add flag to use skip instead of fill for buf[0] == 0 */
+        12:22:29 liuyq: core$ 
+

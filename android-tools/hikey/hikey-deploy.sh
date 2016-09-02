@@ -17,6 +17,7 @@ function flash_image(){
         return
     fi
 
+    echo "======= Flash ${partition} partition with file $file_img =============="
     fastboot flash -u ${partition} ${file_img}
     if [ $? -ne 0 ]; then
         echo "Failed to deploy ${file_img}"
@@ -27,6 +28,6 @@ function flash_image(){
 flash_image boot ${img_dir}/boot_fat.uefi.img
 #flash_image boot ${img_dir}/boot.img
 flash_image system ${img_dir}/system.img
-flash_image cache ${img_dir}/cache.img
+#flash_image cache ${img_dir}/cache.img
 flash_image userdata ${img_dir}/userdata.img
 fastboot reboot

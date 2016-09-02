@@ -1,0 +1,47 @@
+diff --git a/libsparse/backed_block.c b/libsparse/backed_block.c
+index 794cd6b..ecf7d6b 100644
+--- a/libsparse/backed_block.c
++++ b/libsparse/backed_block.c
+@@ -25,7 +25,7 @@
+ 
+ struct backed_block {
+ 	unsigned int block;
+-	unsigned int len;
++	int64_t len;
+ 	enum backed_block_type type;
+ 	union {
+ 		struct {
+diff --git a/libsparse/sparse_read.c b/libsparse/sparse_read.c
+index dbb4dab..c00a686 100644
+--- a/libsparse/sparse_read.c
++++ b/libsparse/sparse_read.c
+@@ -363,7 +363,7 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+ 	int64_t offset = 0;
+ 	unsigned int to_read;
+ 	unsigned int i;
+-	bool sparse_block;
++	bool sparse_block = false;
+ 
+ 	if (!buf) {
+ 		return -ENOMEM;
+@@ -377,7 +377,7 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+ 			free(buf);
+ 			return ret;
+ 		}
+-
++/*
+ 		if (to_read == s->block_size) {
+ 			sparse_block = true;
+ 			for (i = 1; i < s->block_size / sizeof(uint32_t); i++) {
+@@ -386,9 +386,9 @@ static int sparse_file_read_normal(struct sparse_file *s, int fd)
+ 					break;
+ 				}
+ 			}
+-		} else {
++		} else { */
+ 			sparse_block = false;
+-		}
++	/*	}*/
+ 
+ 		if (sparse_block) {
+ 			/* TODO: add flag to use skip instead of fill for buf[0] == 0 */
