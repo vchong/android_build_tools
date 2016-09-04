@@ -124,7 +124,9 @@ function installImage(){
 
     if [ ! -d "$bz2_dir/boot" ]; then
         tar -jxvf ${bz2_dir}/boot.tar.bz2 -C $bz2_dir
-        ln -s $bz2_dir/boot/fvp-base-gicv2-psci.dtb $bz2_dir/boot/fdt.dtb
+        if [ ! -e $bz2_dir/boot/fdt.dtb ]; then
+            ln -s $bz2_dir/boot/fvp-base-gicv2-psci.dtb $bz2_dir/boot/fdt.dtb
+        fi
     fi
 }
 
@@ -136,7 +138,7 @@ function startFvp(){
     cd ${dir_boot}
 
     if ! ${USE_BRIDGE}; then
-    ${RTSM_AEMv8_HOME}/models/Linux64_GCC-4.1/FVP_Base_AEMv8A-AEMv8A \
+    ${RTSM_AEMv8_HOME}/models/Linux64_GCC-4.7/FVP_Base_AEMv8A-AEMv8A \
         -C pctl.startup=0.0.0.0 \
         -C bp.secure_memory=0 \
         -C cluster0.NUM_CORES=4 \
@@ -153,7 +155,7 @@ function startFvp(){
         -C bp.smsc_91c111.enabled=1
         #-C bp.flashloader0.fname=uefi_fvp-base.bin \
     else
-    ${RTSM_AEMv8_HOME}/models/Linux64_GCC-4.1/FVP_Base_AEMv8A-AEMv8A \
+    ${RTSM_AEMv8_HOME}/models/Linux64_GCC-4.7/FVP_Base_AEMv8A-AEMv8A \
         -C pctl.startup=0.0.0.0 \
         -C bp.secure_memory=0 \
         -C cluster0.NUM_CORES=4 \
