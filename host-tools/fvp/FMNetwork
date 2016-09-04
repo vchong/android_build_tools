@@ -1,0 +1,135 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides: ARM Ltd
+# Required-Start: $local_fs $network $syslog
+# Should-Start:
+# Required-Stop: $local_fs $network $syslog
+# Should-Stop:
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 2 6
+# Short-Description: FM Network Setup
+# Description: FM Network Setup
+#              Create TAP deivces and network bridge for Fast Models
+#              See http://www.arm.com/products/tools/fast-models.php 
+#              for more information.
+### END INIT INFO
+
+# This is an example of a Linux LSB conforming init script.
+# See http://refspecs.freestandards.org/ for more information on LSB.
+
+# $FastModels$
+
+# source function library
+if [ -e /etc/rc.d/init.d/functions ];then
+    source /etc/rc.d/init.d/functions
+elif [ -e /lib/lsb/init-functions ];then
+    source /lib/lsb/init-functions
+else
+    echo 'Unable to find lsb functions'
+fi
+PATH=.:/sbin:/usr/sbin:/bin:/usr/bin
+USERS="liuyq"
+NIC=eth0
+PREFIX=ARM
+BRIDGE=armbr0
+start()
+{
+    PID=`ps aux | grep dhclient | grep $BRIDGE | grep -v grep | awk '{print $2}'`
+    #DEFAULT_GW=`route | grep ^default | awk '{print $2}'`
+    DEFAULT_GW=`route -n| grep ^0.0.0.0 | awk '{print $2}'`
+    HOST_IP=`ifconfig $NIC | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'`
+
+    if [ x$PID != x ]; then
+        echo "TAP Bridge $BRIDGE already exist and FMNetwork is running."
+        exit 1
+    fi
+
+    # take down ethx
+    ip addr flush $NIC
+    ifconfig $NIC 0.0.0.0 promisc down
+    sleep 3
+    # create bridge
+    brctl addbr $BRIDGE
+    BRIDGE_MAC=`ifconfig $BRIDGE | grep $BRIDGE | awk '{print $5}'`
+    brctl addif $BRIDGE $NIC
+    # create tap devices and add them into the bridge
+    for user in $USERS
+    do
+       tapctrl -n $PREFIX$user -a create -o $user -t tap
+       ifconfig $PREFIX$user 0.0.0.0 promisc up
+       brctl addif $BRIDGE $PREFIX$user
+    done
+    ifconfig $NIC up
+    ifconfig $BRIDGE hw ether $BRIDGE_MAC 0.0.0.0 promisc
+    ip link set $BRIDGE up
+    # wait process to finish
+    sleep 1s
+    dhclient $BRIDGE
+    route add default gw $DEFAULT_GW $BRIDGE
+    ifconfig $NIC $HOST_IP
+    sleep 2
+    route del default gw $DEFAULT_GW $NIC >/dev/null 2>&1
+    route del $DEFAULT_GW $NIC >/dev/null 2>&1
+    ip addr show 2>&1 > /var/log/fm_bridge_create.log
+    sleep 3
+}
+stop()
+{
+   PID=`ps aux | grep dhclient | grep $BRIDGE | grep -v grep | awk '{print $2}'`
+   HOST_IP=`ifconfig $NIC | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'`
+   #DEFAULT_GW=`route | grep ^default | awk '{print $2}'`
+   DEFAULT_GW=`route -n| grep ^0.0.0.0 | awk '{print $2}'`
+
+    if [ x$PID == x ]; then
+        echo "TAP Bridge $BRIDGE does not exist and no FMNetwork to stop."
+        exit 1
+    fi
+
+   # take down the bridge
+   kill -9 $PID
+   ifconfig $PREFIX$USERS down >/dev/null 2>&1
+   ifconfig $BRIDGE down >/dev/null 2>&1
+   ip addr flush $BRIDGE
+
+   # remove the interfaces from the bridge
+   brctl delif $BRIDGE $NIC
+
+   for user in $USERS
+   do
+      brctl delif $BRIDGE $PREFIX$user
+      tapctrl -n $PREFIX$user -a delete -o $user -t tap
+   done
+   ip link set $BRIDGE down
+   # delete the bridge
+   brctl delbr $BRIDGE
+
+   # unset promiscous mode
+   ifconfig $NIC $HOST_IP -promisc up
+
+   # bring up the network
+   route add default gw $DEFAULT_GW $NIC
+   ifconfig $NIC down
+   sleep 3
+   ifconfig $NIC up
+   ip addr show 2>&1 > /var/log/fm_bridge_delete.log
+   sleep 3
+}
+RETVAL=0
+case "$1" in
+    start)
+           start
+           ;;
+    stop)
+           stop
+           ;;
+    restart)
+           stop
+           start
+           ;;
+    *)
+           echo -e "Usage: $0 {start|stop|restart}"
+           RETVAL=1
+esac
+
+exit $RETVAL
+# Script End

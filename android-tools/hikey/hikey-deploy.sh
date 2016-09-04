@@ -23,6 +23,8 @@ function flash_image(){
         echo "Failed to deploy ${file_img}"
         exit 1
     fi
+    # sleep 2 after flash
+    sleep 2
 }
 
 flash_image boot ${img_dir}/boot_fat.uefi.img

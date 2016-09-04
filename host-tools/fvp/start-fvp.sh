@@ -131,6 +131,7 @@ function installImage(){
 function startFvp(){
     ssh -L 8224:localhost:8224 -L 18224:localhost:18224 -N ${flexlm_account}@flexlm.linaro.org &
     sleep 5
+
     dir_boot="${bz2_dir}/boot"
     cd ${dir_boot}
 
@@ -169,6 +170,7 @@ function startFvp(){
         #-C bp.smsc_91c111.mac_address=auto
     fi
 }
+
 function main(){
     parseArgs "$@"
     installImage

@@ -1,0 +1,18 @@
+diff --git a/src/android.c b/src/android.c
+index 1b4496d..e236f9f 100644
+--- a/src/android.c
++++ b/src/android.c
+@@ -1190,8 +1190,11 @@ static int restorecon_sb(const char *pathname, const struct stat *sb,
+             selinux_log(SELINUX_INFO,
+                         "SELinux:  Relabeling %s from %s to %s.\n", pathname, oldsecontext, secontext);
+         if (!nochange) {
+-            if (lsetfilecon(pathname, secontext) < 0)
+-                goto err;
++            if (lsetfilecon(pathname, secontext) < 0) {
++                if (security_getenforce()){
++                    goto err;
++                }
++            }
+         }
+     }
+ 
