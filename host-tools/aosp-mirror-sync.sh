@@ -131,7 +131,7 @@ function change_log(){
 		return
 	fi
 	local changelog_file="${3}"
-	if [ - z "${changelog_file}" ]; then
+	if [ -z "${changelog_file}" ]; then
 		return
 	fi
 	cd ${dir_aosp_master}
