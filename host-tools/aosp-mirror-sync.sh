@@ -38,7 +38,7 @@ function get_latest_tag_for_aosp(){
         exit 1
     fi
 
-    local latest_branch_aosp=$(git branch -a|grep 'android-6'|sort -V|tail -n1|tr -d ' ')
+    local latest_branch_aosp=$(git branch -a|grep 'android-7'|sort -V|tail -n1|tr -d ' ')
     if [ -z "${latest_branch_aosp}" ]; then
         echo "Failed to get the tags information for AOSP"
         echo "Please check the status and try again"
@@ -50,7 +50,7 @@ function get_latest_tag_for_aosp(){
 }
 
 function get_latest_tag_for_lcr(){
-    local url_m_lcr_juno="https://android-git.linaro.org/gitweb/android-build-configs.git/blob_plain/HEAD:/lcr-member-juno-m"
+    local url_m_lcr_juno="https://android-git.linaro.org/gitweb/android-build-configs.git/blob_plain/HEAD:/lcr-member-juno-n"
     local latest_branch_lcr=$(curl ${url_m_lcr_juno}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
     if [ -z "${latest_branch_lcr}" ]; then
         echo "Failed to get the tags information for LCR"
@@ -123,7 +123,7 @@ __EOF__
     echo "IRC Notify Finished"
 }
 
-dir_aosp_master="/home/yongqin.liu/aosp-master"
+dir_aosp_master="/home/ubuntu/aosp-master"
 function change_log(){
 	export old_tag="$1"
 	export new_tag="$2"
@@ -154,7 +154,7 @@ function change_log(){
 	echo "***************************************************************"  >>${changelog_file}
 	echo "***************************************************************"  >>${changelog_file}
 	cat ${changelog_file}.tmp >>${changelog_file}
-	scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
+	sudo -u yongqin.liu scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
 }
 
 function main(){
