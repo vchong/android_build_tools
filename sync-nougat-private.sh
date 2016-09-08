@@ -11,8 +11,6 @@ else
     echo "Please specify value for MIRROR"
 fi
 
-#branch="android-6.0.0_r26"
-#branch="android-6.0.1_r24"
 branch="android-7.0.0_r4"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
@@ -41,7 +39,6 @@ func_apply_patch NOUGAT-MLCR-PATCHSET
 #func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-n-workarounds
 func_apply_patch hikey-optee-n
-func_apply_patch hikey-optee-kernel-4.4
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
 
