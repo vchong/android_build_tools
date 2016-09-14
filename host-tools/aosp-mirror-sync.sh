@@ -1,7 +1,6 @@
 #!/bin/bash
 
-manifest_git="/SATA3/aosp-mirror/platform/manifest.git"
-manifest_git="/home/yongqin.liu/aosp-mirror/platform/manifest.git"
+manifest_git="/home/ubuntu/aosp-mirror/platform/manifest.git"
 IRC_NOTIFY_CHANNEL="#linaro-android"
 #IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
@@ -157,6 +156,62 @@ function change_log(){
 	sudo -u yongqin.liu scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
 }
 
+function update_android_build_config(){
+    local old_tag=$1
+    local new_tag=$2
+    local url_change_log=$3
+    local OLD_PWD=$(pwd)
+    #local f_redirect="/tmp/git.log"
+    local f_redirect="/dev/null"
+
+    local git_build_config="http://android-git.linaro.org/git/android-build-configs.git"
+    local dir_build_config="/home/ubuntu/android-build-configs"
+    local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org"
+    local reviewers="r=yongqin.liu@linaro.org"
+
+    if [ ! -d "${dir_build_config}" ]; then
+        git clone -b master ${git_build_config} ${dir_build_config} &>${f_redirect}
+        if [ $? -ne 0 ]; then
+            echo "Failed to clone reposiotry ${git_build_config} to ${dir_build_config}" |tee -a ${f_redirect}
+            return
+        fi
+    fi
+
+    cd ${dir_build_config}
+    gitdir=$(git rev-parse --git-dir) && \
+    sudo -u yongqin.liu scp -p -P 29418 yongqin.liu@android-review.linaro.org:hooks/commit-msg /tmp &>${f_redirect} && \
+    cp /tmp/commit-msg ${gitdir}/hooks/
+
+    git pull &>${f_redirect}
+    if [ $? -ne 0 ]; then
+        echo "Failed to pull under ${dir_build_config}" |tee -a ${f_redirect}
+        return
+    fi
+
+    if git log -n1 --pretty=oneline|grep -q "${new_tag}"; then
+        return
+    fi
+    find ./ -type f -exec sed -i "s/${old_tag}/${new_tag}/" \{\} \;
+    git add . &>${f_redirect}
+    if [ $? -ne 0 ]; then
+        echo "Failed to add under ${dir_build_config}" |tee -a ${f_redirect}
+        return
+    fi
+    git commit -s -m "update to tag ${new_tag}" -m "The change log could be checked here: ${url_change_log}" &>${f_redirect}
+    if [ $? -ne 0 ]; then
+        echo "Failed to commit under ${dir_build_config}" |tee -a  ${f_redirect}
+        return
+    fi
+    local url_gerrit=$(sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}  2>&1|grep 'http://android-review.linaro.org/'|awk '{print $2}')
+    if [ -z "${url_gerrit}" ]; then
+        echo "Failed to get the gerrit url" |tee -a ${f_redirect}
+        return
+    fi
+    cd ${OLD_PWD}
+    echo "${url_gerrit}"
+}
+
+
 function main(){
     sync_aosp_mirror
     if has_new_tags; then
@@ -164,8 +219,12 @@ function main(){
 	local new_tag="$(get_latest_tag_for_aosp)"
 	local changelog_file="ChangeLog-${old_tag}-${new_tag}-$(date +%Y-%m-%d-%H-%M-%S).txt"
 	change_log ${old_tag} ${new_tag} "${changelog_file}"
+        local url_gerrit=$(update_android_build_config "${old_tag}" "${new_tag}" "http://people.linaro.org/~yongqin.liu/ChangeLogs/${changelog_file}")
         local message="There are new tags released. The latest AOSP tag is: ${new_tag}."
         message="${message} Please check the change log here: http://people.linaro.org/~yongqin.liu/ChangeLogs/${changelog_file}"
+        if [ -n "${url_gerrit}" ]; then
+            message="${message}, review url: ${url_gerrit}"
+        fi
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
