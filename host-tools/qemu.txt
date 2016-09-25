@@ -1,0 +1,9 @@
+01:37:14 liuyq: test-definitions$ sudo  dpkg -S /usr/bin/qemu-system-x86_64
+qemu-system-x86: /usr/bin/qemu-system-x86_64
+01:37:43 liuyq: test-definitions$
+
+sudo apt-get install qemu-system-x86
+
+sudo service FMNetwork stop
+
+qemu-system-x86_64 -machine accel=kvm:tcg -m 512 -nographic -net nic,macaddr=DE:AD:BE:EF:27:12,model=virtio -net tap -hda /var/lib/lava/dispatcher/tmp/tmpLLtpii/ubuntu-14-04-server-base.img

@@ -15,3 +15,5 @@ run cts --package android.app --emulator --shell-wait-time 600000 --available-ti
 
 
 run cts --plan app --shell-wait-time 600000 --available-timeout 600000 --disable-reboot --log-level VERBOSE --log-level-display VERBOSE --skip-device-info --serial emulator-5554 --force-abi 64
+
+android-cts/tools/cts-tradefed run cts-part2 --retry 3 --disable-reboot --skip-preconditions --skip-device-info --skip-system-status-check com.android.compatibility.common.tradefed.targetprep.NetworkConnectivityChecker| tee /tmp/workspace/cts.log

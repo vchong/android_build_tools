@@ -92,3 +92,34 @@ too,
 the LOCAL_MODULE_TAGS set for BUILD_HOST_EXECUTABLE will affect the modules
 of BUILD_EXECUTABLE with the same name.
 This is a bug, like the memory_replay set in system/extras/memory_replay/Android.mk
+
+==================================================================================
+
+local-intermediates-dir: intermediates dir for binary, like:
+    out/target/product/hikey/obj/SHARED_LIBRARIES/libpiglitutil_intermediates/
+local-generated-sources-dir: intermediates dir for files generate during compiling, like
+    out/target/product/hikey/gen/SHARED_LIBRARIES/libpiglitutil_intermediates/
+    LOCAL_MODULE_CLASS, and LOCAL_MODULE must be defined for using it.
+generated-sources-dir-for: called by local-generated-sources-dir, to generate the intermediates path for local module,
+    we could call it directly in Android.mk as well when need to include files from other modules, like
+        libpiglitutilIncludes := $(call generated-sources-dir-for,SHARED_LIBRARIES,libpiglitutil)
+        piglit_c_includes := $(libpiglitutilIncludes)
+
+if you have files need to be generated during compilation, you need to use the LOCAL_GENERATED_SOURCES:
+like following:
+    LOCAL_GENERATED_SOURCES := $(local-generated-sources-dir)/version.c
+    $(LOCAL_GENERATED_SOURCES) : $(LOCAL_PATH)/version.sh
+        @mkdir -p $(dir $@)
+            $(hide) $< $@
+
+or as suggestiong in build/core/build-system.html, use transform-generated-source and PRIVATE_CUSTOM_TOOL:
+    GEN_PIGLIT_DISPATCH_DIR := $(intermediates)
+    GEN_DISPATCH := $(GEN_PIGLIT_DISPATCH_DIR)/piglit-dispatch-gen.h $(GEN_PIGLIT_DISPATCH_DIR)/piglit-util-gl-enum-gen.c
+    $(GEN_DISPATCH): PRIVATE_CUSTOM_TOOL = python $+ --out-dir $(GEN_PIGLIT_DISPATCH_DIR)
+    $(GEN_DISPATCH): $(LOCAL_PATH)/gen_dispatch.py
+        $(transform-generated-source)
+    LOCAL_GENERATED_SOURCES += $(GEN_DISPATCH)
+
+when we add files to LOCAL_GENERATED_SOURCES, we don't need to add it to LOCAL_SRC_FILES again.
+files specified in LOCAL_SRC_FILES will be based on LOCAL_PATH
+==============================================================================================
