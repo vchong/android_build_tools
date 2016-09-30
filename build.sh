@@ -9,6 +9,7 @@ variant="userdebug"
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
 #export TARGET_GCC_VERSION_EXP=5.3-linaro
+#export USE_CLANG_PLATFORM_BUILD=false
 export WITH_DEXPREOPT=true
 #export MALLOC_IMPL=dlmalloc
 #export MALLOC_IMPL_MUSL=true

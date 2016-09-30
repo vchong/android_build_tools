@@ -19,6 +19,8 @@ LOCAL_MANIFEST_BRANCH=linaro-master
 main "$@"
 
 func_apply_patch hikey-optee
-func_apply_patch hikey-optee-kernel-4.4
+#func_apply_patch hikey-optee-kernel-4.4
 #apply_patch nexus9-workarounds
 func_apply_patch get-hikey-blobs
+
+#./build.sh

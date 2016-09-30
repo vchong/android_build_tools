@@ -1,0 +1,139 @@
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index dd1fadc..f0c7cd6 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -31,9 +31,9 @@ BOARD_HOSTAPD_DRIVER := NL80211
+ CONFIG_DRIVER_NL80211 := y
+ 
+ ifeq ($(TARGET_KERNEL_USE_4_1), true)
+-BOARD_KERNEL_CMDLINE := console=ttyAMA3,115200 androidboot.console=ttyAMA3 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime
++BOARD_KERNEL_CMDLINE := console=ttyAMA3,115200 androidboot.console=ttyAMA3 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime ro.boot.serialno=1234567890
+ else
+-BOARD_KERNEL_CMDLINE := console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime
++BOARD_KERNEL_CMDLINE := console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime ro.boot.serialno=1234567890
+ endif
+ 
+ TARGET_NO_BOOTLOADER := true
+diff --git a/bootloader/EFI/BOOT/grub.cfg b/bootloader/EFI/BOOT/grub.cfg
+index 95c7dcc..5679637 100644
+--- a/bootloader/EFI/BOOT/grub.cfg
++++ b/bootloader/EFI/BOOT/grub.cfg
+@@ -1,4 +1,4 @@
+-set default="0"
++set default="4"
+ set timeout=1
+ menuentry 'AOSP' {
+     search.fs_label boot root
+@@ -10,7 +10,7 @@ menuentry 'AOSP' {
+ menuentry 'AOSP-DEBUG' {
+     search.fs_label boot root
+     set root=($root)
+-    linux /Image earlycon=pl011,0xf7113000 no_console_suspend=1 console=ttyFIQ0 androidboot.console=ttyFIQ0 sysrq_always_enabled androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime
++    linux /Image earlycon=pl011,0xf7113000 no_console_suspend=1 console=ttyFIQ0 androidboot.console=ttyFIQ0 sysrq_always_enabled androidboot.hardware=hikey firmware_class$.path=/system/etc/firmware efi=noruntime
+     initrd /ramdisk.img
+     devicetree /hi6220-hikey.dtb
+ }
+@@ -31,7 +31,7 @@ menuentry 'AOSP@720P' {
+ menuentry 'AOSP@SVGA' {
+     search.fs_label boot root
+     set root=($root)
+-    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60
++    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60 androidboot.selinux=permissive
+     initrd /ramdisk.img
+     devicetree /hi6220-hikey.dtb
+ }
+diff --git a/bootloader/EFI/BOOT/grub.cfg.bak b/bootloader/EFI/BOOT/grub.cfg.bak
+new file mode 100644
+index 0000000..4f162c2
+--- /dev/null
++++ b/bootloader/EFI/BOOT/grub.cfg.bak
+@@ -0,0 +1,41 @@
++set default="4"
++set timeout=1
++menuentry 'AOSP' {
++    search.fs_label boot root
++    set root=($root)
++    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime ro.boot.serialno=1234567890
++    initrd /ramdisk.img
++    devicetree /hi6220-hikey.dtb
++}
++menuentry 'AOSP-DEBUG' {
++    search.fs_label boot root
++    set root=($root)
++    linux /Image earlycon=pl011,0xf7113000 no_console_suspend=1 console=ttyFIQ0 androidboot.console=ttyFIQ0 sysrq_always_enabled androidboot.hardware=hikey firmware_class$.path=/system/etc/firmware efi=noruntime ro.boot.serialno=1234567890
++    initrd /ramdisk.img
++    devicetree /hi6220-hikey.dtb
++}
++menuentry 'AOSP-CONSOLE' {
++    search.fs_label boot root
++    set root=($root)
++    linux /Image console=ttyAMA3,115200 androidboot.console=ttyAMA3 fiq_debugger.disable=Y androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime ro.boot.serialno=1234567890
++    initrd /ramdisk.img
++    devicetree /hi6220-hikey.dtb
++}
++menuentry 'AOSP@720P' {
++    search.fs_label boot root
++    set root=($root)
++    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:1280x720@60 ro.boot.serialno=1234567890
++    initrd /ramdisk.img
++    devicetree /hi6220-hikey.dtb
++}
++menuentry 'AOSP@SVGA' {
++    search.fs_label boot root
++    set root=($root)
++    linux /Image console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime video=HDMI-A-1:800x600@60 androidboot.selinux=permissive ro.boot.serialno=1234567890
++    initrd /ramdisk.img
++    devicetree /hi6220-hikey.dtb
++}
++menuentry 'Fastboot' {
++    search.fs_label boot root
++    chainloader ($root)/EFI/BOOT/fastboot.efi
++}
+diff --git a/device.mk b/device.mk
+index e63f337..b0be4a2 100644
+--- a/device.mk
++++ b/device.mk
+@@ -41,6 +41,9 @@ DEVICE_PACKAGE_OVERLAYS := device/linaro/hikey/overlay
+ # Add openssh support for remote debugging and job submission
+ PRODUCT_PACKAGES += ssh sftp scp sshd ssh-keygen sshd_config start-ssh uim
+ 
++# Add package for btrfs
++PRODUCT_PACKAGES += mkfs.btrfs btrfs-convert
++
+ # Add wifi-related packages
+ PRODUCT_PACKAGES += libwpa_client wpa_supplicant hostapd
+ PRODUCT_PROPERTY_OVERRIDES += wifi.interface=wlan0 \
+diff --git a/fstab.hikey b/fstab.hikey
+index a2458eb..a773725 100644
+--- a/fstab.hikey
++++ b/fstab.hikey
+@@ -5,7 +5,9 @@
+ 
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             ext4      ro                                                                   wait
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             squashfs  ro                                                                   wait
++/dev/block/platform/soc/f723d000.dwmmc0/by-name/system      /system             btrfs  ro                                                                   wait
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/cache       /cache              ext4      discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1    wait
+ /dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               ext4      discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1    wait
++/dev/block/platform/soc/f723d000.dwmmc0/by-name/userdata    /data               btrfs     defaults   wait
+ /devices/platform/soc/f723e000.dwmmc1/mmc_host/mmc*                   auto               auto      defaults  voldmanaged=sdcard1:auto,encryptable=userdata
+ /devices/platform/soc/f72c0000.usb/usb*               auto               auto      defaults  voldmanaged=usbdisk:auto,encryptable=userdata
+diff --git a/sepolicy/btrfs.te b/sepolicy/btrfs.te
+new file mode 100644
+index 0000000..451b085
+--- /dev/null
++++ b/sepolicy/btrfs.te
+@@ -0,0 +1,4 @@
++type btrfs, domain;
++type btrfs_exec, exec_type, file_type;
++
++init_daemon_domain(btrfs)
+diff --git a/sepolicy/file_contexts b/sepolicy/file_contexts
+index dc808fa..30eff78 100644
+--- a/sepolicy/file_contexts
++++ b/sepolicy/file_contexts
+@@ -6,3 +6,5 @@
+ /dev/hci_tty           u:object_r:hci_attach_dev:s0
+ /dev/ttyAMA1           u:object_r:hci_attach_dev:s0
+ /system/bin/uim        u:object_r:hci_attach_exec:s0
++/sbin/btrfs-convert         u:object_r:btrfs_exec:s0
++/sbin/mkfs.btrfs         u:object_r:btrfs_exec:s0
