@@ -66,7 +66,9 @@ function has_new_tags(){
     if [ -n "${latest_branch_aosp}" ] && [ -n "${latest_branch_lcr}" ]; then
         echo "AOSP: ${latest_branch_aosp}"
         echo "LCR: ${latest_branch_lcr}"
-        if [ "${latest_branch_aosp}" \> "${latest_branch_lcr}" ]; then
+        local aosp_ver=${latest_branch_aosp#android-7.0.0_r}
+        local lcr_ver=${latest_branch_lcr#android-7.0.0_r}
+        if [ ${aosp_ver} -gt ${lcr_ver} ]; then
             echo "There are new tags released"
             return 0
         fi
@@ -167,7 +169,7 @@ function update_android_build_config(){
     local git_build_config="http://android-git.linaro.org/git/android-build-configs.git"
     local dir_build_config="/home/ubuntu/android-build-configs"
     local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org"
-    local reviewers="r=yongqin.liu@linaro.org"
+    #local reviewers="r=yongqin.liu@linaro.org"
 
     if [ ! -d "${dir_build_config}" ]; then
         git clone -b master ${git_build_config} ${dir_build_config} &>${f_redirect}

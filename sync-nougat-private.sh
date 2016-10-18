@@ -11,7 +11,7 @@ else
     echo "Please specify value for MIRROR"
 fi
 
-branch="android-7.0.0_r6"
+branch="android-7.0.0_r14"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
