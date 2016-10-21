@@ -66,11 +66,13 @@ function has_new_tags(){
     if [ -n "${latest_branch_aosp}" ] && [ -n "${latest_branch_lcr}" ]; then
         echo "AOSP: ${latest_branch_aosp}"
         echo "LCR: ${latest_branch_lcr}"
-        local aosp_ver=${latest_branch_aosp#android-7.0.0_r}
-        local lcr_ver=${latest_branch_lcr#android-7.0.0_r}
-        if [ ${aosp_ver} -gt ${lcr_ver} ]; then
-            echo "There are new tags released"
-            return 0
+        # android-7.1.0_r4 android-7.0.0_r6 android-7.0.0_r14
+        if [ "X${latest_branch_aosp}" != "X${latest_branch_lcr}" ]; then
+            local newer_ver=$(echo -e "${latest_branch_aosp}\n${latest_branch_lcr}"|sort -V|tail -n1)
+            if [ "X${newer_ver}" = "X${latest_branch_aosp}" ]; then
+                echo "There are new tags released"
+                return 0
+            fi
         fi
     fi
     return 1
