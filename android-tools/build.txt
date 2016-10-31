@@ -123,3 +123,5 @@ or as suggestiong in build/core/build-system.html, use transform-generated-sourc
 when we add files to LOCAL_GENERATED_SOURCES, we don't need to add it to LOCAL_SRC_FILES again.
 files specified in LOCAL_SRC_FILES will be based on LOCAL_PATH
 ==============================================================================================
+Set USE_CLANG_PLATFORM_BUILD = false will cause it to use gcc as default
+==============================================================================================

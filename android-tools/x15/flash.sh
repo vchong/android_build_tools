@@ -2,7 +2,7 @@
 
 img_dir=${1}
 if [ -z "${img_dir}" ]; then
-    img_dir="out/target/product/hikey"
+    img_dir="out/target/product/am57xevm"
 fi
 
 if ! [ -d ${img_dir} ]; then
@@ -19,7 +19,7 @@ function flash_image(){
 
     echo "======= Flash ${partition} partition with file $file_img =============="
     #/SATA3/nougat/out/host/linux-x86/bin/fastboot flash -w ${partition} ${file_img}
-    fastboot flash -w ${partition} ${file_img}
+    fastboot flash ${partition} ${file_img}
     if [ $? -ne 0 ]; then
         echo "Failed to deploy ${file_img}"
         exit 1
@@ -28,10 +28,12 @@ function flash_image(){
     sleep 2
 }
 
-flash_image boot ${img_dir}/boot_fat.uefi.img
-#flash_image boot ${img_dir}/boot.img
+flash_image xloader ${img_dir}/MLO
+flash_image bootloader ${img_dir}/u-boot.img
+flash_image environment ${img_dir}/am57xx-evm-reva3.dtb
+flash_image recovery ${img_dir}/recovery.img
+flash_image boot ${img_dir}/boot.img
 flash_image system ${img_dir}/system.img
-#flash_image cache ${img_dir}/cache.img
+flash_image cache ${img_dir}/cache.img
 flash_image userdata ${img_dir}/userdata.img
-#fastboot flash -S 256M userdata ${img_dir}/userdata.img
 fastboot reboot

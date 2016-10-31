@@ -1,0 +1,142 @@
+frameworks/av/media/libstagefright/codecs/amrwb/Android.mk
+
+root@hikey:/ # libstagefright_amrwbdec_test /data/linaro-android-userspace-test/speech-codec/amrwb/T02_2.amr /data/local/tmp/speech-codec-test.out
+Aborted
+134|root@hikey:/ #
+
+frameworks/av/media/libstagefright/codecs/avc/enc/Android.mk
+
+134|root@hikey:/ # libstagefright_h264enc_test /data/linaro-android-userspace-test/video-codec/h264/BAMQ1_JVC_C.yuv /data/local/tmp/video-codec-test.out 176 144 25 256
+NAL 1 of size 6408 written
+Aborted
+134|root@hikey:/ #
+
+LOCAL_SANITIZE := signed-integer-overflow
+https://www.securecoding.cert.org/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
+
+http://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+-fsanitize=signed-integer-overflow: Signed integer overflow, including all the checks added by -ftrapv, and checking for overflow in signed division (INT_MIN / -1).
+
+-fsanitize=unsigned-integer-overflow,signed-integer-overflow -fsanitize-trap=all -ftrap-function=abort
+
+00:50:46 liuyq: nougat$ grep -rn fxp_mac_16by16 frameworks/av/media/libstagefright/codecs/|grep inline --color
+frameworks/av/media/libstagefright/codecs/amrwb/src/pvamrwbdecoder_basic_op_cequivalent.h:467:    __inline  int32 fxp_mac_16by16(int16 var1,  int16 var2, int32 L_add)
+frameworks/av/media/libstagefright/codecs/amrwb/src/pvamrwbdecoder_basic_op_gcc_armv5.h:258:    static inline int32 fxp_mac_16by16(const int16 L_var1, const int16 L_var2, int32 L_add)
+frameworks/av/media/libstagefright/codecs/amrwb/src/pvamrwbdecoder_basic_op_armv5.h:212:    __inline  int32 fxp_mac_16by16(const int16 var1, const int16 var2, int32 L_add)
+00:51:44 liuyq: nougat$
+
+
+===================================================================================================================================================
+00:59:44 liuyq: nougat$ ./development/scripts/stack /tmp/workspace/logcat.log 
+Searching for native crashes in /tmp/workspace/logcat.log
+Reading symbols from /SATA3/nougat/out/target/product/hikey/symbols
+signal 6 (SIGABRT), code -6 in tid 16543 (libstagefright_)
+Revision: '0'
+pid: 16543, tid: 16543, name: libstagefright_  >>> libstagefright_amrwbdec_test <<<
+signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+     x0   0000000000000000  x1   000000000000409f  x2   0000000000000006  x3   0000000000000008
+     x4   0000000000000040  x5   0000007fb782e300  x6   000000000000002e  x7   000000000000002f
+     x8   0000000000000083  x9   ffffffffffffffdf  x10  0000000000000000  x11  0000000000000001
+     x12  ffffffffffffffff  x13  0000000000000017  x14  00000000e473cbc4  x15  00000000f3441de0
+     x16  0000007fb7d8fee0  x17  0000007fb7d39390  x18  00000000fffffb94  x19  0000007fb7ffeb40
+     x20  0000000000000006  x21  0000007fb7ffea98  x22  0000000000000000  x23  0000007fb782e730
+     x24  0000000040000000  x25  0000007fb782e000  x26  0000007fb782e610  x27  0000000000000001
+     x28  0000007fb782e6b0  x29  0000007ffffff500  x30  0000007fb7d36838
+     sp   0000007ffffff4e0  pc   0000007fb7d39398  pstate 0000000060000000
+Using arm64 toolchain from: /SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+
+Stack Trace:
+  RELADDR           FUNCTION              FILE:LINE
+  000000000006b398  tgkill+8              /proc/self/cwd/bionic/libc/arch-arm64/syscalls/tgkill.S:9
+  0000000000068834  pthread_kill+64       /proc/self/cwd/bionic/libc/bionic/pthread_kill.cpp:45 (discriminator 4)
+  0000000000023e28  raise+24              /proc/self/cwd/bionic/libc/bionic/raise.cpp:34 (discriminator 2)
+  000000000001c8ac  abort+52              /proc/self/cwd/bionic/libc/bionic/abort.cpp:47
+  v-------------->  fxp_mac_16by16        /proc/self/cwd/frameworks/av/media/libstagefright/codecs/amrwb/src/pvamrwbdecoder_basic_op_cequivalent.h:470 (discriminator 1)
+  0000000000007d04  deemphasis_32+448     /proc/self/cwd/frameworks/av/media/libstagefright/codecs/amrwb/src/deemphasis_32.cpp:158 (discriminator 1)
+  0000000000004d18  synthesis_amr_wb+232  /proc/self/cwd/frameworks/av/media/libstagefright/codecs/amrwb/src/synthesis_amr_wb.cpp:196
+  00000000000032a8  pvDecoder_AmrWb+6552  /proc/self/cwd/frameworks/av/media/libstagefright/codecs/amrwb/src/pvamrwbdecoder.cpp:1114
+  00000000000012b4  main+428              /proc/self/cwd/frameworks/av/media/libstagefright/codecs/amrwb/test/amrwbdec_test.cpp:145
+  000000000001a594  __libc_init+88        /proc/self/cwd/bionic/libc/bionic/libc_init_dynamic.cpp:109
+  0000000000001068  do_arm64_start+80     system/media/audio_utils/tinysndfile.c:?
+00:59:50 liuyq: nougat$ 
+--------- beginning of crash
+01-01 05:16:49.247 16543 16543 F libc    : Fatal signal 6 (SIGABRT), code -6 in tid 16543 (libstagefright_)
+--------- beginning of main
+01-01 05:16:49.248  1767  1767 W         : debuggerd: handling request: pid=16543 uid=0 gid=0 tid=16543
+01-01 05:16:49.304 16544 16544 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-01 05:16:49.304 16544 16544 F DEBUG   : Build fingerprint: 'Android/hikey/hikey:7.1/NDE63P/liuyq10281356:userdebug/test-keys'
+01-01 05:16:49.305 16544 16544 F DEBUG   : Revision: '0'
+01-01 05:16:49.305 16544 16544 F DEBUG   : ABI: 'arm64'
+01-01 05:16:49.305 16544 16544 F DEBUG   : pid: 16543, tid: 16543, name: libstagefright_  >>> libstagefright_amrwbdec_test <<<
+01-01 05:16:49.305 16544 16544 F DEBUG   : signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x0   0000000000000000  x1   000000000000409f  x2   0000000000000006  x3   0000000000000008
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x4   0000000000000040  x5   0000007fb782e300  x6   000000000000002e  x7   000000000000002f
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x8   0000000000000083  x9   ffffffffffffffdf  x10  0000000000000000  x11  0000000000000001
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x12  ffffffffffffffff  x13  0000000000000017  x14  00000000e473cbc4  x15  00000000f3441de0
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x16  0000007fb7d8fee0  x17  0000007fb7d39390  x18  00000000fffffb94  x19  0000007fb7ffeb40
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x20  0000000000000006  x21  0000007fb7ffea98  x22  0000000000000000  x23  0000007fb782e730
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x24  0000000040000000  x25  0000007fb782e000  x26  0000007fb782e610  x27  0000000000000001
+01-01 05:16:49.305 16544 16544 F DEBUG   :     x28  0000007fb782e6b0  x29  0000007ffffff500  x30  0000007fb7d36838
+01-01 05:16:49.306 16544 16544 F DEBUG   :     sp   0000007ffffff4e0  pc   0000007fb7d39398  pstate 0000000060000000
+01-01 05:16:49.318 16544 16544 F DEBUG   : 
+01-01 05:16:49.318 16544 16544 F DEBUG   : backtrace:
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #00 pc 000000000006b398  /system/lib64/libc.so (tgkill+8)
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #01 pc 0000000000068834  /system/lib64/libc.so (pthread_kill+64)
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #02 pc 0000000000023e28  /system/lib64/libc.so (raise+24)
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #03 pc 000000000001c8ac  /system/lib64/libc.so (abort+52)
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #04 pc 0000000000007d04  /system/bin/libstagefright_amrwbdec_test
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #05 pc 0000000000004d18  /system/bin/libstagefright_amrwbdec_test
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #06 pc 00000000000032a8  /system/bin/libstagefright_amrwbdec_test
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #07 pc 00000000000012b4  /system/bin/libstagefright_amrwbdec_test
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #08 pc 000000000001a594  /system/lib64/libc.so (__libc_init+88)
+01-01 05:16:49.320 16544 16544 F DEBUG   :     #09 pc 0000000000001068  /system/bin/libstagefright_amrwbdec_test
+--------- beginning of system
+01-01 05:16:49.353  2140  2247 W NativeCrashListener: Couldn't find ProcessRecord for pid 16543
+01-01 05:16:49.355  1767  1767 W         : debuggerd: resuming target 16543
+01-01 05:16:49.356  1767  1767 E         : debuggerd: failed to send signal 18 to target: No such process
+01-01 05:16:49.357  2140  2158 I BootReceiver: Copying /data/tombstones/tombstone_08 to DropBox (SYSTEM_TOMBSTONE)
+
+
+===================================================================================================================================================
+
+09:42:56 liuyq: nougat$ adb shell logcat -d |./development/scripts/stack
+Reading native crash info from stdin
+Reading symbols from /SATA3/nougat/out/target/product/hikey/symbols
+signal 6 (SIGABRT), code -6 in tid 2759 (libstagefright_)
+Revision: '0'
+pid: 2759, tid: 2759, name: libstagefright_  >>> libstagefright_h264enc_test <<<
+signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+     x0   0000000000000000  x1   0000000000000ac7  x2   0000000000000006  x3   0000000000000008
+     x4   0000007ffffff330  x5   00000000fffffff3  x6   000000000000000f  x7   00000000fffffff3
+     x8   0000000000000083  x9   ffffffffffffffdf  x10  0000000000000000  x11  0000000000000001
+     x12  ffffffffffffffff  x13  000000000000000f  x14  0000000000808080  x15  0000000086835421
+     x16  0000007fb7db5ee0  x17  0000007fb7d5f390  x18  0000000002020100  x19  0000007fb7ffeb40
+     x20  0000000000000006  x21  0000007fb7ffea98  x22  0000000000000000  x23  00000000000000d0
+     x24  0000000000000000  x25  0000000000000002  x26  0000007fb79fd1ff  x27  0000007fb79fd1ff
+     x28  0000000000000000  x29  0000007ffffff090  x30  0000007fb7d5c838
+     sp   0000007ffffff070  pc   0000007fb7d5f398  pstate 0000000060000000
+Using arm64 toolchain from: /SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+/SATA3/nougat/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro/bin/aarch64-linux-android-addr2line: Dwarf Error: Info pointer extends beyond end of attributes
+
+Stack Trace:
+  RELADDR           FUNCTION                 FILE:LINE
+  000000000006b398  tgkill+8                 /proc/self/cwd/bionic/libc/arch-arm64/syscalls/tgkill.S:9
+  0000000000068834  pthread_kill+64          /proc/self/cwd/bionic/libc/bionic/pthread_kill.cpp:45 (discriminator 4)
+  0000000000023e28  raise+24                 /proc/self/cwd/bionic/libc/bionic/raise.cpp:34 (discriminator 2)
+  000000000001c8ac  abort+52                 /proc/self/cwd/bionic/libc/bionic/abort.cpp:47
+  0000000000008f3c  simd_sad_mb+536          /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/sad_inline.h:116 (discriminator 1)
+  0000000000006ff4  AVCFullSearch+188        /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/motion_est.cpp:1285
+  0000000000005bb0  AVCMBMotionSearch+720    /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/motion_est.cpp:1064
+  00000000000053d0  AVCMotionEstimation+980  /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/motion_est.cpp:366
+  0000000000004aa8  InitFrame+232            /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/init.cpp:771
+  0000000000001ebc  PVAVCEncSetInput+176     /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/src/avcenc_api.cpp:322
+  0000000000001740  main+1360                /proc/self/cwd/frameworks/av/media/libstagefright/codecs/avc/enc/test/h264_enc_test.cpp:292
+  000000000001a594  __libc_init+88           /proc/self/cwd/bionic/libc/bionic/libc_init_dynamic.cpp:109
+  0000000000001150  do_arm64_start+80        frameworks/av/media/libstagefright/codecs/avc/enc/src/residual.cpp:?
+09:43:27 liuyq: nougat$ 
+

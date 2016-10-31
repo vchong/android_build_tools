@@ -1,4 +1,5 @@
 .repo
+boottime
 abi
 android-patchsets
 art
@@ -27,6 +28,7 @@ pdk
 prebuilts
 sdk
 system
+ti
 tools
 uefi
 vendor
@@ -34,3 +36,9 @@ vexpress-firmware
 android-tools/apks
 android-tools/static-binary/src/bin
 build*.log
+toolchain/
+time.log
+linaro-hikey-20160226-67c37b1a.tgz
+platform_testing/
+Android.bp
+bootstrap.bash

@@ -6,8 +6,11 @@
         export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
         export PATH=${JAVA_HOME}/bin:$PATH
         export ANDROID_HOME=/home/yongqin.liu/android-tools/android-sdk-linux
+        sudo apt-get install gradle
         cd tools
+        ./base/templates/gradle/wrapper/gradlew init
         ./gradlew prepareRepo copyGradleProperty
+        #./base/templates/gradle/wrapper/gradlew prepareRepo copyGradleProperty
         if [ $? -ne 0 ]; then
             echo "Failed to run:./gradlew prepareRepo copyGradleProperty"
             return
@@ -31,3 +34,6 @@ https://android.googlesource.com/platform/cts/+/d8972ff/tools/tradefed-host/src/
 /sdcard/test/bbb_full/
 
 --local-media-path
+
+/SATA3/nougat/cts/hostsidetests/security/src/android/security/cts/EncryptionHostTest.java:50:
+/SATA3/nougat/tools/tradefederation/src/com/android/tradefed/device/AndroidNativeDevice.java:2788:

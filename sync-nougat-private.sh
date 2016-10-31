@@ -9,9 +9,10 @@ elif [ -d /home/yongqin.liu/aosp-mirror/platform/manifest.git ]; then
     export MIRROR="/home/yongqin.liu/aosp-mirror/platform/manifest.git"
 else
     echo "Please specify value for MIRROR"
+    exit 1
 fi
 
-branch="android-7.0.0_r14"
+branch="android-7.1.0_r4"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
@@ -27,6 +28,7 @@ ${BASE}/sync-projects.sh  \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
 
+${BASE}/sync-projects.sh ti/u-boot/ kernel/ti/x15/
 #                          art \
 #                          external/opencv-upstream \
 
@@ -39,6 +41,7 @@ func_apply_patch NOUGAT-MLCR-PATCHSET
 #func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-n-workarounds
 func_apply_patch hikey-optee-n
+func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
 
