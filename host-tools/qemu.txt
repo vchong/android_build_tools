@@ -7,3 +7,25 @@ sudo apt-get install qemu-system-x86
 sudo service FMNetwork stop
 
 qemu-system-x86_64 -machine accel=kvm:tcg -m 512 -nographic -net nic,macaddr=DE:AD:BE:EF:27:12,model=virtio -net tap -hda /var/lib/lava/dispatcher/tmp/tmpLLtpii/ubuntu-14-04-server-base.img
+
+https://en.wikibooks.org/wiki/QEMU/Images
+
+1. qemu-img create -f qcow2 winxp.img 3G
+   qemu-system-x86_64 -m 1024 -hda winxp.img -cdrom winxp_nec.iso -boot d
+   Or
+   qemu-system-x86_64 -m 256 -hda winxp.img -cdrom /dev/cdrom -boot d
+
+3. qemu-system-x86_64 -m 1024 -hda winxp.img -enable-kvm
+   qemu-system-x86_64 -m 256 -hda winxp.img -cdrom winxpsp2.iso -enable-kvm
+   Or
+   qemu -m 256 -hda winxp.img -cdrom winxpsp2.iso -enable-kvm
+
+4. smbserver:
+   qemu -m 256 disk.img -smb /usr/workspace/testing01
+
+   https://en.wikibooks.org/wiki/QEMU/Networking
+
+   qemu-system-x86_64 -m 1024 -hda winxp.img -enable-kvm -machine accel=kvm:tcg -net user -net nic,model=rtl8139
+
+5. host devices:
+   -device usb-host,hostbus=3,hostaddr=2

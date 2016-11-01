@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Runs Linaro Part1 Tests from a pre-existing CTS installation">
+
+    <include name="cts" />
+
+    <option name="compatibility:plan" value="cts-part1" />
+
+    <option name="compatibility:include-filter" value="CtsAadbHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsAbiOverrideHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsAccelerationTestCases" />
+    <option name="compatibility:include-filter" value="CtsAccessibilityServiceTestCases" />
+    <option name="compatibility:include-filter" value="CtsAccessibilityTestCases" />
+    <option name="compatibility:include-filter" value="CtsAccountManagerTestCases" />
+    <option name="compatibility:include-filter" value="CtsAdminTestCases" />
+    <option name="compatibility:include-filter" value="CtsAlarmClockTestCases" />
+    <option name="compatibility:include-filter" value="CtsAnimationTestCases" />
+    <option name="compatibility:include-filter" value="CtsAppUsageHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsAslrMallocTestCases" />
+    <option name="compatibility:include-filter" value="CtsAssistTestCases" />
+    <option name="compatibility:include-filter" value="CtsAtraceHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsBackupTestCases" />
+    <option name="compatibility:include-filter" value="CtsBluetoothTestCases" />
+    <option name="compatibility:include-filter" value="CtsCalendarcommon2TestCases" />
+    <option name="compatibility:include-filter" value="CtsCallLogTestCases" />
+    <option name="compatibility:include-filter" value="CtsCameraTestCases" />
+    <option name="compatibility:include-filter" value="CtsCarTestCases" />
+    <option name="compatibility:include-filter" value="CtsCarrierApiTestCases" />
+    <option name="compatibility:include-filter" value="CtsCompilationTestCases" />
+    <option name="compatibility:include-filter" value="CtsCppToolsTestCases" />
+    <option name="compatibility:include-filter" value="CtsDatabaseTestCases" />
+    <option name="compatibility:include-filter" value="CtsDeviceAdminUninstallerTestCases" />
+    <option name="compatibility:include-filter" value="CtsDevicePolicyManagerTestCases" />
+    <option name="compatibility:include-filter" value="CtsDisplayTestCases" />
+    <option name="compatibility:include-filter" value="CtsDpiTestCases" />
+    <option name="compatibility:include-filter" value="CtsDpiTestCases2" />
+
+</configuration>

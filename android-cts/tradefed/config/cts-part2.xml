@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Runs Linaro Part1 Tests from a pre-existing CTS installation">
+
+    <include name="cts" />
+
+    <option name="compatibility:plan" value="cts-part1" />
+
+    <option name="compatibility:include-filter" value="CtsNdefTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigAttributeTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigBasicDebugDisabledTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigBasicDebugEnabledTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigBasicDomainConfigTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigCleartextTrafficTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigInvalidPinTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigNestedDomainConfigTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecConfigResourcesSrcTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecPolicyUsesCleartextTrafficFalseTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecPolicyUsesCleartextTrafficTrueTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetSecPolicyUsesCleartextTrafficUnspecifiedTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetTestCases" />
+    <option name="compatibility:include-filter" value="CtsNetTestCasesLegacyApi22" />
+    <option name="compatibility:include-filter" value="CtsNetTestCasesLegacyPermission22" />
+    <option name="compatibility:include-filter" value="CtsOsHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsOsTestCases" />
+    <option name="compatibility:include-filter" value="CtsPermission2TestCases" />
+    <option name="compatibility:include-filter" value="CtsPermissionTestCases" />
+    <option name="compatibility:include-filter" value="CtsPreference2TestCases" />
+    <option name="compatibility:include-filter" value="CtsPreferenceTestCases" />
+    <option name="compatibility:include-filter" value="CtsPrintTestCases" />
+    <option name="compatibility:include-filter" value="CtsProviderTestCases" />
+    <option name="compatibility:include-filter" value="CtsRenderscriptLegacyTestCases" />
+    <option name="compatibility:include-filter" value="CtsRenderscriptTestCases" />
+    <option name="compatibility:include-filter" value="CtsRsBlasTestCases" />
+    <option name="compatibility:include-filter" value="CtsRsCppTestCases" />
+    <option name="compatibility:include-filter" value="CtsSampleDeviceTestCases" />
+    <option name="compatibility:include-filter" value="CtsSampleHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsSaxTestCases" />
+    <option name="compatibility:include-filter" value="CtsServicesHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsSignatureTestCases" />
+    <option name="compatibility:include-filter" value="CtsSimpleCpuTestCases" />
+    <option name="compatibility:include-filter" value="CtsSimpleperfTestCases" />
+    <option name="compatibility:include-filter" value="CtsSpeechTestCases" />
+    <option name="compatibility:include-filter" value="CtsSustainedPerformanceHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsSystemUiHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsSystemUiTestCases" />
+    <option name="compatibility:include-filter" value="CtsTelecomTestCases" />
+    <option name="compatibility:include-filter" value="CtsTelecomTestCases2" />
+    <option name="compatibility:include-filter" value="CtsTelephony2TestCases" />
+    <option name="compatibility:include-filter" value="CtsTelephonyTestCases" />
+    <option name="compatibility:include-filter" value="CtsTextTestCases" />
+    <option name="compatibility:include-filter" value="CtsTextureViewTestCases" />
+    <option name="compatibility:include-filter" value="CtsThemeDeviceTestCases" />
+    <option name="compatibility:include-filter" value="CtsThemeHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsTransitionTestCases" />
+    <option name="compatibility:include-filter" value="CtsTrustedVoiceHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsTvProviderTestCases" />
+    <option name="compatibility:include-filter" value="CtsTvTestCases" />
+    <option name="compatibility:include-filter" value="CtsUiAutomationTestCases" />
+    <option name="compatibility:include-filter" value="CtsUiDeviceTestCases" />
+    <option name="compatibility:include-filter" value="CtsUiHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsUidIsolationTestCases" />
+    <option name="compatibility:include-filter" value="CtsUsageStatsTestCases" />
+    <option name="compatibility:include-filter" value="CtsUsbTests" />
+    <option name="compatibility:include-filter" value="CtsUtilTestCases" />
+    <option name="compatibility:include-filter" value="CtsVoiceInteractionTestCases" />
+    <option name="compatibility:include-filter" value="CtsVoiceSettingsTestCases" />
+    <option name="compatibility:include-filter" value="CtsVrTestCases" />
+    <option name="compatibility:include-filter" value="CtsLibcoreOjTestCases" />
+
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerActivityVisiblityTests#testTurnScreenOnActivity" />
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerDockedStackTests#testRotationWhenDockedWhileLocked" />
+    <option name="compatibility:exclude-filter" value="CtsTrustedVoiceHostTestCases" />
+</configuration>

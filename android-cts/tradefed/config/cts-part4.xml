@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Runs Linaro Part4 Tests from a pre-existing CTS installation">
+
+    <include name="cts" />
+
+    <option name="compatibility:plan" value="cts-part4" />
+
+    <option name="compatibility:include-filter" value="CtsDragAndDropHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsDramTestCases" />
+    <option name="compatibility:include-filter" value="CtsDreamsTestCases" />
+    <option name="compatibility:include-filter" value="CtsDrmTestCases" />
+    <option name="compatibility:include-filter" value="CtsDumpsysHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsEffectTestCases" />
+    <option name="compatibility:include-filter" value="CtsExternalServiceTestCases" />
+    <option name="compatibility:include-filter" value="CtsFragmentTestCases" />
+    <option name="compatibility:include-filter" value="CtsGestureTestCases" />
+    <option name="compatibility:include-filter" value="CtsGraphics2TestCases" />
+    <option name="compatibility:include-filter" value="CtsHardwareTestCases" />
+    <option name="compatibility:include-filter" value="CtsHostsideNetworkTests" />
+    <option name="compatibility:include-filter" value="CtsHostsideNumberBlockingTestCases" />
+    <option name="compatibility:include-filter" value="CtsHostsideTvTests" />
+    <option name="compatibility:include-filter" value="CtsJankDeviceTestCases" />
+    <option name="compatibility:include-filter" value="CtsJdwpSecurityHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsJdwpTestCases" />
+    <option name="compatibility:include-filter" value="CtsJniTestCases" />
+    <option name="compatibility:include-filter" value="CtsJobSchedulerTestCases" />
+    <option name="compatibility:include-filter" value="CtsKeystoreTestCases" />
+    <option name="compatibility:include-filter" value="CtsLeanbackJankTestCases" />
+    <option name="compatibility:include-filter" value="CtsLocation2TestCases" />
+    <option name="compatibility:include-filter" value="CtsLocationTestCases" />
+    <option name="compatibility:include-filter" value="CtsMonkeyTestCases" />
+    <option name="compatibility:include-filter" value="CtsMultiUserHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsMultiUserTestCases" />
+
+</configuration>

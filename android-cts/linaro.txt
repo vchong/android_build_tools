@@ -6,3 +6,43 @@
    exlcude following test method:
    android.app.cts.ProgressDialogTest#testShow3
    android.app.cts.ProgressDialogTest#testShow4
+
+
+How to add subset plans for CTS7.0 package
+1. download android-cts-7.0_r1-linux_x86-arm.zip and android-cts-7.0_r2-linux_x86-arm.zip from
+   https://source.android.com/compatibility/cts/downloads.html
+2. unzip the two cts packages into 2 different directories, compare if the tradefed-prebuilt.jar is different. Here we want to use the patches used for r1.
+
+   11:01:54 liuyq: cts$ ll r{1,2}/android-cts/tools/tradefed-prebuilt.jar
+   -rw-r--r-- 1 liuyq liuyq 3962453 Aug 16 01:28 r1/android-cts/tools/tradefed-prebuilt.jar
+   -rw-r--r-- 1 liuyq liuyq 3962453 Oct 11 16:53 r2/android-cts/tools/tradefed-prebuilt.jar
+   11:02:06 liuyq: cts$ md5sum r{1,2}/android-cts/tools/tradefed-prebuilt.jar
+   fd481cf98a598f74a0840bdcfe439bc7  r1/android-cts/tools/tradefed-prebuilt.jar
+   fd481cf98a598f74a0840bdcfe439bc7  r2/android-cts/tools/tradefed-prebuilt.jar
+   11:02:13 liuyq: cts$
+
+
+   11:06:54 liuyq: cts$ ll r{1,2}/android-cts/tools/cts-tradefed.jar
+   -rw-r--r-- 1 liuyq liuyq 132100 Aug 16 01:28 r1/android-cts/tools/cts-tradefed.jar
+   -rw-r--r-- 1 liuyq liuyq 132164 Oct 11 16:53 r2/android-cts/tools/cts-tradefed.jar
+   11:07:01 liuyq: cts$ md5sum r{1,2}/android-cts/tools/cts-tradefed.jar
+   ab27f940c061df185ef6cd624c2076b9  r1/android-cts/tools/cts-tradefed.jar
+   8419fff2030cf6402190f7a13534af7c  r2/android-cts/tools/cts-tradefed.jar
+   11:07:07 liuyq: cts$ vi r2/android-cts/tools/cts-tradefed.jar
+
+3. compare the modules supported via "android-cts/tools/cts-tradefed l m"
+
+
+4. extract the old subplan configs from tradefed-prebuilt.jar
+   jar xvf tradefed-prebuilt.jar
+
+5. add the new subset plans into the tradefed-prebuilt.jar from the new version CTS package
+   jar -uvf tradefed-prebuilt.jar config/
+6. on testdata.v.l.o
+   mkdir -p android-cts/tools, copy the new tradefed-prebuilt.jar into the android-cts/tools directory
+7. create the new CTS package on testdata.v.l.o:
+   zip -rvf android-cts-7.0_r2-linaro.zip android-cts
+8. create symbol link of android-cts-7.0_r2-linaro.zip under /home/testdata.validation.linaro.org/cts
+9. update test plans, and submit for review
+   sed -i 's/android-cts-7.0_r1/android-cts-7.0_r2/' android/*/*
+How to add timeout patches for CTS7.0 package
