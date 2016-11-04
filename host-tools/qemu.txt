@@ -26,6 +26,8 @@ https://en.wikibooks.org/wiki/QEMU/Images
    https://en.wikibooks.org/wiki/QEMU/Networking
 
    qemu-system-x86_64 -m 1024 -hda winxp.img -enable-kvm -machine accel=kvm:tcg -net user -net nic,model=rtl8139
-
+   http://blog.chinaunix.net/uid-280391-id-2449925.html
 5. host devices:
    -device usb-host,hostbus=3,hostaddr=2
+
+

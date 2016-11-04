@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <project path="device/ti/proprietary-open" name="device/ti/proprietary-open-jacinto" revision="d-nougat-release" remote="linaro-android" groups="device,ti" />
+  <project path="device/ti/am57xevm" name="device/ti/am57xevm" revision="d-nougat-release" remote="linaro-android" groups="device,ti" />
+  <project path="hardware/ti/dra7xx" name="hardware/ti/dra7xx" revision="d-nougat-release" remote="linaro-android" groups="device,ti" />
+  <project path="hardware/ti/ipc" name="hardware/ti/ipc" revision="refs/tags/3.43.00.01" remote="linaro-android" groups="device,ti" />
+  <project path="hardware/ti/linuxutils" name="hardware/ti/linuxutils" revision="refs/tags/4.11.00.01" remote="linaro-android" groups="device,ti" />
+  <project path="hardware/ti/dce" name="hardware/ti/dce" revision="refs/tags/3.00.11.00" remote="linaro-android" groups="device,ti" />
+
+  <project path="ti/u-boot" name="android-sdk/u-boot.git" revision="p-ti-u-boot-2016.05" remote="git-ti-mirror" groups="device,ti" />
+  <project path="kernel/ti/x15" name="android-sdk/kernel-omap.git" revision="p-ti-lsk-android-linux-4.4.y" remote="git-ti-mirror" groups="device,ti" />
+</manifest>

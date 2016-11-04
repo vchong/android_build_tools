@@ -1,3 +1,5 @@
+http://tools.android.com/build
+
 1. repo init -u https://android.googlesource.com/platform/manifest -b studio-1.4
 2. apply patch
 3. build:

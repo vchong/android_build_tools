@@ -1,0 +1,122 @@
+[    0.000000] DMI: HP ProLiant DL380 G7, BIOS P67 05/05/2011
+05:00.0 RAID bus controller: Hewlett-Packard Company Smart Array G6 controllers (rev 01)
+========================================
+MemTotal:       24678716 kB
+==================================================================
+processor	: 23
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 44
+model name	: Intel(R) Xeon(R) CPU           X5690  @ 3.47GHz
+
+processor	: 7
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i7-3820QM CPU @ 2.70GHz
+
+=================================================================
+scsi 2:3:0:0: RAID              HP       P410i            5.70 PQ: 0 ANSI: 5
+==================================================================
+yongqin.liu@hackbox.linaro.org:~/marshmallow$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/sda1             435G  278G  136G  68% /
+none                  4.0K     0  4.0K   0% /sys/fs/cgroup
+udev                   12G  4.0K   12G   1% /dev
+tmpfs                 2.4G  1.4M  2.4G   1% /run
+none                  5.0M     0  5.0M   0% /run/lock
+none                   12G  176K   12G   1% /run/shm
+none                  100M     0  100M   0% /run/user
+/dev/mapper/vg0-home  3.6T  1.2T  2.3T  35% /home
+/dev/loop0             48M   15M   34M  30% /home/sun.ao/workspace/hikey/android/out/target/product/hikey/boot_fat
+yongqin.liu@hackbox.linaro.org:~/marshmallow$ 
+yongqin.liu@hackbox.linaro.org:~/marshmallow$ sudo vgdisplay 
+  --- Volume group ---
+  VG Name               vg0
+  System ID             
+  Format                lvm2
+  Metadata Areas        4
+  Metadata Sequence No  7
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                4
+  Act PV                4
+  VG Size               3.64 TiB
+  PE Size               4.00 MiB
+  Total PE              953836
+  Alloc PE / Size       953836 / 3.64 TiB
+  Free  PE / Size       0 / 0   
+  VG UUID               giZczD-X17g-Gwlt-XbbQ-FZyW-2Okf-fpB4wB
+   
+yongqin.liu@hackbox.linaro.org:~/marshmallow$ sudo vgdisplay -v
+    Finding all volume groups
+    Finding volume group "vg0"
+  --- Volume group ---
+  VG Name               vg0
+  System ID             
+  Format                lvm2
+  Metadata Areas        4
+  Metadata Sequence No  7
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                4
+  Act PV                4
+  VG Size               3.64 TiB
+  PE Size               4.00 MiB
+  Total PE              953836
+  Alloc PE / Size       953836 / 3.64 TiB
+  Free  PE / Size       0 / 0   
+  VG UUID               giZczD-X17g-Gwlt-XbbQ-FZyW-2Okf-fpB4wB
+   
+  --- Logical volume ---
+  LV Path                /dev/vg0/home
+  LV Name                home
+  VG Name                vg0
+  LV UUID                dB0QoV-gKd2-l9s2-w8P8-AEKB-i6R9-dLzqDX
+  LV Write Access        read/write
+  LV Creation host, time hackbox.linaro.org, 2015-12-04 15:13:04 +0000
+  LV Status              available
+  # open                 1
+  LV Size                3.64 TiB
+  Current LE             953836
+  Segments               4
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           252:0
+   
+  --- Physical volumes ---
+  PV Name               /dev/sdb     
+  PV UUID               eOzI3G-2RGy-dpeZ-iKnY-MhRI-amAg-wx4EaH
+  PV Status             allocatable
+  Total PE / Free PE    238459 / 0
+   
+  PV Name               /dev/sdc     
+  PV UUID               eVQO2F-KrEy-ENFl-SBFT-rw3X-NOog-03jeci
+  PV Status             allocatable
+  Total PE / Free PE    238459 / 0
+   
+  PV Name               /dev/sdd     
+  PV UUID               rYSGwF-rgyP-XnhU-ao9p-LFWI-reVp-g1BnyC
+  PV Status             allocatable
+  Total PE / Free PE    238459 / 0
+   
+  PV Name               /dev/sde     
+  PV UUID               fjUGW5-4Zih-yh11-it0M-EH4V-rL44-DrEUTK
+  PV Status             allocatable
+  Total PE / Free PE    238459 / 0
+   
+yongqin.liu@hackbox.linaro.org:~/marshmallow$ 
+
+
+http://www8.hp.com/uk/en/products/oas/product-detail.html?oid=5081322
+HP 1TB 3G SATA 7.2K rpm SFF (2.5-inch) Midline 1yr Warranty Hard Drive(625609-B21)  SATA2
+
