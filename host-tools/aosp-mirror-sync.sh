@@ -16,6 +16,9 @@ cd ${BASE_DIR}
 #done
 #repo init -u https://android.googlesource.com/mirror/manifest --mirror --repo-url=git://android.git.linaro.org/tools/repo
 #repo init -u http://android.git.linaro.org/git/platform/manifest.git --repo-url=git://android.git.linaro.org/tools/repo
+function echoerror {
+	echo "$@" 1>&2;
+}
 
 function sync_aosp_mirror(){
 	echo "Started aosp-mirror sync:" `date` >>sync.timestamp
@@ -32,15 +35,15 @@ function get_latest_tag_for_aosp(){
     cd ${manifest_git}
     git fetch --all -q
     if [ $? -ne 0 ]; then
-        echo "Failed to fetch new tags for AOSP"
-        echo "Please check the status and try again"
+        echoerror "Failed to fetch new tags for AOSP"
+        echoerror "Please check the status and try again"
         exit 1
     fi
 
     local latest_branch_aosp=$(git branch -a|grep 'android-7'|sort -V|tail -n1|tr -d ' ')
     if [ -z "${latest_branch_aosp}" ]; then
-        echo "Failed to get the tags information for AOSP"
-        echo "Please check the status and try again"
+        echoerror "Failed to get the tags information for AOSP"
+        echoerror "Please check the status and try again"
         exit 1
     fi
     cd ${PWD_BASE}
@@ -49,11 +52,11 @@ function get_latest_tag_for_aosp(){
 }
 
 function get_latest_tag_for_lcr(){
-    local url_m_lcr_juno="https://android-git.linaro.org/gitweb/android-build-configs.git/blob_plain/HEAD:/lcr-member-juno-n"
+    local url_m_lcr_juno="https://android-git.linaro.org/android-build-configs.git/plain/lcr-member-juno-n"
     local latest_branch_lcr=$(curl ${url_m_lcr_juno}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
     if [ -z "${latest_branch_lcr}" ]; then
-        echo "Failed to get the tags information for LCR"
-        echo "Please check the status and try again"
+        echoerror "Failed to get the tags information for LCR"
+        echoerror "Please check the status and try again"
         exit 1
     fi
     echo "${latest_branch_lcr}"
@@ -70,7 +73,7 @@ function has_new_tags(){
         if [ "X${latest_branch_aosp}" != "X${latest_branch_lcr}" ]; then
             local newer_ver=$(echo -e "${latest_branch_aosp}\n${latest_branch_lcr}"|sort -V|tail -n1)
             if [ "X${newer_ver}" = "X${latest_branch_aosp}" ]; then
-                echo "There are new tags released"
+                echoerror "There are new tags released"
                 return 0
             fi
         fi
@@ -176,7 +179,7 @@ function update_android_build_config(){
     if [ ! -d "${dir_build_config}" ]; then
         git clone -b master ${git_build_config} ${dir_build_config} &>${f_redirect}
         if [ $? -ne 0 ]; then
-            echo "Failed to clone reposiotry ${git_build_config} to ${dir_build_config}" |tee -a ${f_redirect}
+            echoerror "Failed to clone reposiotry ${git_build_config} to ${dir_build_config}" |tee -a ${f_redirect}
             return
         fi
     fi
@@ -198,17 +201,17 @@ function update_android_build_config(){
     find ./ -type f -exec sed -i "s/${old_tag}/${new_tag}/" \{\} \;
     git add . &>${f_redirect}
     if [ $? -ne 0 ]; then
-        echo "Failed to add under ${dir_build_config}" |tee -a ${f_redirect}
+        echoerror "Failed to add under ${dir_build_config}" |tee -a ${f_redirect}
         return
     fi
     git commit -s -m "update to tag ${new_tag}" -m "The change log could be checked here: ${url_change_log}" &>${f_redirect}
     if [ $? -ne 0 ]; then
-        echo "Failed to commit under ${dir_build_config}" |tee -a  ${f_redirect}
+        echoerror "Failed to commit under ${dir_build_config}" |tee -a  ${f_redirect}
         return
     fi
     local url_gerrit=$(sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}  2>&1|grep 'http://android-review.linaro.org/'|awk '{print $2}')
     if [ -z "${url_gerrit}" ]; then
-        echo "Failed to get the gerrit url" |tee -a ${f_redirect}
+        echoerror "Failed to get the gerrit url" |tee -a ${f_redirect}
         return
     fi
     cd ${OLD_PWD}
