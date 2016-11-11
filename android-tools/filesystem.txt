@@ -29,6 +29,42 @@ How to test new file system types
 
    add "androidboot.selinux=permissive" to the boot parameters to use permissive mode
 
+
+    patch on external/libselinux:
+    
+    diff --git a/src/android.c b/src/android.c
+index 5206a9f..fbab7e8 100644
+--- a/src/android.c
++++ b/src/android.c
+@@ -869,8 +869,11 @@ int selinux_android_setfilecon(const char *pkgdir,
+ 
+ 	if (strcmp(ctx_str, orig_ctx_str)) {
+ 		rc = setfilecon(pkgdir, ctx_str);
+-		if (rc < 0)
+-			goto err;
++		if (rc < 0) {
++            if (security_getenforce()){
++			    goto err;
++            }
++        }
+ 	}
+ 
+ 	rc = 0;
+@@ -1253,8 +1256,11 @@ static int restorecon_sb(const char *pathname, const struct stat *sb,
+             selinux_log(SELINUX_INFO,
+                         "SELinux:  Relabeling %s from %s to %s.\n", pathname, oldsecontext, secontext);
+         if (!nochange) {
+-            if (lsetfilecon(pathname, secontext) < 0)
+-                goto err;
++            if (lsetfilecon(pathname, secontext) < 0) {
++                if (security_getenforce()){
++                    goto err;
++                }
++            }
+         }
+     }
+ 
+    
 4. get raw type image file, and see if the device could boot up with the new file sytem type
 
    since file system image file flashing needs to be the same size as the device,

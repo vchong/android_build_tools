@@ -1,0 +1,1 @@
+https://wiki.linaro.org/Boards/BeagleBoard-X15#Rebuild_PowerVR_SGX544-MP2_kernel_module

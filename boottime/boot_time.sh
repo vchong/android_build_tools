@@ -37,7 +37,7 @@ function output_test_result(){
 
 # dmeg line example
 # [    7.410422] init: Starting service 'logd'...
-getTime(){
+function getTime(){
     local key=$1
     if [ -z "${key}" ]; then
         return
@@ -109,13 +109,87 @@ function getTimeFromEvents(){
     POINT_BOOT_PROGRESS_START=$(grep -e boot_progress_start ${F_LOGCAT_EVENTS} |cut -d/ -f2|sed 's/(.*)://'|awk '{print $2}')
     grep -n -e boot_progress -e sf_stop_bootanim -e wm_boot_animation_done  ${F_LOGCAT_EVENTS} |cut -d/ -f2|sed 's/(.*)://'|awk -v boot_progress_start=${POINT_BOOT_PROGRESS_START} '{printf "%s,%0.3f\n", $1,($2-boot_progress_start)/1000}'
 }
-for i in {1..13}; do
-    #echo "==================get boottime for cound ${i}"
-    F_LOGCAT="/SATA3/nougat/boottime/logcat_all_${i}.log"
-    LOG_DMESG="/SATA3/nougat/boottime/dmesg_${i}.txt"
-    F_LOGCAT_EVENTS="/SATA3/nougat/boottime/logcat_events_${i}.log"
-    #getboottime
-    getTimeFromEvents
-done
 
+function parseTimeInfoFromLog(){
+    local fs_type=$1
+    local log_path="${local_file_parent}/${fs_type}"
+    for ((i=1; i<=${GLOBAL_COUNT}; i++)); do
+        #echo "==================get boottime for cound ${i}"
+        F_LOGCAT="${log_path}/logcat_all_${i}.log"
+        LOG_DMESG="${log_path}/boottime/dmesg_${i}.txt"
+        F_LOGCAT_EVENTS="${log_path}/logcat_events_${i}.log"
+        getboottime
+        getTimeFromEvents
+    done
+}
 
+function fastboot_flash(){
+    local partition=$1
+    local image_file=$2
+
+    if [ "X${partition}" = "Xuserdata" ]; then
+        fastboot format userdata
+        if [ $? -ne 0 ]; then
+            echo "Failed to format userdata partition"
+            exit 1
+        fi
+    fi
+    fastboot flash $partition $image_file
+    if [ $? -ne 0 ]; then
+        echo "Failed to flash $partition $image_file"
+        exit 1
+    fi
+}
+
+function test_one_type(){
+    local fs_type=$1
+    local boot_file=$2
+    local userdata_file=$3
+    local system_file=$4
+
+    local img_dir="/SATA3/nougat/images/"
+    local log_path="${local_file_parent}/${fs_type}"
+    mkdir -p ${log_path}
+    #export ANDROID_SERIAL=""
+    adb reboot bootloader
+    sleep 5
+    fastboot_flash boot ${img_dir}/${boot_file}
+    if [ -z "${system_file}" ]; then
+        fastboot_flash system ${img_dir}/system.img
+    else
+        fastboot_flash system ${img_dir}/${system_file}
+    fi
+    fastboot_flash userdata ${img_dir}/${userdata_file}
+    fastboot reboot
+    sleep 5
+    adb wait-for-device
+    adb shell disablesuspend.sh
+
+    #return
+    sleep 300
+
+    for ((i=1; i<=${GLOBAL_COUNT}; i++)); do
+        adb reboot
+        sleep 5
+        adb wait-for-device
+        adb shell disablesuspend.sh
+        sleep 300
+
+        adb shell dmesg >${log_path}/dmesg_$i.log
+        adb logcat -d -v time *:V > ${log_path}/logcat_all_$i.log
+        adb logcat -d -b events -v time *:V> ${log_path}/logcat_events_$i.log
+    done
+}
+
+GLOBAL_COUNT=5
+function main(){
+    test_one_type "ext4-system" "boot_ext4.img" "userdata-ext4-sparse.img"  "system-ext4.img"
+#    test_one_type "ext4" "boot_ext4.img" "userdata-ext4-sparse.img"
+#    test_one_type "btrfs" "boot_btrfs.img" "userdata-btrfs-sparse.img"
+#    test_one_type "btrfs_lzo" "boot_btrfs_lzo.img" "userdata-btrfs-sparse.img"
+#    test_one_type "btrfs_zlib" "boot_btrfs_zlib.img" "userdata-btrfs-sparse.img"
+#    test_one_type "nilfs2" "boot_nilfs2.img" "userdata-nilfs2-sparse.img"
+#    test_one_type "f2fs" "boot_f2fs.img" "userdata-f2fs-sparse.img"
+}
+
+main "$@"
