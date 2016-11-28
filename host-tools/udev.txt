@@ -1,1 +1,13 @@
 sudo udevadm control --reload-rules
+
+
+# adb protocol on hikey (8G version)
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4ee7", MODE="0600", OWNER="liuyq"
+# fastboot protocol on hikey (8G version)
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="d00d", MODE="0600", OWNER="liuyq"
+# adb protocol on Coolpad F1
+SUBSYSTEM=="usb", ATTR{idVendor}=="1ebf", ATTR{idProduct}=="702c", MODE="0600", OWNER="liuyq"
+# adb protocol on X15 0451:d109
+SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d109", MODE="0600", OWNER="liuyq"
+# adb protocol on dragonboard410c 05c6:9091
+SUBSYSTEM=="usb", ATTR{idVendor}=="05c6", ATTR{idProduct}=="9091", MODE="0600", OWNER="liuyq"

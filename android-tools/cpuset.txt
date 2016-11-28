@@ -1,0 +1,187 @@
+cpuset in init.rc:
+
+    # sets up initial cpusets for ActivityManager
+    mkdir /dev/cpuset
+    mount cpuset none /dev/cpuset
+
+    # this ensures that the cpusets are present and usable, but the device's
+    # init.rc must actually set the correct cpus
+    mkdir /dev/cpuset/foreground
+    write /dev/cpuset/foreground/cpus 0
+    write /dev/cpuset/foreground/mems 0
+    mkdir /dev/cpuset/foreground/boost
+    write /dev/cpuset/foreground/boost/cpus 0
+    write /dev/cpuset/foreground/boost/mems 0
+    mkdir /dev/cpuset/background
+    write /dev/cpuset/background/cpus 0
+    write /dev/cpuset/background/mems 0
+
+    # system-background is for system tasks that should only run on
+    # little cores, not on bigs
+    # to be used only by init, so don't change system-bg permissions
+    mkdir /dev/cpuset/system-background
+    write /dev/cpuset/system-background/cpus 0
+    write /dev/cpuset/system-background/mems 0
+
+    mkdir /dev/cpuset/top-app
+    write /dev/cpuset/top-app/cpus 0
+    write /dev/cpuset/top-app/mems 0
+
+    # change permissions for all cpusets we'll touch at runtime
+    chown system system /dev/cpuset
+    chown system system /dev/cpuset/foreground
+    chown system system /dev/cpuset/foreground/boost
+    chown system system /dev/cpuset/background
+    chown system system /dev/cpuset/system-background
+    chown system system /dev/cpuset/top-app
+    chown system system /dev/cpuset/tasks
+    chown system system /dev/cpuset/foreground/tasks
+    chown system system /dev/cpuset/foreground/boost/tasks
+    chown system system /dev/cpuset/background/tasks
+    chown system system /dev/cpuset/system-background/tasks
+    chown system system /dev/cpuset/top-app/tasks
+
+    # set system-background to 0775 so SurfaceFlinger can touch it
+    chmod 0775 /dev/cpuset/system-background
+
+    chmod 0664 /dev/cpuset/foreground/tasks
+    chmod 0664 /dev/cpuset/foreground/boost/tasks
+    chmod 0664 /dev/cpuset/background/tasks
+    chmod 0664 /dev/cpuset/system-background/tasks
+    chmod 0664 /dev/cpuset/top-app/tasks
+    chmod 0664 /dev/cpuset/tasks
+
+
+
+    # Create energy-aware scheduler tuning nodes
+    mkdir /dev/stune
+    mount cgroup none /dev/stune schedtune
+    mkdir /dev/stune/foreground
+    chown system system /dev/stune
+    chown system system /dev/stune/foreground
+    chown system system /dev/stune/tasks
+    chown system system /dev/stune/foreground/tasks
+    chmod 0664 /dev/stune/tasks
+    chmod 0664 /dev/stune/foreground/tasks
+
+
+1. needs ENABLE_CPUSETS to be enabled in BoardConfig.mk
+2. /dev/cpuset/foreground/boost: needs ENABLE_SCHED_BOOST to be enabled in BoardConfig.mk
+   used in files:
+    frameworks/base/services/core/jni/Android.mk
+    frameworks/base/services/core/jni/com_android_server_am_ActivityManagerService.cpp:
+        migrateToBoost and migrateFromBoost
+
+        static JNINativeMethod method_table[] = {
+            { "nativeMigrateToBoost",   "()I", (void*)migrateToBoost },
+            { "nativeMigrateFromBoost", "()I", (void*)migrateFromBoost },
+        };
+
+    frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+        // app launch boost for big.little configurations
+        // use cpusets to migrate freshly launched tasks to big cores
+        nativeMigrateToBoost();
+        mIsBoosted = true;
+        mBoostStartTime = SystemClock.uptimeMillis();
+        Message msg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+        mHandler.sendMessageDelayed(msg, APP_BOOST_MESSAGE_DELAY);
+
+        // Delay to disable app launch boost
+        static final int APP_BOOST_MESSAGE_DELAY = 3000;
+        // Lower delay than APP_BOOST_MESSAGE_DELAY to disable the boost
+        static final int APP_BOOST_TIMEOUT = 2500;
+
+        case APP_BOOST_DEACTIVATE_MSG: {
+            synchronized(ActivityManagerService.this) {
+                if (mIsBoosted) {
+                    if (mBoostStartTime < (SystemClock.uptimeMillis() - APP_BOOST_TIMEOUT)) {
+                        nativeMigrateFromBoost();
+                        mIsBoosted = false;
+                        mBoostStartTime = 0;
+                    } else {
+                        Message newmsg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+                        mHandler.sendMessageDelayed(newmsg, APP_BOOST_TIMEOUT);
+                    }
+                }
+            }
+        } break;
+
+
+3. /dev/stune needs ENABLE_SCHEDBOOST to be enabled in BoardConfig.mk
+   This is only for EAS enabled kernel.
+
+   ENABLE_SCHEDBOOST used in files:
+    system/core/libcutils/Android.mk
+    system/core/libcutils/sched_policy.c
+
+4. /dev/cpuset/foreground, /dev/cpuset/background and /dev/cpuset/top-app
+   need ENABLE_CPUSETS  enabled in BoardConfig.mk
+
+   ENABLE_CPUSETS used in files:
+    system/core/libcutils/Android.mk
+    system/core/libcutils/sched_policy.c
+        set_cpuset_policy
+
+    frameworks/native/services/surfaceflinger/main_surfaceflinger.cpp
+        setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY)
+        set_sched_policy(0, SP_FOREGROUND); ---> /dev/cpuctl/tasks
+        #ifdef ENABLE_CPUSETS
+            // Put most SurfaceFlinger threads in the system-background cpuset
+            // Keeps us from unnecessarily using big cores
+            // Do this after the binder thread pool init
+            set_cpuset_policy(0, SP_SYSTEM);
+        #endif
+
+    frameworks/base/core/jni/android_util_Process.cpp
+        android_os_Process_setProcessGroup
+        {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
+
+    frameworks/base/core/java/android/os/Process.java
+       /**
+        * Sets the scheduling group for a process and all child threads
+        * @hide
+        * @param pid The identifier of the process to change.
+        * @param group The target group for this process from THREAD_GROUP_*.
+        *
+        * @throws IllegalArgumentException Throws IllegalArgumentException if
+        * <var>tid</var> does not exist.
+        * @throws SecurityException Throws SecurityException if your process does
+        * not have permission to modify the given thread, or to use the given
+        * priority.
+        *
+        * group == THREAD_GROUP_DEFAULT means to move all non-background priority
+        * threads to the foreground scheduling group, but to leave background
+        * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
+        * threads, regardless of priority, to the background scheduling group.
+        * group == THREAD_GROUP_FOREGROUND is not allowed.
+        *
+        * Always sets cpusets.
+        */
+        public static final native void setProcessGroup(int pid, int group)
+                  throws IllegalArgumentException, SecurityException;
+
+    frameworks/base/core/java/android/app/ActivityThread.java
+        public void setSchedulingGroup(int group) {
+            // Note: do this immediately, since going into the foreground
+            // should happen regardless of what pending work we have to do
+            // and the activity manager will wait for us to report back that
+            // we are done before sending us to the background.
+            try {
+                Process.setProcessGroup(Process.myPid(), group);
+            } catch (Exception e) {
+                Slog.w(TAG, "Failed setting process group to " + group, e);
+            }
+        }
+
+    13:00:54 liuyq: nougat$ grep -rn 'Process\.setProcessGroup' frameworks/
+    frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java:20368:                    Process.setProcessGroup(app.pid, processGroup);
+    frameworks/base/core/java/android/app/ActivityThread.java:975:                Process.setProcessGroup(Process.myPid(), group);
+    13:01:04 liuyq: nougat$
+
+    12:44:56 liuyq: nougat$ grep -rn setSchedulingGroup frameworks/
+    frameworks/base/core/java/android/app/IApplicationThread.java:125:    void setSchedulingGroup(int group) throws RemoteException;
+    frameworks/base/core/java/android/app/ActivityThread.java:969:        public void setSchedulingGroup(int group) {
+    frameworks/base/core/java/android/app/ApplicationThreadNative.java:453:            setSchedulingGroup(group);
+    frameworks/base/core/java/android/app/ApplicationThreadNative.java:1249:    public void setSchedulingGroup(int group) throws RemoteException {
+    12:44:59 liuyq: nougat$
+

@@ -1,0 +1,15 @@
+The Tadpole Lure is a low cost "Mini-Lure" design
+providing a single RGB LED and a breakout/prototype area.
+
+Components:
+    3 2N3906 PNP Transistors
+    1 RGB LED
+    1 12 Ohm 1/8 Resistor
+    2 68 Ohm 1/8 Resistors
+    3 4.7k Ohm 1/8 Resistors
+    1 2x13 0.1" Female Connector
+    1 PCB
+
+http://elinux.org/Tadpole_Lure
+
+http://blog.163.com/songbingyu8@126/blog/static/11977422201062643113845/

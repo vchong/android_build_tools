@@ -27,8 +27,9 @@ ${BASE}/sync-projects.sh  \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
+                          frameworks/av \
 
-${BASE}/sync-projects.sh ti/u-boot/ kernel/ti/x15/
+#${BASE}/sync-projects.sh ti/u-boot/ kernel/ti/x15/
 #                          art \
 #                          external/opencv-upstream \
 

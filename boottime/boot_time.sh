@@ -151,29 +151,30 @@ function test_one_type(){
     local log_path="${local_file_parent}/${fs_type}"
     mkdir -p ${log_path}
     #export ANDROID_SERIAL=""
-    adb reboot bootloader
-    sleep 5
-    fastboot_flash boot ${img_dir}/${boot_file}
-    if [ -z "${system_file}" ]; then
-        fastboot_flash system ${img_dir}/system.img
-    else
-        fastboot_flash system ${img_dir}/${system_file}
+    if false; then
+        adb reboot bootloader
+        sleep 5
+        fastboot_flash boot ${img_dir}/${boot_file}
+        if [ -z "${system_file}" ]; then
+            fastboot_flash system ${img_dir}/system.img
+        else
+            fastboot_flash system ${img_dir}/${system_file}
+        fi
+        fastboot_flash userdata ${img_dir}/${userdata_file}
+        fastboot reboot
+        sleep 5
+        adb wait-for-device
+        adb shell disablesuspend.sh
+
+        #return
+        sleep 300
     fi
-    fastboot_flash userdata ${img_dir}/${userdata_file}
-    fastboot reboot
-    sleep 5
-    adb wait-for-device
-    adb shell disablesuspend.sh
-
-    #return
-    sleep 300
-
     for ((i=1; i<=${GLOBAL_COUNT}; i++)); do
         adb reboot
         sleep 5
         adb wait-for-device
         adb shell disablesuspend.sh
-        sleep 300
+        sleep 60
 
         adb shell dmesg >${log_path}/dmesg_$i.log
         adb logcat -d -v time *:V > ${log_path}/logcat_all_$i.log
@@ -181,7 +182,7 @@ function test_one_type(){
     done
 }
 
-GLOBAL_COUNT=5
+GLOBAL_COUNT=10
 function main(){
     test_one_type "ext4-system" "boot_ext4.img" "userdata-ext4-sparse.img"  "system-ext4.img"
 #    test_one_type "ext4" "boot_ext4.img" "userdata-ext4-sparse.img"

@@ -23,3 +23,6 @@ https://docs.google.com/spreadsheets/d/1Sp8b6A1zCPQoafsFBZbubr_eNCNPtXA-aYySD8T-
 android-cts/tools/cts-tradefed run cts -m CtsBionicTestCases --disable-reboot --skip-preconditions --skip-device-info --shell-wait-time 300000| tee /tmp/workspace/cts.log
 
 ./android-cts/tools/cts-tradefed run cts-focused2 --disable-reboot --skip-preconditions --skip-device-info --abi armeabi-v7a -s 192.168.0.106:5555 --skip-system-status-check com.android.compatibility.common.tradefed.targetprep.NetworkConnectivityChecker|tee /tmp/workspace/cts.log
+
+ ./android-cts/tools/cts-tradefed run cts-part1 --disable-reboot --skip-preconditions --skip-device-info -s 192.168.0.106:5555 --skip-system-status-check com.android.compatibility.common.tradefed.targetprep.NetworkConnectivityChecker -m CtsDevicePolicyManagerTestCases --test com.android.cts.devicepolicy.MixedDeviceOwnerTest |tee /tmp/workspace/cts.log
+

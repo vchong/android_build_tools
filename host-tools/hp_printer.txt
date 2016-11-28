@@ -1,0 +1,3 @@
+http://hplipopensource.com/hplip-web/models/laserjet/hp_laserjet_p2055d.html
+
+http://hplipopensource.com/hplip-web/models/deskjet_aio/deskjet_2050_j510_series.html

@@ -1,0 +1,69 @@
+Brillo Common Kernel:
+https://android.googlesource.com/device/generic/brillo/+/master/docs/KernelDevelopmentGuide.md
+
+https://developers.google.com/weave/?hl=en
+https://developers.google.com/brillo/?hl=en
+
+http://elinux.org/Android_Brillo_Internals
+
+DragonBoard Brillo系统安装指导
+http://blog.csdn.net/awangqm/article/details/50730887
+https://developer.qualcomm.com/search?search_api_views_fulltext=Brillo
+
+
+Brillo: Bluetooth on DragonBoard 410c @ brillo-m10-dev
+https://www.brobwind.com/archives/883
+
+Brillo: brillo-m10-dev @ DragonBoard 410c
+https://www.brobwind.com/archives/852
+
+repo init -b master https://android.googlesource.com/brillo/manifest
+
+
+yongqin.liu@hackbox.linaro.org:~/brillo$ ./tools/bdk/brunch/brunch config check
+bsp_dir:
+  /home/yongqin.liu/brillo/tools/bdk/BSPs
+os_root:
+  /home/yongqin.liu/brillo
+platform_cache:
+  /home/yongqin.liu/brillo/tools/bdk/platform_cache
+metrics_opt_in:
+  0
+yongqin.liu@hackbox.linaro.org:~/brillo$ 
+
+tools/bdk/cli/config/bsp_manifest.json
+
+
+tools/bdk/brunch/brunch bsp download dragonboard -l
+
+/home/yongqin.liu/brillo/tools/bdk/cli/lib/bsp/device.py
+/home/yongqin.liu/brillo/tools/bdk/cli/lib/commands/bsp/download.py
+
+hardware/bsp/qcom/soc/msm8916/prebuilts/sepolicy/rmt.te
+    allow rmt self:socket create_socket_perms;
+    => allow rmt self:socket create_socket_perms_no_ioctl;
+
+hardware/bsp/qcom/soc/msm8916/prebuilts/sepolicy/qseecomd.te
+    allow tee self:socket create_socket_perms;
+    =>allow tee self:socket create_socket_perms_no_ioctl;
+
+dbus/shill/dbus-constants.h
+https://android.googlesource.com/platform/external/cros/system_api/+/4292f9cb663ca5d2fd0dfcc97e556904c5201d7a%5E%21/#F0
+
+hardware/bsp/qcom/peripheral/wifi/wcn3620/wifi_driver_hal_qcwcn.cpp
+device/generic/brillo/wifi_driver_hal/src/wifi_init.c
+hardware/bsp/qcom/boot_control/gpt.cpp
+    #include <cutils/log.h>
+    => #include <android/log.h>
+
+    liblog  for clang++.real: error: linker command failed with exit code 1 (use -v to see invocation)
+device/generic/brillo/pts/audio/brillo-audio-test/Android.mk
+    libaudioclient
+
+curl -H "Authorization: Privet anonymous" http://192.168.0.254:80/privet/info
+
+
+1. change the default dhcp ip scope
+2. make brillo connect to local internet
+3. app to control brillo to do things like blink leds
+4. make brillo work on hikey

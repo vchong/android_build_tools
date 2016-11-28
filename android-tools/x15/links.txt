@@ -1,1 +1,32 @@
 https://wiki.linaro.org/Boards/BeagleBoard-X15#Rebuild_PowerVR_SGX544-MP2_kernel_module
+http://www.ti.com.cn/tool/cn/tmdsevm572x
+
+描述
+
+AM572x 评估模块提供价格合理的平台来快速开始评估
+    Sitara™ ARM® Cortex®-A15 AM57x 处理器（AM5728、AM5726、AM5718、AM5716）并加快 HMI、机器视觉、联网、医学成像和许多其他工业应用的开发。
+这种开发平台基于
+    双 ARM Cortex-A15、
+    双 C66x DSP 处理器，其中集成了大量接口，如 PCIe、SATA、HDMI、USB 3.0/2.0、双千兆位以太网等。
+
+AM572x 评估模块还集成了视频和 3D/2D 图形加速功能，以及四核可编程实时单元 (PRU) 和双 ARM Cortex-M4 核心。
+
+特性
+硬件    软件    连接
+
+AM5728 处理器
+2GB DDR3L
+TPS659037 电源管理 IC
+7" WVGA 电容式触摸屏 LCD
+4GB eMMC
+300 万像素摄像头模块 (不包含，需要另外订购：http://www.ti.com.cn/tool/cn/TMDSCM572X)
+
+千兆位以太网 (2)
+MiniPCIe
+e/mSATA
+Micro SD 卡
+Micro USB 2.0
+USB 3.0 集线器 (3)
+HDMI
+音频输入/输出
+WiLink8 连接器

@@ -1,0 +1,126 @@
+Parser& parser = Parser::GetInstance();
+parser.AddSectionParser("service",std::make_unique<ServiceParser>());
+parser.AddSectionParser("on", std::make_unique<ActionParser>());
+parser.AddSectionParser("import", std::make_unique<ImportParser>());
+parser.ParseConfig("/init.rc");
+
+
+
+
+ActionManager& am = ActionManager::GetInstance();
+am.QueueEventTrigger("early-init");
+// Queue an action that waits for coldboot done so we know ueventd has set up all of /dev...
+am.QueueBuiltinAction(wait_for_coldboot_done_action, "wait_for_coldboot_done");
+// ... so that we can start queuing up actions that require stuff from /dev.
+am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+am.QueueBuiltinAction(set_mmap_rnd_bits_action, "set_mmap_rnd_bits");
+am.QueueBuiltinAction(keychord_init_action, "keychord_init");
+am.QueueBuiltinAction(console_init_action, "console_init");
+// Trigger all the boot actions to get us started.
+am.QueueEventTrigger("init");
+// Repeat mix_hwrng_into_linux_rng in case /dev/hw_random or /dev/random
+// wasn't ready immediately after wait_for_coldboot_done
+am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+
+// Don't mount filesystems or start core system services in charger mode.
+std::string bootmode = property_get("ro.bootmode");
+if (bootmode == "charger") {
+    am.QueueEventTrigger("charger");
+} else {
+    am.QueueEventTrigger("late-init");
+}
+
+// Run all property triggers based on current state of the properties.
+am.QueueBuiltinAction(queue_property_triggers_action, "queue_property_triggers");
+
+
+
+23:32:39 liuyq: nougat$ grep -rn -e 'trigger ' -e '^on ' -e 'class_start ' boottime/init/rcs-x15/|grep -v 'on property'
+boottime/init/rcs-x15/init.am57xevmboard.rc:3:on early-init
+boottime/init/rcs-x15/init.am57xevmboard.rc:6:on init
+boottime/init/rcs-x15/init.am57xevmboard.rc:11:on post-fs-data
+boottime/init/rcs-x15/init.am57xevmboard.rc:35:on boot
+boottime/init/rcs-x15/init.am57xevmboard.rc:56:on fs
+boottime/init/rcs-x15/bootstat.rc:3:on post-fs-data
+boottime/init/rcs-x15/bootstat.rc:11:on post-fs-data && property:init.svc.bootanim=running
+boottime/init/rcs-x15/vdc.rc:2:on defaultcrypto
+boottime/init/rcs-x15/vdc.rc:8:on encrypt
+boottime/init/rcs-x15/atrace.rc:3:on boot
+boottime/init/rcs-x15/init.environ.rc:2:on init
+boottime/init/rcs-x15/init.am57xevmboard.usb.rc:1:on boot
+boottime/init/rcs-x15/init.usb.rc:6:on post-fs-data
+boottime/init/rcs-x15/init.usb.rc:25:on boot
+boottime/init/rcs-x15/init.usb.rc:106:on boot && property:persist.sys.usb.config=*
+boottime/init/rcs-x15/init.rc:13:on early-init
+boottime/init/rcs-x15/init.rc:31:on init
+boottime/init/rcs-x15/init.rc:239:# Healthd can trigger a full boot from charger mode by signaling this
+boottime/init/rcs-x15/init.rc:243:    trigger late-init
+boottime/init/rcs-x15/init.rc:246:on load_system_props_action
+boottime/init/rcs-x15/init.rc:249:on load_persist_props_action
+boottime/init/rcs-x15/init.rc:255:on firmware_mounts_complete
+boottime/init/rcs-x15/init.rc:259:on late-init
+boottime/init/rcs-x15/init.rc:260:    trigger early-fs
+boottime/init/rcs-x15/init.rc:261:    trigger fs
+boottime/init/rcs-x15/init.rc:262:    trigger post-fs
+boottime/init/rcs-x15/init.rc:267:    trigger load_system_props_action
+boottime/init/rcs-x15/init.rc:271:    trigger post-fs-data
+boottime/init/rcs-x15/init.rc:272:    trigger load_persist_props_action
+boottime/init/rcs-x15/init.rc:275:    trigger firmware_mounts_complete
+boottime/init/rcs-x15/init.rc:277:    trigger early-boot
+boottime/init/rcs-x15/init.rc:278:    trigger boot
+boottime/init/rcs-x15/init.rc:281:on post-fs
+boottime/init/rcs-x15/init.rc:314:    #change permissions on kmsg & sysrq-trigger so bugreports can grab kthread stacks
+boottime/init/rcs-x15/init.rc:328:on post-fs-data
+boottime/init/rcs-x15/init.rc:481:on boot
+boottime/init/rcs-x15/init.rc:571:    class_start core
+boottime/init/rcs-x15/init.rc:573:on nonencrypted
+boottime/init/rcs-x15/init.rc:576:    class_start main
+boottime/init/rcs-x15/init.rc:577:    class_start late_start
+boottime/init/rcs-x15/init.rc:582:on charger
+boottime/init/rcs-x15/init.rc:583:    class_start charger
+boottime/init/rcs-x15/init.rc:594:    trigger post-fs-data
+boottime/init/rcs-x15/init.rc:599:    class_start main
+boottime/init/rcs-x15/init.rc:604:    class_start main
+boottime/init/rcs-x15/init.rc:605:    class_start late_start
+boottime/init/rcs-x15/dumpstate.rc:1:on boot
+boottime/init/rcs-x15/logcatd.rc:31:on load_persist_props_action
+23:33:12 liuyq: nougat$ 
+
+
+
+core class service: pvrsrvinit vold adbd ueventd healthd console surfaceflinger lmkd servicemanager bootanim
+23:40:46 liuyq: nougat$ grep -rn -B1 'class core' boottime/init/rcs-x15/
+boottime/init/rcs-x15/init.am57xevmboard.rc-60-service pvrsrvinit /vendor/bin/pvrsrvinit
+boottime/init/rcs-x15/init.am57xevmboard.rc:61:    class core
+--
+boottime/init/rcs-x15/init.am57xevmboard.rc-67-service uim /system/bin/uim-sysfs
+boottime/init/rcs-x15/init.am57xevmboard.rc:68:    class core
+--
+boottime/init/rcs-x15/vold.rc-3-        --fsck_context=u:r:fsck:s0 --fsck_untrusted_context=u:r:fsck_untrusted:s0
+boottime/init/rcs-x15/vold.rc:4:    class core
+--
+boottime/init/rcs-x15/init.usb.rc-15-service adbd /sbin/adbd --root_seclabel=u:r:su:s0
+boottime/init/rcs-x15/init.usb.rc:16:    class core
+--
+boottime/init/rcs-x15/init.rc-632-service ueventd /sbin/ueventd
+boottime/init/rcs-x15/init.rc:633:    class core
+--
+boottime/init/rcs-x15/init.rc-637-service healthd /sbin/healthd
+boottime/init/rcs-x15/init.rc:638:    class core
+--
+boottime/init/rcs-x15/init.rc-643-service console /system/bin/sh
+boottime/init/rcs-x15/init.rc:644:    class core
+--
+boottime/init/rcs-x15/surfaceflinger.rc-1-service surfaceflinger /system/bin/surfaceflinger
+boottime/init/rcs-x15/surfaceflinger.rc:2:    class core
+--
+boottime/init/rcs-x15/lmkd.rc-1-service lmkd /system/bin/lmkd
+boottime/init/rcs-x15/lmkd.rc:2:    class core
+--
+boottime/init/rcs-x15/servicemanager.rc-1-service servicemanager /system/bin/servicemanager
+boottime/init/rcs-x15/servicemanager.rc:2:    class core
+--
+boottime/init/rcs-x15/bootanim.rc-1-service bootanim /system/bin/bootanimation
+boottime/init/rcs-x15/bootanim.rc:2:    class core
+23:41:11 liuyq: nougat$ 
+

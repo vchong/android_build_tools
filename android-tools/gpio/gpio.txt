@@ -1,0 +1,202 @@
+What is a General-Purpose Input/Output (GPIO) pin?
+    A GPIO is a software controlled digital signal, a GPIO pin is a pin
+    on an integrated circuit whose function and behaviour can be controlled
+    by the user.
+
+    The two main operation mode of a GPIO are input and output:
+        in "input" mode, you can read "low" and "high" values
+        in "output" mode, you can write "low" and "high" values
+    You can think of it as a binary sensor (input) or controlled switch (output).
+    Other uses (e.g. as IRQ lines) are outside the scope of this tutorial.
+
+
+1. need enablement sysfs support on kernel side:
+
+    Symbol: GPIO_SYSFS [=y]
+      Prompt: /sys/class/gpio/... (sysfs interface)
+          Defined at drivers/gpio/Kconfig:51
+          Depends on: GPIOLIB && SYSFS && EXPERIMENTAL
+          Location:
+              -> Kernel configuration
+                  -> Device Drivers
+                      -> GPIO Support (GPIOLIB [=y])
+
+
+    There are three kinds of things in "/sys/class/gpio/":
+        control interface "export" and "unexport"
+        exported GPIOs directories (nodes)
+            echo "out" or "in" to direction
+            echo "1" or "0" to value file
+        GPIO controllers (gpiochip*) directories
+            base: the first GPIO number managed by this particual GPIO controller
+            label: controller label
+            ngpio: how many GPIOs are managed by this controller
+            for f in `ls -d /sys/class/gpio/gpiochip*`; do echo $f `cat $f/label $f/base $f/ngpio` ; done
+
+    Writing a GPIO number to the "export" file will enable access to the GPIO
+    and create the corresponding directory.
+
+
+
+2. enable debugfs for checking gpio configuration
+
+    Symbol: DEBUG_FS [=y]
+      Prompt: Debug Filesystem
+        Defined at lib/Kconfig.debug:77
+        Depends on: SYSFS
+        Location:
+            -> Kernel configuration
+            -> Kernel hacking
+
+    mount -t debugfs none /sys/kernel/debug
+    root@hikey:/ # cat /sys/kernel/debug/gpio
+    GPIOs 352-359, amba/f702f000.gpio, f702f000.gpio:
+
+    GPIOs 360-367, amba/f702e000.gpio, f702e000.gpio:
+
+    GPIOs 368-375, amba/f702d000.gpio, f702d000.gpio:
+
+    GPIOs 376-383, amba/f702c000.gpio, f702c000.gpio:
+
+    GPIOs 384-391, amba/f702b000.gpio, f702b000.gpio:
+
+    GPIOs 392-399, amba/f702a000.gpio, f702a000.gpio:
+
+    GPIOs 400-407, amba/f7029000.gpio, f7029000.gpio:
+
+    GPIOs 408-415, amba/f7028000.gpio, f7028000.gpio:
+
+    GPIOs 416-423, amba/f7027000.gpio, f7027000.gpio:
+
+    GPIOs 424-431, amba/f7026000.gpio, f7026000.gpio:
+
+    GPIOs 432-439, amba/f7025000.gpio, f7025000.gpio:
+
+    GPIOs 440-447, amba/f7024000.gpio, f7024000.gpio:
+
+    GPIOs 448-455, amba/f7023000.gpio, f7023000.gpio:
+
+    GPIOs 456-463, amba/f7022000.gpio, f7022000.gpio:
+     gpio-458 (                    |ssp-pl022           ) out hi    
+
+    GPIOs 464-471, amba/f7021000.gpio, f7021000.gpio:
+
+    GPIOs 472-479, amba/f7020000.gpio, f7020000.gpio:
+     gpio-472 (                    |?                   ) out lo    
+     gpio-473 (                    |?                   ) out lo    
+     gpio-474 (                    |?                   ) out lo    
+     gpio-475 (                    |?                   ) out lo    
+     gpio-479 (                    |?                   ) out lo    
+
+    GPIOs 480-487, amba/f8014000.gpio, f8014000.gpio:
+     gpio-485 (                    |?                   ) out lo    
+
+    GPIOs 488-495, amba/f8013000.gpio, f8013000.gpio:
+
+    GPIOs 496-503, amba/f8012000.gpio, f8012000.gpio:
+     gpio-496 (                    |cd                  ) in  hi IRQ
+     gpio-498 (                    |hi655x_pmic_irq     ) in  hi IRQ
+     gpio-503 (                    |kim                 ) out lo    
+
+    GPIOs 504-511, amba/f8011000.gpio, f8011000.gpio:
+     gpio-505 (                    |mux                 ) out lo    
+     gpio-508 (                    |pd                  ) out lo    
+     gpio-509 (                    |wlan-en-regulator   ) out lo    
+     gpio-511 (                    |fixed_5v_hub        ) out lo    
+    root@hikey:/ # 
+
+    130|root@hikey:/ # for f in `ls -d /sys/class/gpio/gpiochip*`; do echo $f `cat $f/label $f/base $f/ngpio` ; done
+    /sys/class/gpio/gpiochip352 f702f000.gpio 352 8
+    /sys/class/gpio/gpiochip360 f702e000.gpio 360 8
+    /sys/class/gpio/gpiochip368 f702d000.gpio 368 8
+    /sys/class/gpio/gpiochip376 f702c000.gpio 376 8
+    /sys/class/gpio/gpiochip384 f702b000.gpio 384 8
+    /sys/class/gpio/gpiochip392 f702a000.gpio 392 8
+    /sys/class/gpio/gpiochip400 f7029000.gpio 400 8
+    /sys/class/gpio/gpiochip408 f7028000.gpio 408 8
+    /sys/class/gpio/gpiochip416 f7027000.gpio 416 8
+    /sys/class/gpio/gpiochip424 f7026000.gpio 424 8
+    /sys/class/gpio/gpiochip432 f7025000.gpio 432 8
+    /sys/class/gpio/gpiochip440 f7024000.gpio 440 8
+    /sys/class/gpio/gpiochip448 f7023000.gpio 448 8
+    /sys/class/gpio/gpiochip456 f7022000.gpio 456 8
+    /sys/class/gpio/gpiochip464 f7021000.gpio 464 8
+    /sys/class/gpio/gpiochip472 f7020000.gpio 472 8
+    /sys/class/gpio/gpiochip480 f8014000.gpio 480 8
+    /sys/class/gpio/gpiochip488 f8013000.gpio 488 8
+    /sys/class/gpio/gpiochip496 f8012000.gpio 496 8
+    /sys/class/gpio/gpiochip504 f8011000.gpio 504 8
+    root@hikey:/ #
+
+    23=>488
+    24=>489
+    25=>490
+    26=>491
+    27=>492
+    30=>495
+    
+3. Document for using GPIO with 96boards:
+   https://github.com/liuyq/documentation/tree/master/ConsumerEdition/CE-Extras/GPIO
+
+   official documentation for Consumer Edition 96Boards
+   http://www.96boards.org/documentation/ConsumerEdition/README.md/
+
+   The following tables show the Low Speed Expansion Connector pin out on hikey:
+   HiKey Signals        96Boards Signals    PIN     PIN     96Boards Signals    HiKey X20 Signals
+   ----------------------------------------------------------------------------------------------
+   DGND                 GND                 1       2       GND                 DGND
+   UART2_CTS_N          UART0_CTS           3       4       PWR_BTN_N           PMU_PWRON_N
+   UART2_TX             UART0_TxD           5       6       RST_BTN_N           EXP_RSTOUT_N
+   UART2_RX             UART0_RxD           7       8       SPI0_SCLK           SPI0_SCLK
+   UART2_RTS_N          UART0_RTS           9       10      SPI0_DIN            SPI0_DI
+   UART3_TX             UART1_TxD           11      12      SPI0_CS             SPI0_CS_N
+   UART3_RX             UART1_RxD           13      14      SPI0_DOUT           SPIO_DO
+   I2C0_SCL             I2C0_SCL            15      16      PCM_FS              MODEM_PCM_XFS
+   I2C0_SDA             I2C0_SDA            17      18      PCM_CLK             MODEM_PCM_XCLK
+   I2C1_SCL             I2C1_SCL            19      20      PCM_DO              MODEM_PCM_DO
+   I2C1_SDA             I2C1_SDA            21      22      PCM_DI              MODEM_PCM_DI
+   GPIO2_0              GPIO-A              23      24      GPIO-B              GPIO2_1
+   GPIO2_2              GPIO-C              25      26      GPIO-D              GPIO3_3
+   GPIO2_4              GPIO-E              27      28      GPIO-F              BL_PWM_GPIO12_7
+   GPIO6_7_DSI_TE0      GPIO-G              29      30      GPIO-H              GPIO2_7
+   ISP_RSTB0_GPIO10_3   GPIO-I              31      32      GPIO-J              ISP_PWDN0_GPIO9_1
+   ISP_RSTB1_GPIO10_3   GPIO-K              33      34      GPIO-L              ISP_PWDN0_GPIO9_2
+   LDO21_1V8            +1V8                35      36      SYS_DCIN            SYSDC_IN
+   SYS_5V               +5V                 37      38      SYC_DCIN            SYSDC_IN
+   DGND                 GND                 39      40      GND                 DGND
+
+
+   96Boards Out of box experience guide – part 4
+   http://www.96boards.org/blog/96boards-box-experience-guide-4/
+
+   Linux GPIO for 96Boards
+   http://www.96boards.org/blog/bringing-standardization-linux-gpio-96boards/
+
+   How do you access the GPIO pins programmatically?
+   http://www.96boards.org/blog/access-gpio-pins-programmatically/
+
+4. android gpio implementation:
+   https://source.android.com/devices/input/overview.html
+
+5. leds
+   To control these LEDs yourself, you must first replace the default trigger
+   with "None" to disconnect the LED from the kernels activity:
+        echo none > /sys/class/leds/ledX/trigger
+   Then the LED may be turned on by writing a non-zero value into the brightness file:
+        echo 1 > /sys/class/leds/ledX/brightness
+   And to turn it off again:
+        echo 0 > /sys/class/leds/ledX/brightness
+
+
+6. test script
+  
+  pin_num=23
+  echo ${pin_num} > /sys/class/gpio/export
+  echo out > /sys/class/gpio${pin_num}/direction
+  while true; do
+    echo 1 >/sys/class/gpio/gpio488/value
+    sleep 1
+    echo 0 >/sys/class/gpio/gpio488/value
+    sleep 1 ##
+  done
+

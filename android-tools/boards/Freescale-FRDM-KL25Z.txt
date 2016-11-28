@@ -1,0 +1,49 @@
+https://developer.mbed.org/platforms/KL25Z/
+It is based on the NXP KL25Z, with a 32-bit ARM Cortex-M0+ core running at 48MHz.
+It includes 128KB FLASH, 16KB RAM and lots of interfaces including USB Host,
+ USB Device, SPI, I2C, ADC, DAC, PWM, Touch Sensor and other I/O interfaces.
+ 
+Features
+
+NXP KL25Z Kinetis KL2x MCU (MKL25Z128VLK4)
+    High performance ARM® Cortex™-M0+ Core
+    48MHz, 16KB RAM, 128KB FLASH
+    USB (Host/Device)
+    SPI (2)
+    I2C (2)
+    UART (3)
+    PWM (TPM)
+    ADC (16 bit)
+    DAC (1x 12bit)
+    Touch Sensor
+    GPIO (66) 
+
+FRDM-KL25Z Onboard Sensors
+    MMA8451Q - 3-axis accelerometer
+    Capacitive touch sensor 
+
+Evalution Form factor
+    81mm x 53mm
+    5V USB or 4.5-9V supply
+    Built-in USB drag 'n' drop FLASH programmer 
+
+mbed HDK & SDK enabled
+    Drag-n-drop programming
+    USB Serial Port
+    CMSIS-DAP
+    Online development tools
+    Easy to use C/C++ SDK
+    Lots of published libraries and projects 
+
+Status
+    Production 
+    
+    
+https://developer.mbed.org/handbook/mbed-FRDM-KL25Z
+
+http://www.pemicro.com/opensda/
+OpenSDA Firmware (MSD & Debug) 
+and Linux USB Drivers
+
+
+http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/freescale/kl25z/

@@ -1,0 +1,2 @@
+http://en.cppreference.com/w/cpp/language/auto
+http://www.learncpp.com/cpp-tutorial/4-8-the-auto-keyword/

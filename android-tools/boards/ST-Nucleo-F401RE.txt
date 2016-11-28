@@ -1,0 +1,65 @@
+http://www.st.com/en/evaluation-tools/nucleo-f401re.html
+Key Features
+
+    STM32 microcontroller with LQFP64 package
+    Two types of extension resources
+        Arduino Uno Revision 3 connectivity
+        STMicroelectronics Morpho extension pin headers for full access to all STM32 I/Os
+    mbed-enabled (http://mbed.org)
+    On-board ST-LINK/V2-1 debugger/programmer with SWD connector
+        selection-mode switch to use the kit as a standalone ST-LINK/V2-1
+    Flexible board power supply
+        USB VBUS or external source(3.3 V, 5 V, 7 - 12 V)
+        Power management access point
+    Three LEDs
+        USB communication (LD1), user LED (LD2), power LED (LD3)
+    Two push buttons: USER and RESET
+    USB re-enumeration capability: three different interfaces supported on USB
+        Virtual Com port
+        Mass storage
+        Debug port
+    Supported by wide choice of Integrated Development Environments (IDEs) including IAR™, Keil®, GCC-based IDEs
+
+
+https://developer.mbed.org/platforms/ST-Nucleo-F401RE/
+Microcontroller features
+
+Microcontroller features
+
+    STM32F401RET6 in LQFP64 package
+    ARM®32-bit Cortex®-M4 CPU with FPU
+    84 MHz max CPU frequency
+    VDD from 1.7 V to 3.6 V
+    512 KB Flash
+    96 KB SRAM
+    GPIO (50) with external interrupt capability
+    12-bit ADC with 16 channels
+    RTC
+    Advanced-control Timer
+    General Purpose Timers (7)
+    Watchdog Timers (2)
+    USART/UART (4)
+    I2C (3)
+    SPI (3)
+    SDIO
+    USB 2.0 OTG FS 
+
+
+Board features
+
+    Two types of extension resources
+        Arduino Uno Revision 3 connectivity
+        STMicroelectronics Morpho extension pin headers for full access to all STM32 I/Os 
+    On-board ST-LINK/V2-1 debugger/programmer with SWD connector
+        Selection-mode switch to use the kit as a standalone ST-LINK/V2-1 
+    Flexible board power supply
+        USB VBUS or external source (3.3 V, 5 V, 7 - 12 V)
+        Power management access point 
+    User LED (LD2)
+    Two push buttons: USER and RESET
+    USB re-enumeration capability: three different interfaces supported on USB
+        Virtual Com port
+        Mass storage (USB Disk drive) for drag'n'drop programming
+        Debug port 
+
+

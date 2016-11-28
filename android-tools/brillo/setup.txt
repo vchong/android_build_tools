@@ -1,0 +1,551 @@
+https://www.brobwind.com/archives/61
+Brillo: 初步了解: 获取设备信息
+2015-12-10 22:39:45 ~ 2016-01-04 22:44:34 hzak	发表回复
+
+代码使用的是brillo-m8-release/brillo-m8-dev的分支
+
+先forward emulator的80端口到host的8000端口:
+
+$ adb forward tcp:8000 tcp:80
+
+使用curl获取brilloemulator-x86的信息
+
+$ curl -H "Authorization: Privet anonymous" http://localhost:8000/privet/info
+
+可得到如下信息:
+
+{
+"authentication": {
+"anonymousMaxScope": "viewer",
+"crypto": [ "p224_spake2" ],
+"mode": [ "anonymous", "pairing" ],
+"pairing": [ "embeddedCode" ]
+},
+"basicModelManifest": {
+"modelName": "Emulator",
+"oemName": "Brillo",
+"uiDeviceKind": "vendor"
+},
+"description": "X86 Emulator",
+"endpoints": {
+"httpPort": 80,
+"httpUpdatesPort": 80,
+"httpsPort": 443,
+"httpsUpdatesPort": 443
+},
+"gcd": {
+"id": "",
+"status": "unconfigured"
+},
+"id": "3D0CC433-1219-4999-93E5-2C7B817A7F11",
+"modelManifestId": "AAAAA",
+"name": "Starter Board",
+"services": [ "vendor" ],
+"uptime": 136,
+"version": "3.0",
+"wifi": {
+"capabilities": [ "2.4GHz" ],
+"ssid": "",
+"status": "online"
+}
+}
+-------------------------------------------------------
+https://www.brobwind.com/archives/65
+Brillo: 使用curl进行初步调试 (device pairing)
+2015-12-11 22:41:27 ~ 2016-07-03 18:40:32 hzak	发表回复
+
+设备具有wifi AP的功能， 手机可以通过wifi进行连接和控制
+
+设备是具有web server(webservd)的功能，提供http(80)和https(443)服务
+
+手机连接设备后使用http连接， 可以访问如下连接：(external/libweave/src/privet/privet_handler.cc@brillo-m8-dev)：
+
+    /privet/info (scope: kNone)
+    /privet/v3/pairing/start (scope: kNone)
+    /privet/v3/pairing/confirm (scope: kNone)
+    /privet/v3/pairing/cancel (scope: kNone)
+
+如果使用https连接，还可以访问如下连接：
+
+    /privet/v3/auth (scope: kNone)
+    /privet/v3/setup/start (scope: kOwner)
+    /privet/v3/setup/status (scope: kOwner)
+    /privet/v3/state (scope: kViewer)
+    /privet/v3/commandDefs (scope: kViewer)
+    /privet/v3/commands/execute (scope: kViewer)
+    /privet/v3/commands/status (scope: kViewer)
+    /privet/v3/commands/cancel (scope: kViewer)
+    /privet/v3/commands/list (scope: kViewer)
+    /privet/v3/commands/checkForUpdates (scope: kViewer)
+    /privet/v3/traits (scope: kViewer)
+    /privet/v3/components (scope: kViewer)
+
+准备工作（下载，编译代码，运行模似器）：
+
+$ brilloemulator-x86 -m 256
+
+forward设备的80和443端口(实际上只需要443端口)：
+
+$ adb forward tcp:8000 tcp:80
+$ adb forward tcp:8001 tcp:443
+
+查看设备的基本信息：
+
+$ curl -H "Authorization: Privet anonymous" https://localhost:8001/privet/info
+
+可以知道服务器使用的是自签名证书， 使用 -k 参数关闭证书验证
+
+$ curl -H "Authorization: Privet anonymous" -k https://localhost:8001/privet/info
+
+可以得到包含authentication, basicModelManifest, description, endpoints, gcd, id, modelManifestId, name, services, uptime, version, wifi
+
+关于anonymous, 是一个特珠的scope (kNone), weave定义了四种类型的scope: kNone(0), kViewer(1), kUser(2), kOwer(3), 具备的权限也是逐渐增大(external/libweave/include/weave/settings.h)
+
+paring start:
+
+$ curl -H "Authorization: Privet anonymous" -H "Content-Type: application/json" -X POST --data '{ "pairing": "embeddedCode", "crypto": "p224_spake2" }' -k https://localhost:8001/privet/v3/pairing/start
+
+可以得到sessionId和deviceCommitment (clientCommitment)
+
+Screen Shot 2015-12-11 at 10.33.05 PM
+
+pairing confirm(传入由paring start得到的sessionId和deviceCommitment):
+
+$ curl -H "Authorization: Privet anonymous" -H "Content-Type: application/json" -X POST --data '{ "sessionId": "0588E45C-C759-4F2A-8F15-0D34EA212D10", "clientCommitment": "m9wluyfSJP4AoX1JOH+bUMJJOEErF1i5yveHZbGPhnfef04JpvWMuL9Tckk8gHPVpm7D9t/kVw4=" }' -k https://localhost:8001/privet/v3/pairing/confirm
+
+就可以得到certFingerprint和certSignature
+
+Screen Shot 2015-12-11 at 10.34.10 PM
+
+----------------------------------------------------------------
+https://www.brobwind.com/archives/70
+Brillo: webservd 所需的证书与 private key
+2015-12-12 16:41:22 ~ 2016-07-03 18:41:19 hzak	发表回复
+
+从代码：system/webservd/webservd/server.cc@brillo-m8-dev上看webservd所需要的证书是这么来的：
+
+    读取/data/misc/webservd/certificate文件，得到证书
+    读取/data/misc/webservd/key文件，得到private key
+
+如果读取证书或者private key有问题，那么就会去重新创建证书和private key:
+
+    创建X509证书：有效期365.2425天， CN为”Brillo device”
+    创建RSA key pair
+    创建EVP key并transfer ownership of RSA key pair to EVP key
+    使用EVP key给证书签名
+    将创建好的证书和key保存到文件(key会使用之前创建的证书作加密再保存)
+
+通过openssl命令可以获取网站的证书：
+
+$ openssl s_client -showcerts -connect localhost:8001
+
+Screen Shot 2015-12-12 at 4.39.00 PM
+-------------------------------------------------------------------
+https://www.brobwind.com/archives/78
+Brillo: 从/privet/v3/auth获取access token
+2015-12-13 15:51:40 ~ 2016-03-24 20:32:02 hzak	3条评论
+
+Brillo设备在进行pairing的时候，需要access token, 这个access token是通过/privet/v3/auth这个连接得到的。相关代码请看externl/libweaved/src/privet/privet_handler.cc@brillo-m8-dev
+
+/privet/v3/auth这个连接需要使用https访问, 由/privet/info中可知authentication的anonymousMaxSope 为viewer, crypto 为p224_spake2, mode为anonymous与pairing, pairing使用embeddedCode：
+
+$ curl -H "Authorization: Privt anonymous" -k https://localhost:8001/privet/info
+{
+   "authentication": {
+      "anonymousMaxScope": "viewer",
+      "crypto": [ "p224_spake2" ],
+      "mode": [ "anonymous", "pairing" ],
+      "pairing": [ "embeddedCode" ]
+   },
+   ...
+}
+
+    emulator tcp端口映射
+
+运行在emulator时加命令行参数：
+
+$ brilloemualtor-x86 -m 256 -- -redir tcp:8000::80 -redir tcp:8001::443
+
+通过adb forward实现：
+
+$ adb forward tcp:8000 tcp:80
+$ adb forward tcp:8001 tcp:443
+
+    authentication mode为anonymous: 用于request scope, 增大anonymous的作用域：
+
+如去request owner scope会返回access denied：
+
+$ curl -H "Authorization: Privet anonymous" -H 'Content-Type: application/json' \
+    -X POST \
+    --data '{ "mode": "anonymous", "requestedScope": "owner" }' \
+    -k https://localhost:8001/privet/v3/auth
+{
+   "error": {
+      "code": "accessDenied",
+      "debugInfo": [ {
+         "code": "accessDenied",
+         "debugInfo": "HandleAuth@external/libweave/src/privet/privet_handler.cc:672",
+         "message": "Scope 'owner' is not allowed"
+      } ],
+      "message": "Scope 'owner' is not allowed"
+   }
+}
+
+而会request viewer scope则会成功(由/privet/info可知):
+
+$ curl -H "Authorization: Privet anonymous" -H 'Content-Type: application/json' \
+    -X POST \
+    --data '{ "mode": "anonymous", "requestedScope": "viewer" }' \
+    -k https://localhost:8001/privet/v3/auth
+{
+   "accessToken": "o6yq+Nhh835iGl7HmnL838RRCcER7LOi28C6g01fAJgxOjE6MTQ1MTE5ODA3Mg==",
+   "expiresIn": 3600,
+   "scope": "viewer",
+   "tokenType": "Privet"
+}
+
+从返回的信息中，我们可以得到accessToken,  token expires time: 3600秒后过期，于是我们就可以访问scope为viewer的连接，如/privet/v3/commands/list：
+
+$ curl -H "Authorization: Privet VZJ7xLIDQpnShNQEPElo3tFPHezhtBrqq8ZB/lWsTQ0OTk5MDcyNg==" \
+    -k https://localhost:8001/privet/v3/commands/list
+{
+"commands": [ ]
+}
+
+    authentication mode为pairing: 可以得到所有scope(viewer, user, owner)的access token
+
+显然，如果进行pairing类型的认证，以便得到所有scope的access token需要authCode, authCode是经过base64 encode HmacSha256加密过后的session id和session key, 而session id和session key是在设备pairing后得到的。
+
+首先进行pairing, 得到session id:
+
+$ curl -H "Authorization: Privet anonymous" -H 'Content-Type: application/json' \
+    -X POST \
+    --data '{ "pairing": "embeddedCode", "crypto": "p224_spake2" }' \
+    -k https://localhost:8001/privet/v3/pairing/start
+{
+   "deviceCommitment": "IFS6F6YgB26DSuXVLG9gZvUcuqe3vVQHXsOYIH2Gz2p3FqW4QuVPl4SRRqo0wqDUl6jgrmcaim0=",
+   "sessionId": "58414923-35EB-406E-8407-88DDE34CC290"
+}
+
+$ curl -H "Authorization: Privet anonymous" -H 'Content-Type: application/json' \
+    -X POST \
+    --data '{"sessionId": "58414923-35EB-406E-8407-88DDE34CC290", "clientCommitment": "ICRFzZwrH6n5c1D/LsEQrf5H6/Ap6Hb+x4ayEonnTsDW+diTwYD0nzJxut+ZxLnFifZxsZhWRIw="}'
+    -k https://localhost:8001/privet/v3/pairing/confirm
+{
+   "certFingerprint": "USQs/v/5C3YcOhJtVF3kZ8V7l6vqNJtf84PefK4n7tw=",
+   "certSignature": "IhmKwW6SHypU3QnqGIMbBanzJgFRBErrqnWiPoEm59w="
+}
+
+NOTE: pairing confirm中的clientCommitment 并非是之前做pairing start中得到的deviceComitment, deviceCommitment只是用来验证client中的password是否与device中的password(embedded_code)一致。详见后文。
+
+NOTE: paring start/confirm 中的access token可以任意。
+
+这时我们假设已经知道了authCode, 下面试着去获取owner的access token:
+
+$ curl -H "Authorization: Privet anonymous" -H 'Content-Type: application/json' \
+    -X POST \
+    --data '{ "mode": "pairing", "authCode": "I+/YzvpmdAeS0xP67wRJhA5UEQUSf6qjh+eqVdS0BeM=", "requestedScope": "owner" }' -k https://localhost:8001/privet/v3/auth
+{
+   "accessToken": "bpl/zQW0nH6lmRfW7z7dpvu4i82plGyeqoFhjJeR8dwzOjI6MTQ1MTE5OTI2NA==",
+   "expiresIn": 3600,
+   "scope": "owner",
+   "tokenType": "Privet"
+}
+
+可以看到我们已经可以得到ower的access token了，我们就获得了设备的所有控制权。
+
+下面看看如何得到authCode:
+
+需要embedded_code, 可以从设备的system/etc/weaved/weaved.conf中得到，default: hello
+
+int main(int argc, char *argv[])
+{
+    if (argc != 4) return -1;
+
+    std::string password(argv[1]);
+    std::string session_id(argv[2]);
+    std::string device_commitment_base64(argv[3]);
+
+    crypto::P224EncryptedKeyExchange spake{
+        crypto::P224EncryptedKeyExchange::kPeerTypeClient, password};
+
+    std::string client_commitment_base64{Base64Encode(spake.GetNextMessage())};
+
+    std::vector<uint8_t> device_commitment;
+    if (!Base64Decode(device_commitment_base64, &device_commitment)) {
+        VLOG(0) << "base64 decode failed!";
+        return -2;
+    }
+
+    if (spake.ProcessMessage(std::string(device_commitment.begin(), device_commitment.end())) !=
+            crypto::P224EncryptedKeyExchange::kResultPending) {
+        VLOG(0) << "spake: process message failed: password mismatch!";
+        return -3;
+    }
+
+    const std::string& key = spake.GetUnverifiedKey();
+    std::vector<uint8_t> auth_code{
+        HmacSha256(std::vector<uint8_t>{key.begin(), key.end()},
+                   std::vector<uint8_t>{session_id.begin(), session_id.end()})};
+
+    std::string auth_code_base64{Base64Encode(auth_code)};
+
+    VLOG(0) << "{ \"sessionId\": \"" << session_id << "\", \"clientCommitment\": \"" <<
+            client_commitment_base64 << "\" }";
+    VLOG(0) << "{ \"mode\": \"pairing\", \"authCode\": \"" << auth_code_base64 << "\" }";
+
+    return 0;
+}
+
+相关代码可以从这里下载：create-auth-code.c
+
+关于spake, 请参考这篇文档：
+
+http://www.di.ens.fr/~mabdalla/papers/AbPo05a-letter.pdf
+
+编译，打包，运行emulator后，执行:
+
+$ adb shell create-auth-code "hello" <session id> <deviceCommitment>
+
+后可以得到confirm pairing & authentication的json 代码。
+
+NOTE: brillo-m7-release的方法：
+
+设备要配对需要在out/target/product/brilloemulator_x86/system/etc/weaved/weaved.conf (device/generic/brillo/brilloemulator_x86/base_product/weaved.conf) 中添加 secret字段 (代码：external/libweave/src/config.cc)。secret字段是经过base64编码的任意32字节的数据。？
+
+如果想进行brillo设备的配对，就必须要先知道这个secret，再通过secret得到accesstoken进行pairing。？
+
+NOTE: 这个连接也可做个参考：
+
+https://chromium.googlesource.com/chromiumos/third_party/autotest/+/master/server/site_tests/buffet_PrivetSetupFlow/buffet_PrivetSetupFlow.py
+
+# Copyright 2014 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+import logging
+import time
+from autotest_lib.client.common_lib import error
+from autotest_lib.client.common_lib.cros import avahi_utils
+from autotest_lib.client.common_lib.cros.network import interface
+from autotest_lib.client.common_lib.cros.network import iw_runner
+from autotest_lib.client.common_lib.cros.network import netblock
+from autotest_lib.client.common_lib.cros.network import ping_runner
+from autotest_lib.client.common_lib.cros.network import xmlrpc_security_types
+from autotest_lib.client.common_lib.cros.tendo import peerd_config
+from autotest_lib.client.common_lib.cros.tendo import buffet_config
+from autotest_lib.client.common_lib.cros.tendo import privet_helper
+from autotest_lib.server import site_linux_router
+from autotest_lib.server import test
+from autotest_lib.server.cros.network import hostap_config
+from autotest_lib.server.cros.network import wifi_client
+PASSPHRASE = 'chromeos'
+PRIVET_AP_STARTUP_TIMEOUT_SECONDS = 30
+PRIVET_MDNS_RECORD_TIMEOUT_SECONDS = 10
+PRIVET_CONNECT_TIMEOUT_SECONDS = 30
+POLLING_PERIOD = 0.5
+class buffet_PrivetSetupFlow(test.test):
+    """This test validates the privet pairing/authentication/setup flow."""
+    version = 1
+    def warmup(self, host, router_hostname=None):
+        self._router = None
+        self._shill_xmlrpc_proxy = None
+        config = buffet_config.BuffetConfig(
+                log_verbosity=3,
+                enable_ping=True,
+                disable_pairing_security=True,
+                device_whitelist='any',
+                options={'wifi_bootstrap_mode': 'automatic'})
+        config.restart_with_config(host=host)
+        self._router = site_linux_router.build_router_proxy(
+                test_name=self.__class__.__name__,
+                client_hostname=host.hostname,
+                router_addr=router_hostname,
+                enable_avahi=True)
+        self._shill_xmlrpc_proxy = wifi_client.get_xmlrpc_proxy(host)
+        # Cleans up profiles, wifi credentials, sandboxes our new credentials.
+        self._shill_xmlrpc_proxy.init_test_network_state()
+        peerd_config.PeerdConfig(verbosity_level=3).restart_with_config(
+                host=host)
+    def cleanup(self, host):
+        if self._shill_xmlrpc_proxy is not None:
+            self._shill_xmlrpc_proxy.clean_profiles()
+        if self._router is not None:
+            self._router.close()
+        buffet_config.naive_restart(host=host)
+    def run_once(self, host):
+        helper = privet_helper.PrivetHelper(host=host)
+        logging.info('Looking for privet bootstrapping network from DUT.')
+        scan_interface = self._router.get_wlanif(2437, 'managed')
+        self._router.host.run('%s link set %s up' %
+                              (self._router.cmd_ip, scan_interface))
+        start_time = time.time()
+        privet_bss = None
+        while time.time() - start_time < PRIVET_AP_STARTUP_TIMEOUT_SECONDS:
+            bss_list = self._router.iw_runner.scan(scan_interface)
+            for bss in bss_list or []:
+                if helper.is_softap_ssid(bss.ssid):
+                    privet_bss = bss
+        if privet_bss is None:
+            raise error.TestFail('Device did not start soft AP in time.')
+        self._router.release_interface(scan_interface)
+        # Get the netblock of the interface running the AP.
+        dut_iw_runner = iw_runner.IwRunner(remote_host=host)
+        devs = dut_iw_runner.list_interfaces(desired_if_type='AP')
+        if not devs:
+            raise error.TestFail('No AP devices on DUT?')
+        ap_interface = interface.Interface(devs[0].if_name, host=host)
+        ap_netblock = netblock.from_addr(ap_interface.ipv4_address_and_prefix)
+        # Set up an AP on the router in the 5Ghz range with WPA2 security.
+        wpa_config = xmlrpc_security_types.WPAConfig(
+                psk=PASSPHRASE,
+                wpa_mode=xmlrpc_security_types.WPAConfig.MODE_PURE_WPA2,
+                wpa2_ciphers=[xmlrpc_security_types.WPAConfig.CIPHER_CCMP])
+        router_conf = hostap_config.HostapConfig(
+                frequency=5240, security_config=wpa_config,
+                mode=hostap_config.HostapConfig.MODE_11N_PURE)
+        self._router.hostap_configure(router_conf)
+        # Connect the other interface on the router to the AP on the client
+        # at a hardcoded IP address.
+        self._router.configure_managed_station(
+                privet_bss.ssid, privet_bss.frequency,
+                ap_netblock.get_addr_in_block(200))
+        station_interface = self._router.get_station_interface(instance=0)
+        logging.debug('Set up station on %s', station_interface)
+        self._router.ping(ping_runner.PingConfig(ap_netblock.addr, count=3))
+        logging.info('Looking for privet webserver in mDNS records.')
+        start_time = time.time()
+        while time.time() - start_time < PRIVET_MDNS_RECORD_TIMEOUT_SECONDS:
+            all_records = avahi_utils.avahi_browse(host=self._router.host)
+            records = [record for record in all_records
+                       if (record.interface == station_interface and
+                           record.record_type == '_privet._tcp')]
+            if records:
+                break
+            time.sleep(POLLING_PERIOD)
+        if not records:
+            raise error.TestFail('Did not find privet mDNS records in time.')
+        if len(records) > 1:
+            raise error.TestFail('Should not see multiple privet records.')
+        privet_record = records[0]
+        # TODO(wiley) pull the HTTPs port number out of the /info API.
+        helper = privet_helper.PrivetdHelper(
+                host=self._router.host,
+                hostname=privet_record.address,
+                http_port=int(privet_record.port))
+        helper.ping_server()
+        # Now configure the client with WiFi credentials.
+        auth_token = helper.privet_auth()
+        ssid = self._router.get_ssid()
+        data = helper.setup_add_wifi_credentials(ssid, PASSPHRASE)
+        helper.setup_start(data, auth_token)
+        logging.info('Waiting for DUT to connect to router network.')
+        start_time = time.time()
+        # Wait for the DUT to take down the AP.
+        while time.time() - start_time < PRIVET_CONNECT_TIMEOUT_SECONDS:
+            if not dut_iw_runner.list_interfaces(desired_if_type='AP'):
+                break
+            time.sleep(POLLING_PERIOD)
+        else:
+            raise error.TestFail('Timeout waiting for DUT to take down AP.')
+        # But we should be able to ping the client from the router's AP.
+        while time.time() - start_time < PRIVET_CONNECT_TIMEOUT_SECONDS:
+            if dut_iw_runner.list_interfaces(desired_if_type='managed'):
+                break
+            time.sleep(POLLING_PERIOD)
+        else:
+            raise error.TestFail('Timeout waiting for DUT managerd interface.')
+        while time.time() - start_time < PRIVET_CONNECT_TIMEOUT_SECONDS:
+            devs = dut_iw_runner.list_interfaces(desired_if_type='managed')
+            if devs:
+                managed_interface = interface.Interface(devs[0].if_name,
+                                                        host=host)
+                # Check if we have an IP yet.
+                if managed_interface.ipv4_address_and_prefix:
+                    break
+            time.sleep(POLLING_PERIOD)
+        else:
+            raise error.TestFail('Timeout waiting for DUT managerd interface.')
+        managed_netblock = netblock.from_addr(
+                managed_interface.ipv4_address_and_prefix)
+        while time.time() - start_time < PRIVET_CONNECT_TIMEOUT_SECONDS:
+            PING_COUNT = 3
+            result = self._router.ping(
+                    ping_runner.PingConfig(managed_netblock.addr,
+                                           ignore_result=True,
+                                           count=PING_COUNT))
+            if result.received == PING_COUNT:
+                break
+            time.sleep(POLLING_PERIOD)
+        else:
+            raise error.TestFail('Timeout before ping was successful.')
+        # And buffet should think it is online as well.
+        helper = privet_helper.PrivetdHelper(
+                host=host, hostname=managed_netblock.addr,
+                http_port=int(privet_record.port))
+        helper.ping_server()
+        if not helper.wifi_setup_was_successful(ssid, auth_token):
+            raise error.TestFail('Device claims to be offline, but is online.')
+
+[2016-01-09 09:38:26] Paring需要在5分钟之内完成，access token在3600秒之后失效。并且在获取auth token之后，session id就无效了。也就是说需要获得新的auth token，就要重新paring，重新获取session id。
+
+还要最重要的一环，Brillo系统的时间要与产生authorization token系统的时间不能相差太大（access token中包含时间信息，在调用WEB API的时候，取这个时间验证时效。
+----------------------------------------------------------------------------
+Brillo: brillo UI kind
+2015-12-20 17:49:44 ~ 2016-01-04 23:01:59 hzak	发表回复
+
+文件external/libweave/src/privet/device_ui_kind.cc中定义了brillo设备类型，从modelManifestId的头两个字母判断当前设备类型：
+
+    “AC”: accessPoint
+    “AK”: aggregator
+    “AM”: camera
+    “AB”: developmentBoard
+    “AH”: acHeating
+    “AI”: light
+    “AO”: lock
+    “AK”: printer
+    “AD”: speaker
+    “AL”: storage
+    “AJ”: toy
+    “AA”: vendor
+    “AN”: video
+
+$ curl -H "Authorization: Privet anonymous" -k https://10.0.0.25/privet/info
+{
+   "authentication": {
+      "anonymousMaxScope": "none",
+      "crypto": [ "p224_spake2" ],
+      "mode": [ "anonymous", "pairing" ],
+      "pairing": [ "embeddedCode" ]
+   },
+   "basicModelManifest": {
+      "modelName": "rpi",
+      "oemName": "hzak",
+      "uiDeviceKind": "vendor"
+   },
+   "description": "brillo @ rpi",
+   "endpoints": {
+      "httpPort": 80,
+      "httpUpdatesPort": 80,
+      "httpsPort": 443,
+      "httpsUpdatesPort": 443
+   },
+   "gcd": {
+      "id": "",
+      "status": "unconfigured"
+   },
+   "id": "89FE15C9-19FB-4638-AEB8-B5946B595B99",
+   "modelManifestId": "AAAAA",
+   "name": "rpi",
+   "services": [ "vendor" ],
+   "uptime": 326,
+   "version": "3.0",
+   "wifi": {
+      "capabilities": [ "2.4GHz" ],
+      "hostedSsid": "rpi 48.AAAAACBprv",
+      "ssid": "",
+      "status": "connecting"
+   }
+}
+
+可以看到这台设备的modelManifestId为AAAAA, 头两个字母为AA, 所以它的UI kind为vendor, 即字段中的services为vendor。
+
