@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-branch="android-7.1.0_r4"
+branch="android-7.1.0_r7"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
@@ -37,6 +37,7 @@ ${BASE}/sync-projects.sh  \
 #export https_proxy=192.168.0.102:37586
 
 func_apply_patch NOUGAT-MLCR-PATCHSET
+func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS
 #func_apply_patch juno-m-workarounds
 #func_apply_patch marshmallow-gcc5-patchset
 #func_apply_patch marshmallow-gcc6-patchset
