@@ -29,7 +29,10 @@ ${BASE}/sync-projects.sh  \
                           frameworks/base \
                           frameworks/av \
 
-#${BASE}/sync-projects.sh ti/u-boot/ kernel/ti/x15/
+${BASE}/sync-projects.sh \
+                        kernel/ti/x15/ \
+
+#                        ti/u-boot/ \
 #                          art \
 #                          external/opencv-upstream \
 

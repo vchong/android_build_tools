@@ -1,0 +1,93 @@
+1. kernel version:
+
+2. Building kernel out of tree
+   http://www.crashcourse.ca/wiki/index.php/Building_kernel_out_of_tree
+
+   2 options:
+    * constantly add the option O=${KERNEL_OUT} to every make command, or
+    * set the environment variable of KBUILD_OUTPUT to ${KERNEL_OUT}
+
+   $(MAKE) -j1 $(KERNEL_VERBOSE) O=$(KERNEL_OUT) ARCH=$(ARCH) KCONFIG_ALLCONFIG=$(KERNEL_OUT)/.merged.config alldefconfig
+    * set KERNEL_VERBOSE: to "V=1" will show more compiling logs
+    * O=${KERNEL_OUT}: set to generate the result files under $KERNEL_OUT instead of the kernel source tree
+    * ARCH=$(ARCH): sepcify the target platform arch
+    * KCONFIG_ALLCONFIG:  used to specify a config file which contains (usually a subset of all) preset config symbols.
+                          These variable settings are still subject to normal dependency checks.
+                          Enables to create "miniature" config (miniconfig) or custom config files containing just the config symbols that you are interested in.
+                          Then the kernel config system generates the full .config file, including symbols of your miniconfig file.
+      see Documentation/kbuild/kconfig.txt
+
+    * alldefconfig: New config with all symbols set to default
+                    Fills in any missing symbols with Kconfig default
+      see ./scripts/kconfig/Makefile for other options like oldconfig, allnoconfig
+
+3. when set kernel config value
+   if not have "# CONFIG_AIO is not set" specified, then might have 'CONFIG_AIO=y' generated in .config
+   if has "# CONFIG_AIO is not set" specified, then will "# CONFIG_AIO is not set" generated in .config
+
+   in ./init/Kconfig, we have AIO config defined as following:
+   config AIO
+       bool "Enable AIO support" if EXPERT
+       default y
+       help
+         This option enables POSIX asynchronous I/O which may by used
+         by some high performance threaded applications. Disabling
+         this option saves about 7k.
+
+   in ./drivers/tty/Kconfig, config VT is defined as following:
+   config VT
+       bool "Virtual terminal" if EXPERT
+       depends on !S390 && !UML
+       select INPUT
+       default y
+       ---help---
+         If you say Y here, you will get support for terminal devices with
+         display and keyboard devices. These are called "virtual" because you
+         can run several virtual terminals (also called virtual consoles) on
+         one physical terminal. This is rather useful, for example one
+         virtual terminal can collect system messages and warnings, another
+         one can be used for a text-mode user session, and a third could run
+         an X session, all in parallel. Switching between virtual terminals
+         is done with certain key combinations, usually Alt-<function key>.
+
+         The setterm command ("man setterm") can be used to change the
+         properties (such as colors or beeping) of a virtual terminal. The
+         man page console_codes(4) ("man console_codes") contains the special
+         character sequences that can be used to change those properties
+         directly. The fonts used on virtual terminals can be changed with
+         the setfont ("man setfont") command and the key bindings are defined
+         with the loadkeys ("man loadkeys") command.
+
+         You need at least one virtual terminal device in order to make use
+         of your keyboard and monitor. Therefore, only people configuring an
+         embedded system would want to say N here in order to save some
+         memory; the only way to log into such a system is then via a serial
+         or network connection.
+
+         If unsure, say Y, or else you won't be able to do much with your new
+         shiny Linux system :-)
+  when we have CONFIG_VT enabled, we will have following configs enabled by default:
+  (Will not have these settings if we have "# CONFIG_VT is not set")
+    CONFIG_VT=y
+    CONFIG_CONSOLE_TRANSLATIONS=y
+    CONFIG_VT_CONSOLE=y
+    CONFIG_VT_CONSOLE_SLEEP=y
+    CONFIG_HW_CONSOLE=y
+    CONFIG_VT_HW_CONSOLE_BINDING=y
+
+    #
+    # Console display driver support
+    #
+    CONFIG_DUMMY_CONSOLE=y
+    CONFIG_FRAMEBUFFER_CONSOLE=y
+    CONFIG_FRAMEBUFFER_CONSOLE_DETECT_PRIMARY=y
+    CONFIG_FRAMEBUFFER_CONSOLE_ROTATION=y
+
+    # Speakup console speech
+    #
+    # CONFIG_SPEAKUP is not set
+
+    CONFIG_FONT_SUPPORT=y
+    # CONFIG_FONTS is not set
+    CONFIG_FONT_8x8=y
+    CONFIG_FONT_8x16=y

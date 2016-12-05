@@ -30,3 +30,80 @@ USB 3.0 集线器 (3)
 HDMI
 音频输入/输出
 WiLink8 连接器
+
+
+http://www.ti.com/product/AM5728/datasheet
+
+1 Device Overview
+    1.1 Features
+
+        For Silicon Revision 1.1 information, see SPRS915
+        Dual ARM® Cortex®-A15 Microprocessor Subsystem
+        Up to 2 C66x™ Floating-Point VLIW DSP
+        Fully Object-Code Compatible With C67x™ and C64x+™
+        Up to Thirty-two 16 × 16-Bit Fixed-Point Multiplies per Cycle
+        Up to 2.5MB of On-Chip L3 RAM
+        Two DDR3/DDR3L Memory Interface (EMIF) Modules
+        Supports up to DDR3-1066
+        Up to 2GB Supported per EMIF
+        Dual ARM® Cortex®-M4 co-processors
+        IVA-HD Subsystem
+        Display Subsystem
+        Full-HD Video (1920 × 1080p, 60 fps)
+        Multiple Video Input and Video Output
+        2D and 3D Graphics
+        Display Controller With DMA Engine and up to Three Pipelines
+        HDMI™ Encoder: HDMI 1.4a and DVI 1.0 Compliant
+        2x Dual-Core Programmable Real-Time Unit and Industrial Communication Subsystem (PRU-ICSS)
+        2D-Graphics Accelerator (BB2D) Subsystem
+        Vivante™ GC320 Core
+        Video Processing Engine (VPE)
+        Dual-Core PowerVR® SGX544™ 3D GPU
+        Crypto Hardware Accelerators
+        AES, SHA, RNG, DES and 3DES
+        Three Video Input Port (VIP) Modules
+        General-Purpose Memory Controller (GPMC)
+        Enhanced Direct Memory Access (EDMA) Controller
+        2-Port Gigabit Ethernet (GMAC)
+        Sixteen 32-Bit General-Purpose Timers
+        32-Bit MPU Watchdog Timer
+        Five Inter-Integrated Circuit (I2C) Ports
+        HDQ™/1-Wire® Interface
+        Ten Configurable UART/IrDA/CIR Modules
+        Four Multichannel Serial Peripheral Interfaces (McSPI)
+        Quad SPI Interface (QSPI)
+        SATA Gen2 Interface
+        Eight Multichannel Audio Serial Port (McASP) Modules
+        SuperSpeed USB 3.0 Dual-Role Device
+        High-Speed USB 2.0 Dual-Role Device
+        Four MultiMedia Card/Secure Digital/Secure Digital Input Output Interfaces (MMC/SD/SDIO)
+        PCI-Express® 3.0 Subsystems With Two 5-Gbps Lanes
+        One 2-lane Gen2-Compliant Port
+        or Two 1-lane Gen2-Compliant Ports
+        Dual Controller Area Network (DCAN) Modules
+        CAN 2.0B Protocol
+        Up to 247 General-Purpose I/O (GPIO) Pins
+        Power, Reset, and Clock Management
+        On-Chip Debug With CTools Technology
+        28-nm CMOS Technology
+        23 mm × 23 mm, 0.8-mm Pitch, 760-Pin BGA (ABC)
+
+    1.2 Applications
+
+        Industrial Communication
+        Human Machine Interface (HMI)
+        Automation and Control
+        High Performance Applications
+        Other General Use
+
+    1.3 Description
+
+        AM572x Sitara ARM applications processors are built to meet the intense processing needs of the modern embedded products.
+        AM572x devices bring high processing performance through the maximum flexibility of a fully integrated mixed processor solution. The devices also combine programmable video processing with a highly integrated peripheral set. Cryptographic acceleration is available in every AM572x device.
+        Programmability is provided by dual-core ARM Cortex-A15 RISC CPUs with Neon™ extension, and two TI C66x VLIW floating-point DSP cores. The ARM allows developers to keep control functions separate from other algorithms programmed on the DSPs and coprocessors, thus reducing the complexity of the system software.
+
+        Additionally, TI provides a complete set of development tools for the ARM and C66x DSP, including C compilers, a DSP assembly optimizer to simplify programming and scheduling, and a debugging interface for visibility into source code execution.
+        Device Information
+        PART NUMBER PACKAGE BODY SIZE
+        AM5728  FCBGA (760) 23.0 mm × 23.0 mm
+        AM5726  FCBGA (760) 23.0 mm × 23.0 mm

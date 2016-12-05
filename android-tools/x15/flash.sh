@@ -17,6 +17,9 @@ function flash_image(){
         return
     fi
 
+    if [ ! -f "${file_img}" ]; then
+        return
+    fi
     echo "======= Flash ${partition} partition with file $file_img =============="
     #/SATA3/nougat/out/host/linux-x86/bin/fastboot flash -w ${partition} ${file_img}
     fastboot flash ${partition} ${file_img}

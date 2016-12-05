@@ -38,6 +38,7 @@ function build_hikey(){
     targets="droid"
     export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
 #    export TARGET_USERDATAIMAGE_4GB=true
+#    export TARGET_USERDATAIMAGE_TYPE=f2fs
     export TARGET_BUILD_KERNEL=true
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
@@ -107,55 +108,88 @@ function build_tools_ddmlib(){
 }
 
 function build_x15(){
-    local gcc_path="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8"
-    export PATH=${gcc_path}/bin:$PATH
-    export CROSS_COMPILE="arm-none-eabi-"
-    export ARCH=arm
+    CROSS_COMPILE="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8/bin/arm-none-eabi-"
+    #local gcc_path="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"
+    #CROSS_COMPILE="arm-linux-androideabi-"
+    #export ARCH=arm
     local kernel_dir=${ROOT_DIR}/kernel/ti/x15
     local uboot_dir=${ROOT_DIR}/ti/u-boot
     local output_dir=${ROOT_DIR}/out/target/product/am57xevm/
 
     # compile u-boot
-    cd ${uboot_dir}
-    make am57xx_evm_nodt_defconfig
-    make -j${CPUS}
-    cd ${ROOT_DIR}/
+    if false; then
+        cd ${uboot_dir}
+        make am57xx_evm_nodt_defconfig
+        make -j${CPUS}
+        cd ${ROOT_DIR}/
+    fi
 
     # compile kernel
-    cd ${kernel_dir}
-    ./ti_config_fragments/defconfig_builder.sh -t ti_sdk_am57x_android_release
-    make ti_sdk_am57x_android_release_defconfig
-    make -j${CPUS} zImage
-    make am57xx-evm-reva3.dtb
-    cd ${ROOT_DIR}/
+    if false; then
+        cd ${kernel_dir}
+        KERNEL_OUT=${output_dir}/obj/kernel
+        rm -fr "${KERNEL_OUT}" && mkdir -p "${KERNEL_OUT}"
+        make distclean
+        ./ti_config_fragments/defconfig_builder.sh -t ti_sdk_am57x_android_release
+        mv -v arch/arm/configs/ti_sdk_am57x_android_release_defconfig ${KERNEL_OUT}/ti_sdk_am57x_android_release_defconfig
+        make -j1 O=${KERNEL_OUT} ARCH=arm KCONFIG_ALLCONFIG=${KERNEL_OUT}/ti_sdk_am57x_android_release_defconfig alldefconfig
+        if [ $? -ne 0 ]; then
+            echo "Failed to generate .config"
+            exit
+        fi
+        make -j${CPUS} O=${KERNEL_OUT} ARCH=arm CROSS_COMPILE="${CROSS_COMPILE}" zImage
+        if [ $? -ne 0 ]; then
+            echo "Failed to compile kernel"
+            exit
+        fi
 
-    cp -fv $kernel_dir/arch/arm/boot/zImage device/ti/am57xevm/kernel
+        make O=${KERNEL_OUT} ARCH=arm CROSS_COMPILE="${CROSS_COMPILE}" am57xx-evm-reva3.dtb
+        if [ $? -ne 0 ]; then
+            echo "Failed to compile dtb"
+            exit
+        fi
+        cd ${ROOT_DIR}/
 
-    # compile pvrsrvkm.ko
-    local eurasiacon_dir=${ROOT_DIR}/device/ti/proprietary-open/jacinto6/sgx_src/eurasia_km/eurasiacon
-    local src_dir=${eurasiacon_dir}/build/linux2/omap_android
-    #local pvrsrvkm_f=${eurasiacon_dir}/binary2_omap_android_release/target/pvrsrvkm.ko
-    local pvrsrvkm_f=${ROOT_DIR}/out/target/product/am57xevm/target/kbuild/pvrsrvkm.ko
+        cp -fv ${KERNEL_OUT}/arch/arm/boot/zImage device/ti/am57xevm/kernel
+    fi
 
-    export KERNELDIR=${kernel_dir}
-    export KERNEL_CROSS_COMPILE="$CROSS_COMPILE"
-    export ANDROID_ROOT=$(pwd)
-    export TARGET_DEVICE=am57xevm
 
-    cd ${src_dir}
-    make TARGET_PRODUCT="am57xevm" BUILD=release
-    cd ${ROOT_DIR}
-
-    mkdir -p ${output_dir}/system/lib/modules
-    cp ${pvrsrvkm_f}  ${output_dir}/system/lib/modules
-
+    export TARGET_BUILD_KERNEL=true
     # compile android
     targets="droidcore"
     build full_am57xevm
     targets="selinuxtarballs"
 
-    cp -uvf ${uboot_dir}/u-boot.img ${uboot_dir}/MLO ${output_dir}
-    cp -uvf ${kernel_dir}/arch/arm/boot/zImage ${kernel_dir}/arch/arm/boot/dts/am57xx-evm-reva3.dtb ${output_dir}
+    # compile pvrsrvkm.ko
+    if false; then
+        local eurasiacon_dir=${ROOT_DIR}/device/ti/proprietary-open/jacinto6/sgx_src/eurasia_km/eurasiacon
+        local src_dir=${eurasiacon_dir}/build/linux2/omap_android
+        #local pvrsrvkm_f=${eurasiacon_dir}/binary2_omap_android_release/target/pvrsrvkm.ko
+        local pvrsrvkm_f=${ROOT_DIR}/out/target/product/am57xevm/target/kbuild/pvrsrvkm.ko
+
+        make V=1 -j${CPUS} \
+            ARCH=arm \
+            TARGET_DEVICE="am57xevm" \
+            TARGET_PRODUCT="am57xevm" \
+            BUILD=release \
+            KERNELDIR=/SATA3/nougat/out/target/product/am57xevm/obj/kernel/ \
+            KERNEL_CROSS_COMPILE=/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- \
+            CROSS_COMPILE=/SATA3/nougat//prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi- \
+            ANDROID_ROOT=/SATA3/nougat \
+            OUT=/SATA3/nougat/out/target/product/am57xevm \
+            -C ${src_dir}
+            build
+
+
+
+        mkdir -p ${output_dir}/system/lib/modules
+        cp ${pvrsrvkm_f}  ${output_dir}/system/lib/modules
+    fi
+
+    if false; then
+        cp -uvf ${uboot_dir}/u-boot.img ${uboot_dir}/MLO ${output_dir}
+        cp -uvf ${kernel_dir}/arch/arm/boot/zImage ${kernel_dir}/arch/arm/boot/dts/am57xx-evm-reva3.dtb ${output_dir}
+    fi
 }
 
 #build_vexpress
@@ -163,9 +197,7 @@ function build_x15(){
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-#build_x15
-
-
-build_hikey
+#build_hikey
+build_x15
 #build_flounder
 #build_flo
