@@ -11,7 +11,7 @@ export PATH=${BASE_DIR}:${PATH}
 cd ${BASE_DIR}
 #rm -fr .repo
 
-#while ! repo init -u https://android.googlesource.com/mirror/manifest --mirror; do
+#while ! repo init -u https://android.googlesource.com/a/mirror/manifest --mirror; do
 #    sleep 10
 #done
 #repo init -u https://android.googlesource.com/mirror/manifest --mirror --repo-url=git://android.git.linaro.org/tools/repo

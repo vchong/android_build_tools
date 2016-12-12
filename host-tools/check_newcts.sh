@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IRC_NOTIFY_CHANNEL="#linaro-android"
+#IRC_NOTIFY_CHANNEL="#linaro-android"
 IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
@@ -20,7 +20,7 @@ function get_latest_cts(){
 }
 
 function get_latest_for_lcr(){
-    local url_m_lcr_juno="https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/lcr-member-juno-m/template-cts-focused1.json"
+    local url_m_lcr_juno="https://git.linaro.org/qa/test-plans.git/plain/android/lcr-member-juno-m/template-cts-focused1.json"
     local latest_lcr=$(curl ${url_m_lcr_juno}|grep CTS_URL|cut -d\" -f 4)
     if [ -z "${latest_lcr}" ]; then
         echo "Failed to get the tags information for LCR"
