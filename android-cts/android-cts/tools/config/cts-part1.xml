@@ -48,4 +48,6 @@
     <option name="compatibility:include-filter" value="CtsDpiTestCases" />
     <option name="compatibility:include-filter" value="CtsDpiTestCases2" />
 
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedDeviceOwnerTest#testAlwaysOnVpn" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedProfileOwnerTest#testAlwaysOnVpn" />
 </configuration>

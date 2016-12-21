@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-branch="android-7.1.0_r7"
+branch="android-7.1.1_r6"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
@@ -20,7 +20,6 @@ LOCAL_MANIFEST_BRANCH="linaro-nougat"
 main "$@"
 
 ${BASE}/sync-projects.sh  \
-                          system/gatekeeper \
                           build \
                           bionic \
                           android-patchsets \

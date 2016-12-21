@@ -91,3 +91,14 @@
     # CONFIG_FONTS is not set
     CONFIG_FONT_8x8=y
     CONFIG_FONT_8x16=y
+
+4. when CONFIG_MODULES not enabled, compiling module will cause problems like this:
+  /SATA3/nougat/out/target/product/am57xevm/target/kbuild/pvrsrvkm.mod.c:8:1: error: variable '__this_module' has initializer but incomplete type
+   __attribute__((section(".gnu.linkonce.this_module"))) = {
+    ^
+    /SATA3/nougat/out/target/product/am57xevm/target/kbuild/pvrsrvkm.mod.c:9:2: error: unknown field 'name' specified in initializer
+      .name = KBUILD_MODNAME,
+        ^
+   For this problem, please check if CONFIG_MODULES is enabled first
+5. when specify dirctory path for OUTPUT or anything variants, please remove the last "/",
+   otherwise it would cause problem during compiling. Like could not found rules for compiling some ko files

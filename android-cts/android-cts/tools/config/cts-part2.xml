@@ -80,6 +80,12 @@
     <option name="compatibility:include-filter" value="CtsVoiceSettingsTestCases" />
     <option name="compatibility:include-filter" value="CtsVrTestCases" />
     <option name="compatibility:include-filter" value="CtsLibcoreOjTestCases" />
+    <option name="compatibility:include-filter" value="CtsRetailDemoHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsShortcutHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsShortcutManagerTestCases" />
+    <option name="compatibility:include-filter" value="CtsSystemIntentTestCases" />
+    <option name="compatibility:include-filter" value="CtsToastLegacyTestCases" />
+    <option name="compatibility:include-filter" value="CtsToastTestCases" />
 
     <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerActivityVisiblityTests#testTurnScreenOnActivity" />
     <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerDockedStackTests#testRotationWhenDockedWhileLocked" />
