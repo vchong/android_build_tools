@@ -40,7 +40,7 @@ ${BASE}/sync-projects.sh \
 
 func_apply_patch NOUGAT-MLCR-PATCHSET
 func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS
-#func_apply_patch juno-m-workarounds
+func_apply_patch juno-n-workarounds
 #func_apply_patch marshmallow-gcc5-patchset
 #func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-n-workarounds
