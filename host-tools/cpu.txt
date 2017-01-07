@@ -1,0 +1,5 @@
+thermal:
+cat /sys/class/thermal/thermal_zone*/temp
+
+CPU status
+/sys/devices/system/cpu/

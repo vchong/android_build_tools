@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TestPlan version="1.0">
-  <Entry exclude="android.media.cts.DecoderTest#testCodecResetsH264WithSurface;android.media.cts.StreamingMediaPlayerTest#testHLS" name="android.media"/>
-  <Entry name="android.mediastress"/>
-</TestPlan>

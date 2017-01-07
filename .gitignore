@@ -42,3 +42,4 @@ linaro-hikey-20160226-67c37b1a.tgz
 platform_testing/
 Android.bp
 bootstrap.bash
+kernel-3.18/

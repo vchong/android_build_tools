@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-branch="android-7.1.0_r7"
+branch="android-7.1.1_r6"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
@@ -20,7 +20,6 @@ LOCAL_MANIFEST_BRANCH="linaro-nougat"
 main "$@"
 
 ${BASE}/sync-projects.sh  \
-                          system/gatekeeper \
                           build \
                           bionic \
                           android-patchsets \
@@ -41,7 +40,7 @@ ${BASE}/sync-projects.sh \
 
 func_apply_patch NOUGAT-MLCR-PATCHSET
 func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS
-#func_apply_patch juno-m-workarounds
+func_apply_patch juno-n-workarounds
 #func_apply_patch marshmallow-gcc5-patchset
 #func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-n-workarounds

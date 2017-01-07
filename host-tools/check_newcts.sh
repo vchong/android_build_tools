@@ -7,7 +7,7 @@ IRC_NOTIFY_NICK="aosp-tag-check"
 
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
-    local available_cts=$(curl ${url_cts}|grep 'android-cts-7.*-linux_x86-arm.zip'|cut -d\" -f 2)
+    local available_cts=$(curl ${url_cts}|grep 'android-cts-7.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
     # https://dl.google.com/dl/android/cts/android-cts-7.0_r1-linux_x86-arm.zip
     if [ -z "${available_cts}" ]; then
         echo "Failed to wget cts download webpage: ${url_cts}"
