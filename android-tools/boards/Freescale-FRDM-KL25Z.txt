@@ -47,3 +47,5 @@ and Linux USB Drivers
 
 
 http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/freescale/kl25z/
+
+http://andsk.se/2014/08/13/a-step-by-step-guide-to-using-the-frdm-kl25z-in-linux-with-gcc-and-the-mbed-library/

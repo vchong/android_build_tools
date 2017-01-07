@@ -1,0 +1,49 @@
+https://download.owncloud.org/download/repositories/stable/owncloud/
+
+
+
+Ubuntu_14.04 owncloud-9.1.2-1.1
+
+You can add the repository key to apt. Keep in mind that the owner of the key may distribute updates, packages and repositories that your system will trust (more information). Run the following shell commands as root to trust the repository:
+
+wget -nv https://download.owncloud.org/download/repositories/stable/Ubuntu_14.04/Release.key -O Release.key
+apt-key add - < Release.key
+
+Run the following shell commands as root to add the repository and install from there.
+
+sh -c "echo 'deb http://download.owncloud.org/download/repositories/stable/Ubuntu_14.04/ /' > /etc/apt/sources.list.d/owncloud.list"
+apt-get update
+apt-get install owncloud
+
+Direct Download
+
+
+Ubuntu_14.04 owncloud-files-9.1.2-1.1
+
+You can add the repository key to apt. Keep in mind that the owner of the key may distribute updates, packages and repositories that your system will trust (more information). Run the following shell commands as root to trust the repository:
+
+wget -nv https://download.owncloud.org/download/repositories/stable/Ubuntu_14.04/Release.key -O Release.key
+apt-key add - < Release.key
+
+Run the following shell commands as root to add the repository and install from there.
+
+sh -c "echo 'deb http://download.owncloud.org/download/repositories/stable/Ubuntu_14.04/ /' > /etc/apt/sources.list.d/owncloud.list"
+apt-get update
+apt-get install owncloud-files
+
+
+Android Client:
+https://github.com/owncloud/android.git
+
+p1: Error:Configuration with name 'default' not found. 
+    submodules not checked out. run "git submodule update --init"
+p2: how to compile:
+     export ANDROID_HOME=/home/liuyq/Android/Sdk/
+    ./gradlew clean build
+
+    11:25:31 liuyq: owncloud$ find ./ -name *.apk
+    ./build/outputs/apk/owncloud_2.2.0-release-unsigned.apk
+    ./build/outputs/apk/owncloud_2.2.0-debug.apk
+    ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-release-unsigned.apk
+    ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-debug.apk
+    11:26:26 liuyq: owncloud$ 

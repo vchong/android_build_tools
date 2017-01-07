@@ -1,0 +1,69 @@
+https://github.com/ARMmbed/mbed-os/blob/master/docs/BUILDING.md
+https://github.com/mbedmicro/mbed.git is a link to https://github.com/ARMmbed/mbed-os.git are actually the same
+
+https://docs.mbed.com/docs/mbed-os-handbook/en/5.2/dev_tools/cli/
+
+sudo pip install mbed-cli
+sudo pip install -r mbed-os/requirements.txt
+
+pkar@dx7408:/data/ARMmbed/mbed-os-program$ cat mbed-os/requirements.txt
+colorama>=0.3.3
+PySerial>=2.7
+PrettyTable>=0.7.2
+Jinja2>=2.7.3
+IntelHex>=1.3
+junit-xml
+pyYAML
+requests
+mbed-ls>=0.2.13
+mbed-host-tests>=1.1.2
+mbed-greentea>=0.2.24
+beautifulsoup4>=4
+fuzzywuzzy>=0.11
+pkar@dx7408:/data/ARMmbed/mbed-os-program$
+
+mbed compile -t GCC_ARM -m NUCLEO_F401RE -c
+mbed compile -t GCC_ARM -m KL25Z
+mbed config --global GCC_ARM_PATH /data/ARMmbed/toolchain/gcc-arm-none-eabi-4_9-2015q2/bin
+
+mbed import https://github.com/ARMmbed/mbed-os-example-blinky
+导入一个项目，在该目录下可以直接运行mbed compile命令
+
+mbed new mbed-os-program
+新建一个项目，并没有main.cpp, mbed compile命令不会成功，会报错误main没有定义
+
+Link: mbed-os-program
+./BUILD/KL25Z/GCC_ARM/mbed-os/platform/retarget.o: In function `__wrap_main':
+retarget.cpp:(.text.__wrap_main+0x6): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+[ERROR] ./BUILD/KL25Z/GCC_ARM/mbed-os/platform/retarget.o: In function `__wrap_main':
+retarget.cpp:(.text.__wrap_main+0x6): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+
+需要追加一个如下类似的main.cpp文件：
+
+    #include "mbed.h"
+
+    DigitalOut led1(LED1);
+
+    // main() runs in its own thread in the OS
+    // (note the calls to wait below for delays)
+    int main() {
+        while (true) {
+            led1 = !led1;
+            wait(0.5);
+        }   
+    }
+
+
+否则需要制定--library来编译
+
+GCC toolchain
+wget https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q2-update/+download/gcc-arm-none-eabi-4_9-2015q2-20150609-linux.tar.bz2
+wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q3-update/+download/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
+
+
+TODO:
+
+1. 当有多个源码文件而非一个文件时是如何处理编译
+2. 如何列出可用的library?
