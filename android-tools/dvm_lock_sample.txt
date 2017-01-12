@@ -1,0 +1,131 @@
+yongqin.liu@hackbox.linaro.org:~/nougat$ grep -irn dvm_lock_sample system/ frameworks/ dalvik/ art/
+system/core/logcat/event.logtags:68:20003 dvm_lock_sample (process|3),(main|1|5),(thread|3),(time|1|3),(file|3),(line|1|5),(ownerfile|3),(ownerline|1|5),(sample_percent|1|6)
+art/runtime/monitor_android.cc:26:#define EVENT_LOG_TAG_dvm_lock_sample 20003
+art/runtime/monitor_android.cc:106:  android_btWriteLog(EVENT_LOG_TAG_dvm_lock_sample, EVENT_TYPE_LIST, eventBuffer,
+yongqin.liu@hackbox.linaro.org:~/nougat$
+
+http://francinelin.blogspot.hk/2014/03/dvmlocksample-android-event-log.html
+
+# Dalvik VM
+20003 dvm_lock_sample (process|3),(main|1|5),(thread|3),(time|1|3),(file|3),(line|1|5),(ownerfile|3),(ownerline|1|5),(sample_percent|1|6)
+
+# Optionally, after the tag names can be put a description for the value(s)
+# of the tag. Description are in the format
+#    (<name>|data type[|data unit])
+# Multiple values are separated by commas.
+#
+# The data type is a number from the following values:
+# 1: int
+# 2: long
+# 3: string
+# 4: list
+# 5: float
+#
+# The data unit is a number taken from the following list:
+# 1: Number of objects
+# 2: Number of bytes
+# 3: Number of milliseconds
+# 4: Number of allocations
+# 5: Id
+# 6: Percent
+# Default value for data of type int/long is 2 (bytes).
+
+I/dvm_lock_sample(  463): [system_server,1,Binder:463_4,2086,InputMethodManagerService.java,1231,Throwable.java,-2,100]
+    // All known input methods.  mMethodMap also serves as the global
+    // lock for this class.
+    final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
+    final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<>();
+
+    synchronized (mMethodMap) {
+    }
+    https://developer.android.com/reference/java/util/concurrent/ConcurrentHashMap.html
+
+
+
+[system_server,0,android.bg,617,Settings.java,4990,PackageManagerService.java,19303,100]
+
+frameworks/base/services/core/java/com/android/server/pm/Settings.java
+
+22:20:53 liuyq: nougat$ grep -rn 'Settings(' frameworks/base/services/core/java/com/android/server/pm/ 
+frameworks/base/services/core/java/com/android/server/pm/Settings.java:400:    Settings(Object lock) {
+frameworks/base/services/core/java/com/android/server/pm/Settings.java:404:    Settings(File dataDir, Object lock) {
+frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java:1762:                    getUnknownSourcesSettings());
+frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java:2070:        mSettings = new Settings(mPackages);
+frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java:12311:    private int getUnknownSourcesSettings() {
+22:21:01 liuyq: nougat$ 
+
+
+frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+/**
+* Keep track of all those APKs everywhere.
+* <p>
+* Internally there are two important locks:
+* <ul>
+* <li>{@link #mPackages} is used to guard all in-memory parsed package details
+* and other related state. It is a fine-grained lock that should only be held
+* momentarily, as it's one of the most contended locks in the system.
+* <li>{@link #mInstallLock} is used to guard all {@code installd} access, whose
+* operations typically involve heavy lifting of application data on disk. Since
+* {@code installd} is single-threaded, and it's operations can often be slow,
+* this lock should never be acquired while already holding {@link #mPackages}.
+* Conversely, it's safe to acquire {@link #mPackages} momentarily while already
+* holding {@link #mInstallLock}.
+* </ul>
+* Many internal methods rely on the caller to hold the appropriate locks, and
+* this contract is expressed through method name suffixes:
+* <ul>
+* <li>fooLI(): the caller must hold {@link #mInstallLock}
+* <li>fooLIF(): the caller must hold {@link #mInstallLock} and the package
+* being modified must be frozen
+* <li>fooLPr(): the caller must hold {@link #mPackages} for reading
+* <li>fooLPw(): the caller must hold {@link #mPackages} for writing
+* </ul>
+* <p>
+* Because this class is very central to the platform's security; please run all
+* CTS and unit tests whenever making modifications:
+*
+* <pre>
+* $ runtest -c android.content.pm.PackageManagerTests frameworks-core
+* $ cts-tradefed run commandAndExit cts -m AppSecurityTests
+* </pre>
+*/
+
+
+    // Keys are String (package name), values are Package.  This also serves
+    // as the lock for the global state.  Methods that must be called with
+    // this lock held have the prefix "LP".
+    @GuardedBy("mPackages")
+    final ArrayMap<String, PackageParser.Package> mPackages =
+                new ArrayMap<String, PackageParser.Package>();
+
+
+in loadMediaPackages:
+
+    synchronized (mInstallLock) {
+        PackageParser.Package pkg = null;
+        try {
+            // Sadly we don't know the package name yet to freeze it
+            pkg = scanPackageTracedLI(new File(codePath), parseFlags,
+            SCAN_IGNORE_FROZEN, 0, null);
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
+        }
+        // Scan the package
+        if (pkg != null) {
+            /*
+            * TODO why is the lock being held? doPostInstall is
+            * called in other places without the lock. This needs
+            * to be straightened out.
+            */
+            // writer
+            synchronized (mPackages) {
+                retCode = PackageManager.INSTALL_SUCCEEDED;
+                pkgList.add(pkg.packageName);
+                // Post process args
+                args.doPostInstall(PackageManager.INSTALL_SUCCEEDED,
+                pkg.applicationInfo.uid);
+            }
+        } else {
+            Slog.i(TAG, "Failed to install pkg from  " + codePath + " from sdcard");
+        }
+    }

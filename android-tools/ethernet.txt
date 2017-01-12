@@ -1,0 +1,6 @@
+1. init will start zygote and system server
+2. SystemServer will use SystemServiceManager to start  EthernetService
+
+   com.android.server.ethernet.EthernetService
+
+   frameworks/base/services/java/com/android/server/SystemServer.java

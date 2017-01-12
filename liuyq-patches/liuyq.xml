@@ -35,4 +35,11 @@
   <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-5.3-linaro"  />
   -->
   <!-- https://github.com/96boards-hikey/edk2.git -->
+
+  <!-- https://github.com/owncloud/android.git -->
+  <!--
+  <project path="packages/apps/owncloud" name="owncloud/android.git" revision="master" remote="github4liuyq" />
+  <project path="packages/apps/owncloud/owncloud-android-library" name="owncloud/android-library.git" revision="master" remote="github4liuyq" />
+  <project path="packages/apps/owncloud/user_manual/ocdoc" name="owncloud/documentation" revision="master" remote="github4liuyq" />
+  -->
 </manifest>

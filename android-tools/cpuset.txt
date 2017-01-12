@@ -185,3 +185,14 @@ cpuset in init.rc:
     frameworks/base/core/java/android/app/ApplicationThreadNative.java:1249:    public void setSchedulingGroup(int group) throws RemoteException {
     12:44:59 liuyq: nougat$
 
+
+
+Tests on hikey:
+1. when write 0-7 to both /dev/cpuset/foreground/cpus and /dev/cpuset/foreground/boost/cpus, it will cause problem to write task id to /dev/cpuset/foreground/cpus, seens cpuset and it's subset could not use the same set of cpus. but the root cpuset is an exception.
+
+It will report "Device or Resource is busy"
+
+2. could not write multiple lines into the cpus files, like the return line
+   it will report Argument list is too long error
+3. When there is no cpus file for one cpuset, write to tasks operation will fail,
+   and report "No space" problem

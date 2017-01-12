@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-branch="android-7.1.1_r6"
+branch="android-7.1.1_r13"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
@@ -48,6 +48,7 @@ func_apply_patch hikey-optee-n
 func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
+func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 
 #func_apply_patch LIUYQ-PATCHSET
 

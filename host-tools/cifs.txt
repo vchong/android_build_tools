@@ -1,0 +1,4 @@
+sudo mount -t cifs //192.168.0.104/iphone /tmp/workspace/ -o username=Administrator,password=200011,rw 
+
+
+XP side, need to disable firewall

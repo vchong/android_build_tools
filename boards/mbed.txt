@@ -56,7 +56,7 @@ collect2: error: ld returned 1 exit status
     }
 
 
-否则需要制定--library来编译
+否则需要指定--library来编译
 
 GCC toolchain
 wget https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q2-update/+download/gcc-arm-none-eabi-4_9-2015q2-20150609-linux.tar.bz2
@@ -75,5 +75,3 @@ TODO:
 
 1. 当有多个源码文件而非一个文件时是如何处理编译
 2. 如何列出可用的library?
-
-
