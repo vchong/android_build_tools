@@ -63,3 +63,5 @@ Board features
         Debug port 
 
 
+
+sudo microcom -p /dev/ttyACM0 -s 9600

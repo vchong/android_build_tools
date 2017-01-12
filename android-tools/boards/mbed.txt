@@ -63,7 +63,17 @@ wget https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q2-update/+download/gcc
 wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q3-update/+download/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
 
 
+Files:
+mbed-os/targets/targets.json
+mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F401RE/device/
+mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F401RE/PinNames.h
+mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F401RE/device/TOOLCHAIN_GCC_ARM/startup_stm32f401xe.S
+mbed-os/targets/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F401RE/device/TOOLCHAIN_GCC_ARM/STM32F401XE.ld
+
+mbed-os/targets/TARGET_Freescale/TARGET_KLXX/TARGET_KL25Z/PinNames.h
 TODO:
 
 1. 当有多个源码文件而非一个文件时是如何处理编译
 2. 如何列出可用的library?
+
+

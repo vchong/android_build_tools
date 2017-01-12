@@ -1,0 +1,49 @@
+https://wiki.zephyrproject.org/view/96B-Carbon
+
+
+https://www.zephyrproject.org/doc/doc/getting_started/getting_started.html
+sudo apt-get install git make gcc g++ python3-ply ncurses-dev
+wget https://nexus.zephyrproject.org/content/repositories/releases/org/zephyrproject/zephyr-sdk/0.8.2-i686/zephyr-sdk-0.8.2-i686-setup.run 
+chmod +x zephyr-sdk-0.8.2-i686-setup.run
+./zephyr-sdk-0.8.2-i686-setup.run
+
+
+$ git clone https://gerrit.zephyrproject.org/r/zephyr
+$ cd zephyr
+$ git remote add linaro https://github.com/linaro/zephyr
+$ git remote update
+$ git checkout -t linaro/carbon
+$ source zephyr-env.sh
+$ make -C samples/drivers/disco BOARD=96b_carbon
+
+pkar@dx7408:/data/zephyr$ cat ~/.zephyrrc 
+export ZEPHYR_GCC_VARIANT=zephyr
+export ZEPHYR_SDK_INSTALL_DIR=/data/zephyr/zephyr-sdk
+pkar@dx7408:/data/zephyr$ 
+
+Build command
+source zephyr-env.sh
+make -C samples/shell BOARD=96b_carbon
+make -C samples/shell BOARD=96b_carbon_nrf51 
+make -C samples/drivers/disco BOARD=96b_carbon
+make -C samples/shell BOARD=nucleo_f401re
+
+use ARM GCC as toolchain
+$ export GCCARMEMB_TOOLCHAIN_PATH="~/gcc-arm-none-eabi-5_3-2016q1/"
+$ export ZEPHYR_GCC_VARIANT=gccarmemb
+$ make -C samples/hello_world CROSS_COMPILE=~/gcc-arm-none-eabi-5_3-2016q1/bin/arm-none-eabi- BOARD=arduino_due
+
+boards/arm/nucleo_f401re/
+drivers/gpio/Kconfig.stm32
+
+git clone git://git.code.sf.net/p/stm32flash/code stm32flash-code
+cd stm32flash-code && sudo make install
+
+Step 1: Enter the STM32 Bootloader mode
+    Connect the micro-USB cable to the USB-UART port
+    Press the BOOT0 switch and hold
+    While holding BOOT0 switch, also press the RST switch (At this point you should be pressing two switches)
+    Release the RST switch, then release the BOOT0 switch.
+
+sudo stm32flash -b 115200 -g 0x0 -w /tmp/workspace/zephyr.bin /dev/ttyUSB0
+
