@@ -7,6 +7,7 @@ targets="selinuxtarballs"
 #targets="boottarball"
 variant="userdebug"
 
+#export CFG_GP_SOCKETS=n
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
 #export TARGET_GCC_VERSION_EXP=5.3-linaro
@@ -197,7 +198,7 @@ function build_x15(){
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-#build_hikey
-build_x15
+build_hikey
+#build_x15
 #build_flounder
 #build_flo
