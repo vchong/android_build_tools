@@ -1,2 +1,14 @@
 http://en.cppreference.com/w/cpp/language/auto
 http://www.learncpp.com/cpp-tutorial/4-8-the-auto-keyword/
+
+Native debug:
+https://source.android.com/devices/tech/debug/#native
+
+source build/envsetup.sh
+lunch hikey-userdebug
+adb shell gdbserver :5039 /system/bin/my_test_app
+gdbclient <pid|processname>
+
+when <optimized out> is printed with p var in gdb shell,
+it means we need to set the binary compilation to compile with -O0
+

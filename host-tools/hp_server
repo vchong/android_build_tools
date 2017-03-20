@@ -1,6 +1,11 @@
 [    0.000000] DMI: HP ProLiant DL380 G7, BIOS P67 05/05/2011
 05:00.0 RAID bus controller: Hewlett-Packard Company Smart Array G6 controllers (rev 01)
 ========================================
+scsi 2:3:0:0: RAID              HP       P410i            5.70 PQ: 0 ANSI: 5
+==================================================================
+http://www8.hp.com/uk/en/products/oas/product-detail.html?oid=5081322
+HP 1TB 3G SATA 7.2K rpm SFF (2.5-inch) Midline 1yr Warranty Hard Drive(625609-B21)  SATA2
+=========================================================================
 MemTotal:       24678716 kB
 ==================================================================
 processor	: 23
@@ -8,7 +13,7 @@ vendor_id	: GenuineIntel
 cpu family	: 6
 model		: 44
 model name	: Intel(R) Xeon(R) CPU           X5690  @ 3.47GHz
-
+==================================================================
 processor	: 7
 vendor_id	: GenuineIntel
 cpu family	: 6
@@ -16,8 +21,6 @@ model		: 58
 model name	: Intel(R) Core(TM) i7-3820QM CPU @ 2.70GHz
 
 =================================================================
-scsi 2:3:0:0: RAID              HP       P410i            5.70 PQ: 0 ANSI: 5
-==================================================================
 yongqin.liu@hackbox.linaro.org:~/marshmallow$ df -h
 Filesystem            Size  Used Avail Use% Mounted on
 /dev/sda1             435G  278G  136G  68% /
@@ -116,9 +119,6 @@ yongqin.liu@hackbox.linaro.org:~/marshmallow$ sudo vgdisplay -v
    
 yongqin.liu@hackbox.linaro.org:~/marshmallow$ 
 
-
-http://www8.hp.com/uk/en/products/oas/product-detail.html?oid=5081322
-HP 1TB 3G SATA 7.2K rpm SFF (2.5-inch) Midline 1yr Warranty Hard Drive(625609-B21)  SATA2
 
 
 

@@ -3,6 +3,9 @@
 img_dir=${1}
 if [ -z "${img_dir}" ]; then
     img_dir="out/target/product/hikey"
+    FIRMWARE_DIR="out/dist"
+else
+    FIRMWARE_DIR="${img_dir}"
 fi
 
 if ! [ -d ${img_dir} ]; then
@@ -19,7 +22,7 @@ function flash_image(){
 
     echo "======= Flash ${partition} partition with file $file_img =============="
     #/SATA3/nougat/out/host/linux-x86/bin/fastboot flash -w ${partition} ${file_img}
-    fastboot flash -w ${partition} ${file_img}
+    fastboot flash ${partition} ${file_img}
     if [ $? -ne 0 ]; then
         echo "Failed to deploy ${file_img}"
         exit 1
@@ -29,6 +32,7 @@ function flash_image(){
 }
 
 #flash_image boot ${img_dir}/boot.img
+flash_image fastboot "${FIRMWARE_DIR}"/fip.bin
 flash_image boot ${img_dir}/boot_fat.uefi.img
 flash_image system ${img_dir}/system.img
 #flash_image cache ${img_dir}/cache.img

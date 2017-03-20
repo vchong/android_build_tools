@@ -10,7 +10,7 @@ variant="userdebug"
 #export CFG_GP_SOCKETS=n
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
-#export TARGET_GCC_VERSION_EXP=5.3-linaro
+#export TARGET_GCC_VERSION_EXP=6.3-linaro
 #export USE_CLANG_PLATFORM_BUILD=false
 export WITH_DEXPREOPT=true
 #export MALLOC_IMPL=dlmalloc
@@ -45,6 +45,7 @@ function build_hikey(){
     export TARGET_BOOTIMAGE_USE_FAT=true
     build hikey
     targets="selinuxtarballs"
+    make -C device/linaro/hikey/bootloader TARGET_TEE_IS_OPTEE=true
 }
 
 function build_manta(){
@@ -109,24 +110,10 @@ function build_tools_ddmlib(){
 }
 
 function build_x15(){
-    CROSS_COMPILE="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.8/bin/arm-none-eabi-"
-    #local gcc_path="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"
-    #CROSS_COMPILE="arm-linux-androideabi-"
-    #export ARCH=arm
-    local kernel_dir=${ROOT_DIR}/kernel/ti/x15
-    local uboot_dir=${ROOT_DIR}/ti/u-boot
-    local output_dir=${ROOT_DIR}/out/target/product/am57xevm/
-
-    # compile u-boot
-    if false; then
-        cd ${uboot_dir}
-        make am57xx_evm_nodt_defconfig
-        make -j${CPUS}
-        cd ${ROOT_DIR}/
-    fi
 
     # compile kernel
     if false; then
+        local kernel_dir=${ROOT_DIR}/kernel/ti/x15
         cd ${kernel_dir}
         KERNEL_OUT=${output_dir}/obj/kernel
         rm -fr "${KERNEL_OUT}" && mkdir -p "${KERNEL_OUT}"
@@ -154,13 +141,6 @@ function build_x15(){
         cp -fv ${KERNEL_OUT}/arch/arm/boot/zImage device/ti/am57xevm/kernel
     fi
 
-
-    export TARGET_BUILD_KERNEL=true
-    # compile android
-    targets="droidcore"
-    build full_am57xevm
-    targets="selinuxtarballs"
-
     # compile pvrsrvkm.ko
     if false; then
         local eurasiacon_dir=${ROOT_DIR}/device/ti/proprietary-open/jacinto6/sgx_src/eurasia_km/eurasiacon
@@ -181,15 +161,26 @@ function build_x15(){
             -C ${src_dir}
             build
 
-
-
         mkdir -p ${output_dir}/system/lib/modules
         cp ${pvrsrvkm_f}  ${output_dir}/system/lib/modules
     fi
 
+    # compile android
+    export TARGET_BUILD_KERNEL=true
+    export TARGET_BUILD_UBOOT=true
+    export BOARD_USES_FULL_RECOVERY_IMAGE=true
+    export TARGET_USES_MKE2FS=true
+    targets="droidcore"
+    build full_am57xevm
+    targets="selinuxtarballs"
+
     if false; then
-        cp -uvf ${uboot_dir}/u-boot.img ${uboot_dir}/MLO ${output_dir}
-        cp -uvf ${kernel_dir}/arch/arm/boot/zImage ${kernel_dir}/arch/arm/boot/dts/am57xx-evm-reva3.dtb ${output_dir}
+        CROSS_COMPILE="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-"
+        local output_dir=${ROOT_DIR}/out/target/product/am57xevm/obj/u-boot
+        local uboot_dir=${ROOT_DIR}/ti/u-boot
+        make -C ${uboot_dir} O=${output_dir} ARCH=arm am57xx_evm_nodt_defconfig CROSS_COMPILE="${CROSS_COMPILE}"
+        make -C ${uboot_dir} O=${output_dir} -j${CPUS} ARCh=arm CROSS_COMPILE="${CROSS_COMPILE}"
+        cp -vf ${output_dir}/u-boot.img ${output_dir}/MLO ${ROOT_DIR}/out/target/product/am57xevm/
     fi
 }
 

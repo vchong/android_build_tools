@@ -30,4 +30,5 @@
     <option name="compatibility:include-filter" value="CtsLibcoreTestCases" />
     <option name="compatibility:include-filter" value="CtsWidgetTestCases" />
 
+    <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.TabActivityTest#testChildTitleCallback" />
 </configuration>

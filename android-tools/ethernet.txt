@@ -4,3 +4,26 @@
    com.android.server.ethernet.EthernetService
 
    frameworks/base/services/java/com/android/server/SystemServer.java
+
+
+3. system/netd/server/CommandListener.cpp
+
+   CommandListener::InterfaceCmd::runCommand
+   /sys/class/net/
+
+   root@am57xevm:/ # ll /sys/class/net/
+   total 0
+   lrwxrwxrwx 1 root root 0 1970-01-01 00:00 eth0 -> ../../devices/platform/44000000.ocp/48484000.ethernet/net/eth0
+   lrwxrwxrwx 1 root root 0 1970-01-01 00:00 eth1 -> ../../devices/platform/44000000.ocp/48484000.ethernet/net/eth1
+   lrwxrwxrwx 1 root root 0 1970-01-01 00:00 lo -> ../../devices/virtual/net/lo
+   lrwxrwxrwx 1 root root 0 1970-01-01 00:00 sit0 -> ../../devices/virtual/net/sit0
+   root@am57xevm:/ #
+
+
+   ndc interface  list
+
+4. frameworks/opt/net/ethernet/java/com/android/server/ethernet/EthernetService.java
+   frameworks/opt/net/ethernet/java/com/android/server/ethernet/EthernetServiceImpl.java
+   started by SystemServer.java
+
+   

@@ -1,0 +1,27 @@
+Hi,
+I've finished updating stuff to build, and cleaned up some of the more messy bits.
+
+To grab the source:
+
+repo init -u https://android.googlesource.com/platform/manifest.git -b android-6.0.0_r26
+repo sync
+cd .repo
+git clone -b linaro-marshmallow-dragonboard git://android-git.linaro.org/platform/manifest.git local_manifests
+cd ..
+repo sync
+
+Unfortunately, even freedreno relies on some firmware files we can't just add to git for legal reasons, so grab the Ubuntu (not Android!) BSP from
+https://developer.qualcomm.com/hardware/dragonboard-410c/tools
+and unzip it.
+
+to build:
+
+. build/envsetup.sh
+lunch aosp_dragonboard410c-userdebug
+make droidcore -j18 ADRENO_FIRMWARE=.../linux-ubuntu-board-support-package-v1.1/proprietary-ubuntu
+
+Other than rebasing to M and cleaning up some messes, this is what we had at the end of Connect, so don't expect it to boot to UI just yet...
+But it'll be a good starting point.
+
+ttyl
+bero
