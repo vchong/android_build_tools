@@ -19,6 +19,10 @@ function flash_image(){
     if [ -z "${partition}" ] || [ -z "${file_img}" ]; then
         return
     fi
+    if [ ! -e "${file_img}" ]; then
+        echo "${file_img} does not exist"
+        return
+    fi
 
     echo "======= Flash ${partition} partition with file $file_img =============="
     #/SATA3/nougat/out/host/linux-x86/bin/fastboot flash -w ${partition} ${file_img}

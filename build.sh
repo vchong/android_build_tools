@@ -37,7 +37,7 @@ function build_hikey(){
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
     targets="droid"
-    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+#    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
 #    export TARGET_USERDATAIMAGE_4GB=true
 #    export TARGET_USERDATAIMAGE_TYPE=f2fs
     export TARGET_BUILD_KERNEL=true
