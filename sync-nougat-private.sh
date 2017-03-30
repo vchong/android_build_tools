@@ -28,6 +28,8 @@ ${BASE}/sync-projects.sh  \
                           frameworks/base \
                           frameworks/av \
                           external/optee_test \
+                          external/optee_client \
+                          optee/optee_os \
 
 ${BASE}/sync-projects.sh \
                         system/extras \
