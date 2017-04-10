@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-branch="android-7.1.1_r28"
+branch="android-7.1.2_r5"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
