@@ -98,29 +98,29 @@ __EOF__
 function main(){
     if has_new; then
         local new_cts_version=$(get_latest_cts)
-	local local_dir=$(date +%y.%m)
-	local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
-	local remote_url="https://dl.google.com/dl/android/cts/${package_name}"
-        local message="There is new cts package released. The latest AOSP tag is: ${new_cts_version}"
-        message="${message}, ${remote_url}"
-	local testdata_remote_file="/home/testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
-	local test_data_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org ls /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name})
-	if [ "X${remote_file}" = "X${remote_file_to_check}" ]; then
-		message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
-	else
-		mkdir -p ${local_dir}
-		wget ${remote_url} -O "${local_dir}/${package_name}"
-		if [ $? -ne 0 ]; then
-			message="${message}, failed to download it, please check manually"
-		else
-			sudo -u yongqin.liu scp -r ${local_dir} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
-			if [ $? -eq 0 ]; then
-				message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
-			else
-				message="${message}, failed to download it, please check manually"
-			fi
-		fi
-	fi
+    local local_dir=$(date +%y.%m)
+    local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
+    local remote_url="https://dl.google.com/dl/android/cts/${package_name}"
+    local message="There is new cts package released. The latest AOSP tag is: ${new_cts_version}"
+    message="${message}, ${remote_url}"
+    local testdata_remote_file="/home/testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+    local test_data_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org ls /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name})
+    if [ "X${remote_file}" = "X${remote_file_to_check}" ]; then
+        message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+    else
+        mkdir -p ${local_dir}
+        wget ${remote_url} -O "${local_dir}/${package_name}"
+        if [ $? -ne 0 ]; then
+            message="${message}, failed to download it, please check manually"
+        else
+            sudo -u yongqin.liu scp -r ${local_dir} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
+            if [ $? -eq 0 ]; then
+                message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+            else
+                message="${message}, failed to download it, please check manually"
+            fi
+        fi
+    fi
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
