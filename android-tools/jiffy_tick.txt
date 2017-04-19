@@ -1,0 +1,40 @@
+https://en.wikipedia.org/wiki/Jiffy_(time)
+In computing, a jiffy was originally the time between two ticks of the system timer interrupt.[4] It is not an absolute time interval unit, since its duration depends on the clock interrupt frequency of the particular hardware platform.
+
+http://man7.org/linux/man-pages/man7/time.7.html
+the software clock maintained by the kernel which measures time in jiffies.
+
+The size of a jiffy is determined by the value of the kernel constant HZ.
+
+The times(2) system call is a special case.  It reports times with a
+granularity defined by the kernel constant USER_HZ.  User-space
+applications can determine the value of this constant using
+sysconf(_SC_CLK_TCK).
+
+
+
+programmable clocks typically have several modes of operation: one-shot mode
+and square-wave mode. In square-wave mode, after counter getting to zero and
+causing the interrupt, the holding register is automatically copied into the counter,
+and the whole process is repeated again indefinitely. These periodic interrupts
+are called clock ticks.
+
+The quantum is the number of clock ticks the theread may continue to run for.
+In the currect Linux version, the clock runs at 1000HZ, and each tick is 1ms,
+which is called a jiffy
+
+
+./include/asm-generic/param.h
+#ifndef __ASM_GENERIC_PARAM_H
+#define __ASM_GENERIC_PARAM_H
+
+#include <uapi/asm-generic/param.h>
+
+# undef HZ
+# define HZ     CONFIG_HZ   /* Internal kernel timer frequency */
+# define USER_HZ    100     /* some user interfaces are */
+# define CLOCKS_PER_SEC (USER_HZ)       /* in "ticks" like times() */
+#endif /* __ASM_GENERIC_PARAM_H */
+
+
+kernel/time/time.c

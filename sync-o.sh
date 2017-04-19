@@ -12,17 +12,18 @@ else
     exit 1
 fi
 
-branch="android-7.1.2_r5"
+branch="android-7.1.1_r28"
+branch="android-o-preview-1"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-nougat"
 
 main "$@"
 
+#                          android-patchsets \
+#                          build \
 ${BASE}/sync-projects.sh  \
-                          build \
                           bionic \
-                          android-patchsets \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
@@ -47,16 +48,16 @@ ${BASE}/sync-projects.sh \
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-func_apply_patch NOUGAT-MLCR-PATCHSET
-func_apply_patch juno-n-workarounds
+#func_apply_patch NOUGAT-MLCR-PATCHSET
+#func_apply_patch juno-n-workarounds
 #func_apply_patch marshmallow-gcc5-patchset
 #func_apply_patch marshmallow-gcc6-patchset
-func_apply_patch hikey-n-workarounds
-func_apply_patch hikey-optee-n
-func_apply_patch x15-n-workarounds
+func_apply_patch hikey-o-workarounds
+#func_apply_patch hikey-optee-n
+#func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
-func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
+#func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
 
