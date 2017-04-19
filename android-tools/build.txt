@@ -125,3 +125,243 @@ files specified in LOCAL_SRC_FILES will be based on LOCAL_PATH
 ==============================================================================================
 Set USE_CLANG_PLATFORM_BUILD = false will cause it to use gcc as default
 ==============================================================================================
+
+
+==================================
+build/soong/cc/config/global.go
+    func bionicHeaders(bionicArch, kernelArch string) string {
+        return strings.Join([]string{
+            "-isystem bionic/libc/arch-" + bionicArch + "/include",
+            "-isystem bionic/libc/include",
+            "-isystem bionic/libc/kernel/uapi",
+            "-isystem bionic/libc/kernel/uapi/asm-" + kernelArch,
+            "-isystem bionic/libc/kernel/android/uapi",
+        }, " ")
+    }
+
+build/soong/cc/config/arm64_device.go
+    func init() {
+        ....
+        pctx.StaticVariable("Arm64IncludeFlags", bionicHeaders("arm64", "arm64"))
+        ....
+    }
+
+    func (t *toolchainArm64) IncludeFlags() string {
+        return "${config.Arm64IncludeFlags}"
+    }
+
+    func arm64ToolchainFactory(arch android.Arch) Toolchain {
+        if arch.ArchVariant != "armv8-a" {
+            panic(fmt.Sprintf("Unknown ARM architecture version: %q", arch.ArchVariant))
+        }
+
+        return &toolchainArm64{
+            toolchainCflags:      variantOrDefault(arm64CpuVariantCflagsVar, arch.CpuVariant),
+            toolchainClangCflags: variantOrDefault(arm64ClangCpuVariantCflagsVar, arch.CpuVariant),
+        }
+    }
+
+
+build/soong/cc/config/toolchain.go
+    type Toolchain interface {
+        ...
+        IncludeFlags() string
+        ...
+    }
+
+
+build/soong/Android.bp
+    bootstrap_go_package {
+        name: "soong-cc-config",
+        pkgPath: "android/soong/cc/config",
+        deps: [
+            "soong-android",
+        ],
+        srcs: [
+            "cc/config/clang.go",
+            "cc/config/global.go",
+            "cc/config/tidy.go",
+            "cc/config/toolchain.go",
+
+            "cc/config/arm_device.go",
+            "cc/config/arm64_device.go",
+            "cc/config/mips_device.go",
+            "cc/config/mips64_device.go",
+            "cc/config/x86_device.go",
+            "cc/config/x86_64_device.go",
+
+            "cc/config/x86_darwin_host.go",
+            "cc/config/x86_linux_host.go",
+            "cc/config/x86_linux_bionic_host.go",
+            "cc/config/x86_windows_host.go",
+        ],
+        testSrcs: [
+            "cc/config/tidy_test.go",
+        ],
+    }
+
+
+build/soong/cc/makevars.go
+    func makeVarsToolchain(ctx android.MakeVarsContext, secondPrefix string,
+        target android.Target) {
+        ...
+        ctx.StrictRaw(makePrefix+"C_SYSTEM_INCLUDES", strings.Join(systemIncludes, " "))
+        includeFlags, err := ctx.Eval(toolchain.IncludeFlags())
+        if err != nil {
+            panic(err)
+        }
+        includes, systemIncludes := splitSystemIncludes(ctx, includeFlags)
+        ctx.StrictRaw(makePrefix+"C_INCLUDES", strings.Join(includes, " "))
+        ctx.StrictRaw(makePrefix+"C_SYSTEM_INCLUDES", strings.Join(systemIncludes, " "))
+        ...
+    }
+
+build/soong/Android.bp
+    bootstrap_go_package {
+        name: "soong-cc",
+        pkgPath: "android/soong/cc",
+        deps: [
+            "blueprint",
+            "blueprint-pathtools",
+            "soong",
+            "soong-android",
+            "soong-cc-config",
+            "soong-genrule",
+        ],
+        srcs: [
+            "cc/androidmk.go",
+            "cc/builder.go",
+            "cc/cc.go",
+            "cc/check.go",
+            "cc/coverage.go",
+            "cc/gen.go",
+            "cc/makevars.go", // called
+            "cc/prebuilt.go",
+            "cc/proto.go",
+            "cc/relocation_packer.go",
+            "cc/sanitize.go",
+            "cc/stl.go",
+            "cc/strip.go",
+            "cc/tidy.go",
+            "cc/util.go",
+
+            "cc/cmakelists.go",
+            "cc/compiler.go",
+            "cc/installer.go",
+            "cc/linker.go",
+
+            "cc/binary.go",
+            "cc/library.go",
+            "cc/object.go",
+            "cc/test.go",
+            "cc/toolchain_library.go",
+
+            "cc/ndk_prebuilt.go",
+            "cc/ndk_headers.go",
+            "cc/ndk_library.go",
+            "cc/ndk_sysroot.go",
+        ],
+        testSrcs: [
+            "cc/cc_test.go",
+            "cc/test_data_test.go",
+        ],
+        pluginFor: ["soong_build"],
+    }
+
+
+
+build/soong/cc/compiler.go
+    // Create a Flags struct that collects the compile flags from global values,
+    // per-target values, module type values, and per-module Blueprints properties
+    func (compiler *baseCompiler) compilerFlags(ctx ModuleContext, flags Flags) Flags {
+        ......
+        if !ctx.noDefaultCompilerFlags() {
+            flags.GlobalFlags = append(flags.GlobalFlags, "-I"+android.PathForModuleSrc(ctx).String())
+
+            if !(ctx.sdk() || ctx.vndk()) || ctx.Host() {
+                flags.SystemIncludeFlags = append(flags.SystemIncludeFlags,
+                    "${config.CommonGlobalIncludes}",
+                    "${config.CommonGlobalSystemIncludes}",
+                    tc.IncludeFlags(),
+                    "${config.CommonNativehelperInclude}")
+            }
+        }
+        ......
+    }
+
+build/soong/Android.bp
+build/soong/cc/config/arm64_device.go
+IncludeFlags
+
+build/soong/cc/compiler.go
+
+
+in build/make/core/clang/config.mk:
+# A list of projects that are allowed to set LOCAL_CLANG to false.
+# INTERNAL_LOCAL_CLANG_EXCEPTION_PROJECTS is defined later in other config.mk.
+LOCAL_CLANG_EXCEPTION_PROJECTS = \
+bionic/tests/ \
+device/huawei/angler/ \
+device/lge/bullhead/ \
+external/gentoo/integration/ \
+hardware/qcom/ \
+$(INTERNAL_LOCAL_CLANG_EXCEPTION_PROJECTS)
+
+
+
+==========================
+
+CLANG & GCC
+go & makefile
+Android.mk & Android.bp
+ckati & ninja
+
+build/soong: build/soong/README.md
+
+Soong is the replacement for the old Android make-based build system.  It
+replaces Android.mk files with Android.bp files, which are JSON-like simple
+declarative descriptions of modules to build.
+
+build tools written in Go
+
+Android.bp file format
+By design, Android.bp files are very simple.  There are no conditionals or
+control flow statements - any complexity is handled in build logic written in
+Go.  The syntax and semantics of Android.bp files are intentionally similar
+to [Bazel BUILD files](https://www.bazel.io/versions/master/docs/be/overview.html)
+when possible.
+
+
+Android.bp:
+https://godoc.org/github.com/google/blueprint
+Blueprint is a meta-build system that reads in Blueprints files that describe modules that need to be built, and produces a Ninja manifest describing the commands that need to be run and their dependencies. Where most build systems use built-in rules or a domain-specific language to describe the logic for converting module descriptions to build rules, Blueprint delegates this to per-project build logic written in Go. For large, heterogenous projects this allows the inherent complexity of the build logic to be maintained in a high-level language, while still allowing simple changes to individual modules by modifying easy to understand Blueprints files.
+
+For a list of valid module types and their properties see $OUT_DIR/soong/.bootstrap/docs/soong_build.html.
+
+Ninja
+http://ninja-build.org/
+Ninja is a small build system with a focus on speed. It differs from other build systems in two major respects: it is designed to have its input files generated by a higher-level build system, and it is designed to run builds as fast as possible.
+
+Why yet another build system?
+Where other build systems are high-level languages Ninja aims to be an assembler.
+
+Ninja build files are human-readable but not especially convenient to write by hand. (See the generated build file used to build Ninja itself.) These constrained build files allow Ninja to evaluate incremental builds quickly.
+
+Kati/ckati
+https://github.com/google/kati
+kati is an experimental GNU make clone. The main goal of this tool is to speed-up incremental build of Android.
+Currently, kati does not offer a faster build by itself. It instead converts your Makefile to a ninja file.
+
+Soong
+https://android.googlesource.com/platform/build/soong
+Soong is a builder for Android that uses Blueprint to parse Blueprints files and Ninja to do the dependency tracking and subprocess management.
+Soong itself is responsible for converting the modules read by Blueprint into build rules, which will be written to a build.ninja file by Blueprint.
+Soong is the replacement for the old Android make-based build system. It replaces Android.mk files with Android.bp files, which are JSON-like simple declarative descriptions of modules to build.
+
+Go:
+https://golang.org/
+Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.
+
+Build logic
+The build logic is written in Go using the blueprint framework. Build logic receives module definitions parsed into Go structures using reflection and produces build rules. The build rules are collected by blueprint and written to a ninja build file.
+
