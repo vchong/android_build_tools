@@ -237,3 +237,8 @@ init/main.c
 
 kernel/linaro/hisilicon/fs/exec.c:
     do_execve -> do_execveat_common -> exec_binprm
+
+
+out/host/linux-x86/bin/mkbootfs -d out/target/product/hikey/system out/target/product/hikey/root | out/host/linux-x86/bin/minigzip > out/target/product/hikey/ramdisk.img
+
+out/host/linux-x86/bin/mkbootimg  --kernel out/target/product/hikey/kernel --ramdisk out/target/product/hikey/ramdisk.img --cmdline "console=ttyFIQ0 androidboot.console=ttyFIQ0 androidboot.hardware=hikey firmware_class.path=/system/etc/firmware efi=noruntime printk.devkmsg=on printk.devkmsg=on buildvariant=userdebug" --os_version 7.1.2 --os_patch_level 2017-04-05  --output out/target/product/hikey/boot.img
