@@ -176,3 +176,64 @@ kernel side source:
         # define USER_HZ    100     /* some user interfaces are */
         # define CLOCKS_PER_SEC (USER_HZ)       /* in "ticks" like times() */
 
+
+
+The start time of init process is around 0,
+it seems not the time that the real /init command in the root direcotry get started.
+Need to check how the init command is called from kernel side.
+    [    0.000000] arm_arch_timer: Architected cp15 timer(s) running at 1.20MHz (phys).
+    [    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x11b661f8e, max_idle_ns: 1763180809113 ns
+    [    0.000005] sched_clock: 56 bits at 1200kHz, resolution 833ns, wraps every 4398046510838ns
+    [    0.000096] clocksource: arm,sp804: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 99544814920 ns
+    [    0.000105] sched_clock: 32 bits at 19MHz, resolution 52ns, wraps every 111848106981ns
+    [    0.000650] Console: colour dummy device 80x25
+    [    0.000672] Calibrating delay loop (skipped), value calculated using timer frequency.. 2.40 BogoMIPS (lpj=4800)
+    [    0.000684] pid_max: default: 32768 minimum: 301
+    [    0.000835] Security Framework initialized
+    [    0.000844] SELinux:  Initializing.
+    [    0.000955] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes)
+    [    0.000963] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes)
+    [    0.001807] ===LIUYQ pid=1, real_start_time=0 <===   [    0.001814] ===LIUYQ pid=1, tsk->comm=swapper/0, real_start_time=0
+    [    0.001853] ===LIUYQ pid=2, real_start_time=0
+    [    0.002682] sched-energy: Sched-energy-costs installed from DT
+    [    0.002696] CPU0: update cpu_capacity 1024
+    [    0.002717] ASID allocator initialised with 65536 entries
+    [    0.002780] ===LIUYQ pid=3, real_start_time=0
+    ...
+    [   12.736070] (stk) : timed out waiting for ldisc to be un-installed
+    [   12.810921] Freeing unused kernel memory: 2304K (ffffffc000f60000 - ffffffc0011a0000)
+    [   12.818963] ===LIUYQ /init was called for as init <=== printed from init/main.c in kernel
+    [   12.826774] init: init first stage started!
+
+Android uses initramfs, which /init command is used as the first userspace command:
+https://wiki.gentoo.org/wiki/Custom_Initramfs
+    CONFIG_INITRAMFS_SOURCE=""
+    CONFIG_BLK_DEV_INITRD=y
+init/main.c
+    // start_kernel is called in the head.S or similar files in arch directories
+    asmlinkage __visible void __init start_kernel(void) {}
+        -> static noinline void __ref rest_init(void) ()
+            -> static int __ref kernel_init(void *unused)
+                -> kernel_init_freeable();
+                    -> static noinline void __init kernel_init_freeable(void){}
+                        ->  if (!ramdisk_execute_command) ramdisk_execute_command = "/init";
+
+    static int __ref kernel_init(void *unused){
+        kernel_init_freeable();
+        ...
+        if (ramdisk_execute_command) {
+            ret = run_init_process(ramdisk_execute_command);
+            ...
+        }
+        ...
+    }
+
+    static int run_init_process(const char *init_filename){
+        argv_init[0] = init_filename;
+        return do_execve(getname_kernel(init_filename),
+                (const char __user *const __user *)argv_init,
+                (const char __user *const __user *)envp_init);
+    }
+
+kernel/linaro/hisilicon/fs/exec.c:
+    do_execve -> do_execveat_common -> exec_binprm
