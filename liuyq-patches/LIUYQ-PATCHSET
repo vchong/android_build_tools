@@ -14,12 +14,4 @@ if ! [ -d "$AOSP" ] && ! [ -d "$AOSP/bionic" ] && [ -d "$AOSP"/build ]; then
         echo "or with the AOSP source directory as its first parameter."
         exit 1
 fi
-
-# changes to make chromium_org to use the system libz.so and libz_minizip.so
-## improvements on bootchart
-## http://android-review.linaro.org/17416
-apply --linaro system/core 17416/2
-
-## add bootchart_parse
-## http://android-review.linaro.org/17667
-apply --linaro system/core 17667/1
+#==================================
