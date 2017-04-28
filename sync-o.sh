@@ -14,9 +14,10 @@ fi
 
 branch="android-7.1.1_r28"
 branch="android-o-preview-1"
+#branch="master"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
-LOCAL_MANIFEST_BRANCH="linaro-nougat"
+LOCAL_MANIFEST_BRANCH="linaro-o-preview"
 
 main "$@"
 
@@ -48,15 +49,13 @@ ${BASE}/sync-projects.sh \
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-#func_apply_patch NOUGAT-MLCR-PATCHSET
+func_apply_patch O-MLCR-PATCHSET
 #func_apply_patch juno-n-workarounds
-#func_apply_patch marshmallow-gcc5-patchset
-#func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-o-workarounds
-#func_apply_patch hikey-optee-n
-#func_apply_patch x15-n-workarounds
+func_apply_patch hikey-optee-n
+func_apply_patch hikey-clang-4.9
+func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
-#func_apply_patch get-hikey-blobs
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
