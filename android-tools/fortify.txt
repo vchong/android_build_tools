@@ -1,0 +1,244 @@
+Android 中的 FORTIFY
+2017-04-26 16:05
+
+FORTIFY 是 Android 自 2012 年中以来一直配备的一项重要的安全功能。去年初，在将默认的 C/C++ 编译器从 GCC 迁移为 Clang 后，我们投入大量时间和精力，确保 FORTIFY 在 Clang 中的质量与之前相当。为做到这一点，我们重新设计了某些关键的 FORTIFY 功能的工作方式，具体将在下文介绍。
+
+在我们介绍全新 FORTIFY 的一些详情之前，我们来简单回顾一下 FORTIFY 的功能及其用法。
+
+什么是 FORTIFY？
+
+FORTIFY 是 C 标准库的扩展集，用于拦截对 memset、sprintf 和 open 和其他标准函数的错误使用。它有三大功能：
+
+    如果在编译时 FORTIFY 检测到错误调用标准库函数，则在错误得到修复前将不允许编译您的代码。
+
+    如果 FORTIFY 未获取足够的信息，或者如果确定代码是安全的，FORTIFY 将不会对任何信息进行编译。这意味着，当 FORTIFY 在找不到错误的上下文中使用时，它的运行时开销为 0。
+
+    否则，FORTIFY 会进一步进行检查，动态确定可疑代码是否存在错误。如果检测到错误，FORTIFY 将输出部分调试信息并中止程序运行。
+
+思考下例，它是 FORTIFY 在真实代码中捕获的一个错误：
+
+struct Foo { int val; struct Foo *next;};void initFoo(struct Foo *f) { memset(&f, 0, sizeof(struct Foo));}
+
+FORTIFY 发现，我们错误地将 &f 作为 memset 的第一个参数进行传递，而实际上应为 f。通常，很难追踪此类错误，因为它表面上可能将 8 个字节的附加 0 写入任意的堆叠部分，而实际上对 *f 不进行任何操作。因此，取决于您的编译器优化设置、initFoo 的用法和您的项目的测试标准，此错误可能长时间被忽略。有了 FORTIFY，您会收到如下编译时错误：
+
+/path/to/file.c: call to unavailable function 'memset': memset called with size bigger than buffer memset(&f, 0, sizeof(struct Foo)); ^~~~~~ 以下列函数为例，说明如何进行运行时检查：
+
+// 2147483648 == pow(2, 31). Use sizeof so we get the nul terminator,// as well.#define MAX_INT_STR_SIZE sizeof("2147483648")struct IntAsStr { char asStr[MAX_INT_STR_SIZE]; int num;};void initAsStr(struct IntAsStr *ias) { sprintf(ias->asStr, "%d", ias->num);}
+
+此代码适用于所有正数。但是，当您传入 num <= -1000000 的 IntAsStr 时，sprintf 会将 MAX_INT_STR_SIZE+1 个字节写入到 ias->asStr 中。如果不使用 FORTIFY，此差一错误（结果会清除 num 中的一个字节）可能被静默忽略。而有了它，程序可以输出堆叠追踪信息、内存映射，并在中止运行时转储内核信息。
+
+FORTIFY 还可以执行其他几项检查，例如确保对 open 的调用具有适当的参数，而它的主要用途是捕获上述与内存有关的错误。
+
+但是，FORTIFY 并不能捕获当前与内存有关的 所有 错误。以下列代码为例：
+
+__attribute__((noinline)) // Tell the compiler to never inline this function.inline void intToStr(int i, char *asStr) { sprintf(asStr, “%d”, num); }char *intToDupedStr(int i) { const int MAX_INT_STR_SIZE = sizeof(“2147483648”); char buf[MAX_INT_STR_SIZE]; intToStr(i, buf); return strdup(buf);}
+
+由于 FORTIFY 根据缓冲区的类型及其分配位置（如果可见）确定缓冲区的大小，因此它无法捕获此错误。在本例中，FORTIFY 放弃检测是因为：
+
+    我们无法确定此类指针指向的对象大小，因为 char * 可以指向不定数量的字节
+
+    FORTIFY 无法确定指针分配的位置，因为 asStr 可以指向任何对象。
+
+如果您想知道为什么这里有非内联属性，那是因为，如果 intToStr 内联到 intToDupedStr 中，FORTIFY 可能可以捕获此错误。这是因为，编译器可以因此确定 asStr 指向同一个内存作为缓冲区，这是一个 sizeof(buf) 字节大小的内存区。
+
+FORTIFY 的工作方式
+
+FORTIFY 的工作原理是：在编译时截获对标准库函数的所有直接调用，然后将这些调用重定向至经过 FORTIFY 处理的特殊版本的上述库函数。每个库函数由发出运行时诊断的部分和发出编译时诊断的部分（如果适用）组成。下面是一个简化的示例，说明经过 FORTIFY 处理的 memset（源自 string.h）的运行时部分。实际的 FORTIFY 实现可能包含几个附加的优化或检查部分。
+
+_FORTIFY_FUNCTIONinline void *memset(void *dest, int ch, size_t count) { size_t dest_size = __builtin_object_size(dest); if (dest_size == (size_t)-1) return __memset_real(dest, ch, count); return __memset_chk(dest, ch, count, dest_size);}
+
+在本例中：
+
+    _FORTIFY_FUNCTION 扩展到几个特定于编译器的属性，使对 memset 的所有直接调用均调用此特殊包装器。
+
+    __memset_real 用于跳过 FORTIFY，以调用“正常的”memset 函数。
+
+    __memset_chk 是经过 FORTIFY 处理的特殊 memset。如果 count > dest_size，__memset_chk 中止程序运行。否则，它会一直调用到 __memset_real 为止。
+
+    因为 __builtin_object_size，奇迹发生了：它很像 size sizeof，但是它不会告诉您某个类型的大小，而是在编译时尝试计算出给定指针包含的字节数量。如果失败，它会返回 (size_t)-1。
+
+__builtin_object_size 可能看上去比较粗略。编译器究竟如何能计算出某个未知指针指向多少个字节？其实……它不能。:)因此，_FORTIFY_FUNCTION 必须内联所有这些函数：内联 memset 调用也许可以使指针指向的分配（例如，本地变量和 malloc 的调用结果等等）可见。如果它可见，我们通常可以确定准确的 __builtin_object_size 结果。
+
+编译时诊断位同样主要围绕 __builtin_object_size 进行。事实上，如果您的编译器能通过某种方式发出是否可以证明某个表达式为 true 的诊断，则您可以将此诊断添加到包装器中。利用特定于编译器的属性，在 GCC 和 Clang 上均可实现这一点，因此，添加诊断与添加正确的属性一样简单。
+
+为什么不使用 Sanitize 呢？
+
+如果您熟悉 C/C++ 内存检查工具的话，您可能在想，既然有了 Clang 的 AddressSanitizer 等工具，FORTIFY 还有何用处。Sanitizer 非常适用于捕获和跟踪与内存有关的错误，而且可以捕获许多 FORTIFY 所无法捕获的问题，但我们建议使用 FORTIFY，原因有两个：
+
+    除了在代码运行时检查其是否存在错误以外，FORTIFY 还可以引发明显的编译时代码错误，而 Sanitizer 在出现问题时仅仅中止程序运行。尽管人们公认应尽早捕获问题，但我们还希望尽我们所能提供编译时错误。
+
+    FORTIFY 非常轻便，可应用于生产环境。对我们的代码启用 FORTIFY 后发现，最高 CPU 性能下降约 1.5%（平均下降 0.1%），几乎不产生内存开销，且二进制文件大小增幅很小。与之对比的是，Sanitizer 可能使代码运行速度下降一半以上，而且往往消耗大量的内存和存储空间。
+
+有鉴于此，我们在 Android 生产版本中启用 FORTIFY，以减轻某些错误可能造成的损失。尤其是，FORTIFY 可以将潜在的远程代码执行错误转化为仅中止受破坏的应用的错误。重申一遍，Sanitizer 可以检测的错误数量超过 FORTIFY，因此我们绝对支持在开发/调试版本中使用 Sanitizer。但是，对提供给用户的二进制文件运行 Sanitizer，其成本过高，不宜在生产版本中启用它。
+
+FORTIFY 重新设计
+
+FORTIFY 的初始实现用到了 C89 中的几个技巧，并引入几个特定于 GCC 的属性和语言扩展。由于 Clang 无法模拟 GCC 的运行方式，无法完全支持初始 FORTIFY 实现，我们对 FORTIFY 进行了很大幅度的重新设计，使其在 Clang 中也能尽可能高效。特别是，Clang 风格的 FORTIFY 实现不仅支持某些函数重载（如果您使用 overloadable 属性，Clang 可以非常顺利地对 C 函数应用 C++ 重载规则），还可以充分利用一些特定于 Clang 的属性和语言扩展。
+
+我们使用这一新的 FORTIFY 对数以亿计的代码行进行了测试，包括所有 Android 代码、所有 Chrome 操作系统代码（需要自行重新实现 FORTIFY）、我们的内部代码库以及许多常见的开放源代码项目。
+
+此项测试表明，我们的方法破坏代码的方式层出不穷，比如：
+
+template <typename OpenFunc>bool writeOutputFile(OpenFunc &&openFile, const char *data, size_t len) {}bool writeOutputFile(const char *data, int len) { // Error: Can’t deduce type for the newly-overloaded `open` function. return writeOutputFile(&::open, data, len);}
+
+和
+
+struct Foo { void *(*fn)(void *, const void *, size_t); }void runFoo(struct Foo f) { // Error: Which overload of memcpy do we want to take the address of? if (f.fn == memcpy) { return; } // [snip]}
+
+还有一个开放源代码项目曾试图解析系统头文件（比如 stdio.h），以确定它包含哪些函数。添加 Clang FORTIFY 位会严重干扰解析器运行，导致其编译失败。
+
+尽管作出上述大幅变更，但我们看到，破坏代码的情况非常少。例如，在编译 Chrome 操作系统时，不到 2% 的程序包出现轻微的编译时错误，只需修复几个文件即可解决这些错误。尽管能做到这一点已经“相当不错”，但它还不够理想，因此我们对方法进行了优化，进一步减少不兼容情况的发生。尽管其中部分迭代需要变更 Clang 的工作方式，但 Clang+LLVM 社区非常认同我们提议的调整和补充并予以大力支持：
+
+    在 Clang 中添加 pass_object_size、
+
+    在 Clang 中添加 alloc_size（在 LLVM 中添加对应的函数），以及
+
+    其他各种增强/改进功能，例如启用在重载解析期间转化与 C 不兼容的指针。
+
+最近，我们将它推广应用于 AOSP，且从 Android O 开始，Android 平台将受到 Clang FORTIFY 的保护。我们仍在对 NDK 进行最后的改进，开发者应该不久就会看到升级后的 FORTIFY 实现。此外，如前文所述，Chrome 操作系统现在也采用类似的 FORTIFY 实现，我们希望在接下来的几个月与开放源代码社区合作，将类似的实现* 引入 GNU C 库 glibc 中。
+
+    了解更多细节，查看文内所有链接，请点击文末“阅读原文”。
+===============================================================
+ FORTIFY in Android
+Posted by George Burgess, Software Engineer
+
+FORTIFY is an important security feature that's been available in Android since mid-2012. After migrating from GCC to clang as the default C/C++ compiler early last year, we invested a lot of time and effort to ensure that FORTIFY on clang is of comparable quality. To accomplish this, we redesigned how some key FORTIFY features worked, which we'll discuss below.
+
+Before we get into some of the details of our new FORTIFY, let's go through a brief overview of what FORTIFY does, and how it's used.
+
+What is FORTIFY?
+
+FORTIFY is a set of extensions to the C standard library that tries to catch the incorrect use of standard functions, such as memset, sprintf, open, and others. It has three primary features:
+
+    If FORTIFY detects a bad call to a standard library function at compile-time, it won't allow your code to compile until the bug is fixed.
+    If FORTIFY doesn't have enough information, or if the code is definitely safe, FORTIFY compiles away into nothing. This means that FORTIFY has 0 runtime overhead when used in a context where it can't find a bug.
+    Otherwise, FORTIFY adds checks to dynamically determine if the questionable code is buggy. If it detects bugs, FORTIFY will print out some debugging information and abort the program.
+
+
+Consider the following example, which is a bug that FORTIFY caught in real-world code:
+
+struct Foo {
+    int val;
+    struct Foo *next;
+};
+void initFoo(struct Foo *f) {
+    memset(&f, 0, sizeof(struct Foo));
+}
+
+FORTIFY caught that we erroneously passed &f as the first argument to memset, instead of f. Ordinarily, this kind of bug can be difficult to track down: it manifests as potentially writing 8 bytes extra of 0s into a random part of your stack, and not actually doing anything to *f. So, depending on your compiler optimization settings, how initFoo is used, and your project's testing standards, this could slip by unnoticed for quite a while. With FORTIFY, you get a compile-time error that looks like:
+
+/path/to/file.c: call to unavailable function 'memset': memset called with size bigger than buffer
+    memset(&f, 0, sizeof(struct Foo));
+    ^~~~~~
+
+For an example of how run-time checks work, consider the following function:
+
+// 2147483648 == pow(2, 31). Use sizeof so we get the nul terminator,
+// as well.
+#define MAX_INT_STR_SIZE sizeof("2147483648")
+struct IntAsStr {
+    char asStr[MAX_INT_STR_SIZE];
+    int num;
+};
+void initAsStr(struct IntAsStr *ias) {
+    sprintf(ias->asStr, "%d", ias->num);
+}
+
+This code works fine for all positive numbers. However, when you pass in an IntAsStr with num <= -1000000, the sprintf will write MAX_INT_STR_SIZE+1 bytes to ias->asStr. Without FORTIFY, this off-by-one error (that ends up clearing one of the bytes in num) may go silently unnoticed. With it, the program prints out a stack trace, a memory map, and will abort with a core dump.
+
+FORTIFY also performs a handful of other checks, such as ensuring calls to open have the proper arguments, but it's primarily used for catching memory-related errors like the ones mentioned above.
+However, FORTIFY can't catch every memory-related bug that exists. For example, consider the following code:
+
+__attribute__((noinline)) // Tell the compiler to never inline this function.
+inline void intToStr(int i, char *asStr) { sprintf(asStr, “%d”, num); }
+
+
+char *intToDupedStr(int i) {
+    const int MAX_INT_STR_SIZE = sizeof(“2147483648”);
+    char buf[MAX_INT_STR_SIZE];
+    intToStr(i, buf);
+    return strdup(buf);
+}
+
+Because FORTIFY determines the size of a buffer based on the buffer's type and—if visible—its allocation site, it can't catch this bug. In this case, FORTIFY gives up because:
+
+    the pointer is not a type with a pointee size we can determine with confidence because char * can point to a variable amount of bytes
+    FORTIFY can't see where the pointer was allocated, because asStr could point to anything.
+
+
+If you're wondering why we have a noinline attribute there, it's because FORTIFY may be able to catch this bug if intToStr gets inlined into intToDupedStr. This is because it would let the compiler see that asStr points to the same memory as buf, which is a region of sizeof(buf) bytes of memory.
+
+How FORTIFY works
+
+FORTIFY works by intercepting all direct calls to standard library functions at compile-time, and redirecting those calls to special FORTIFY'ed versions of said library functions. Each library function is composed of parts that emit run-time diagnostics, and—if applicable—parts that emit compile-time diagnostics. Here is a simplified example of the run-time parts of a FORTIFY'ed memset (taken from string.h). An actual FORTIFY implementation may include a few extra optimizations or checks.
+
+_FORTIFY_FUNCTION
+inline void *memset(void *dest, int ch, size_t count) {
+    size_t dest_size = __builtin_object_size(dest);
+    if (dest_size == (size_t)-1)
+        return __memset_real(dest, ch, count);
+    return __memset_chk(dest, ch, count, dest_size);
+}
+
+In this example:
+
+    _FORTIFY_FUNCTION expands to a handful of compiler-specific attributes to make all direct calls to memset call this special wrapper.
+    __memset_real is used to bypass FORTIFY to call the "regular" memset function.
+    __memset_chk is the special FORTIFY'ed memset. If count > dest_size, __memset_chk aborts the program. Otherwise, it simply calls through to __memset_real.
+    __builtin_object_size is where the magic happens: it's a lot like size sizeof, but instead of telling you the size of a type, it tries to figure out how many bytes exist at the given pointer during compilation. If it fails, it hands back (size_t)-1.
+
+
+The __builtin_object_size might seem sketchy. After all, how can the compiler figure out how many bytes exist at an unknown pointer? Well... It can't. :) This is why _FORTIFY_FUNCTION requires inlining for all of these functions: inlining the memset call might make an allocation that the pointer points to (e.g. a local variable, result of calling malloc, …) visible. If it does, we can often determine an accurate result for __builtin_object_size.
+
+The compile-time diagnostic bits are heavily centered around __builtin_object_size, as well. Essentially, if your compiler has a way to emit diagnostics if an expression can be proven to be true, then you can add that to the wrapper. This is possible on both GCC and clang with compiler-specific attributes, so adding diagnostics is as simple as tacking on the correct attributes.
+
+Why not Sanitize?
+
+If you're familiar with C/C++ memory checking tools, you may be wondering why FORTIFY is useful when things like clang's AddressSanitizer exist. The sanitizers are excellent for catching and tracking down memory-related errors, and can catch many issues that FORTIFY can't, but we recommend FORTIFY for two reasons:
+
+    In addition to checking your code for bugs while it's running, FORTIFY can emit compile-time errors for code that's obviously incorrect, whereas the sanitizers only abort your program when a problem occurs. Since it's generally accepted that catching issues as early as possible is good, we'd like to give compile-time errors when we can.
+    FORTIFY is lightweight enough to enable in production. Enabling it on parts of our own code showed a maximum CPU performance degradation of ~1.5% (average 0.1%), virtually no memory overhead, and a very small increase in binary size. On the other hand, sanitizers can slow code down by well over 2x, and often eat up a lot of memory and storage space.
+
+
+Because of this, we enable FORTIFY in production builds of Android to mitigate the amount of damage that some bugs can cause. In particular, FORTIFY can turn potential remote code execution bugs into bugs that simply abort the broken application. Again, sanitizers are capable of detecting more bugs than FORTIFY, so we absolutely encourage their use in development/debugging builds. But the cost of running them for binaries shipped to users is simply way too high to leave them enabled for production builds.
+
+FORTIFY redesign
+
+FORTIFY's initial implementation used a handful of tricks from the world of C89, with a few GCC-specific attributes and language extensions sprinkled in. Because Clang cannot emulate how GCC works to fully support the original FORTIFY implementation, we redesigned large parts of it to make it as effective as possible on clang. In particular, our clang-style FORTIFY implementation makes use of clang-specific attributes and language extensions, as well as some function overloading (clang will happily apply C++ overloading rules to your C functions if you use its overloadable attribute).
+
+We tested hundreds of millions of lines of code with this new FORTIFY, including all of Android, all of Chrome OS (which needed its own reimplementation of FORTIFY), our internal codebase, and many popular open source projects.
+
+This testing revealed that our approach broke existing code in a variety of exciting ways, like:
+
+template <typename OpenFunc>
+bool writeOutputFile(OpenFunc &&openFile, const char *data, size_t len) {}
+
+bool writeOutputFile(const char *data, int len) {
+    // Error: Can’t deduce type for the newly-overloaded `open` function.
+    return writeOutputFile(&::open, data, len);
+}
+
+and
+
+struct Foo { void *(*fn)(void *, const void *, size_t); }
+void runFoo(struct Foo f) {
+    // Error: Which overload of memcpy do we want to take the address of?
+    if (f.fn == memcpy) {
+        return;
+    }
+    // [snip]
+}
+
+
+There was also an open-source project that tried to parse system headers like stdio.h in order to determine what functions it has. Adding the clang FORTIFY bits greatly confused the parser, which caused its build to fail.
+
+Despite these large changes, we saw a fairly low amount of breakage. For example, when compiling Chrome OS, fewer than 2% of our packages saw compile-time errors, all of which were trivial fixes in a couple of files. And while that may be "good enough," it is not ideal, so we refined our approach to further reduce incompatibilities. Some of these iterations even required changing how clang worked, but the clang+LLVM community was very helpful and receptive to our proposed adjustments and additions, such as:
+
+    the addition of pass_object_size to clang,
+    the addition of alloc_size to clang (and its counterpart in LLVM), and
+    various other enhancements/tweaks, like allowing incompatible pointer conversions in overload resolution for C.
+
+
+We recently pushed it to AOSP, and starting in Android O, the Android platform will be protected by clang FORTIFY. We're still putting some finishing touches on the NDK, so developers should expect to see our upgraded FORTIFY implementation there in the near future. In addition, as we alluded to above, Chrome OS also has a similar FORTIFY implementation now, and we hope to work with the open-source community in the coming months to get a similar implementation* into glibc, the GNU C library.
+
+* For those who are interested, this will look very different than the Chrome OS patch. Clang recently gained an attribute called diagnose_if, which ends up allowing for a much cleaner FORTIFY implementation than our original approach for glibc, and produces far prettier errors/warnings than we currently can. We expect to have a similar 
