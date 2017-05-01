@@ -173,8 +173,10 @@ function test_one_type(){
         adb reboot
         sleep 5
         adb wait-for-device
-        adb shell disablesuspend.sh
-        sleep 10
+        adb root
+        sleep 2
+        adb shell /data/local/tmp/disablesuspend.sh
+        sleep 5
 
         adb shell dmesg >${log_path}/dmesg_$i.log
         adb logcat -d -v time *:V > ${log_path}/logcat_all_$i.log

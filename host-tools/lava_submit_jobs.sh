@@ -56,11 +56,11 @@ https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-a
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-glbenchmark-2.5.1.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-weekly.json
 "
-#https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cts-focused1.json
-#https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cts-focused2.json
-#https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-benchmarkpi.json
-#https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cf-bench.json
 x15_other_jobs="
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cts-focused1.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cts-focused2.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-benchmarkpi.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-cf-bench.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-gearses2eclair.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-geekbench3.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/x15/template-javawhetstone.json
