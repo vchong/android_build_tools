@@ -156,10 +156,10 @@ function submit_job(){
     sed -i "s=%%ANDROID_META_NAME%%=${build_name}=" ${job_file}
     sed -i "s=%%ANDROID_META_URL%%=${ANDROID_META_URL}=" ${job_file}
     sed -i "s=%%DOWNLOAD_URL%%=${DOWNLOAD_URL}=" ${job_file}
-    sed -i "s=%%ANDROID_BOOT%%=${DOWNLOAD_URL}/boot${IMG_EXT}=" ${job_file}
-    sed -i "s=%%ANDROID_SYSTEM%%=${DOWNLOAD_URL}/system${IMG_EXT}=" ${job_file}
-    sed -i "s=%%ANDROID_DATA%%=${DOWNLOAD_URL}/userdata${IMG_EXT}=" ${job_file}
-    sed -i "s=%%ANDROID_CACHE%%=${DOWNLOAD_URL}/cache${IMG_EXT}=" ${job_file}
+    sed -i "s=%%ANDROID_BOOT%%=${DOWNLOAD_URL}/boot${img_ext}=" ${job_file}
+    sed -i "s=%%ANDROID_SYSTEM%%=${DOWNLOAD_URL}/system${img_ext}=" ${job_file}
+    sed -i "s=%%ANDROID_DATA%%=${DOWNLOAD_URL}/userdata${img_ext}=" ${job_file}
+    sed -i "s=%%ANDROID_CACHE%%=${DOWNLOAD_URL}/cache${img_ext}=" ${job_file}
     sed -i "s=%%JOB_NAME%%=${build_name}=" ${job_file}
 
     lava-tool submit-job "${lava_server}" "${job_file}"
@@ -193,7 +193,7 @@ function submit_remain_jobs_for_hikey_premerge(){
 function submit_remain_jobs_for_juno_premerge(){
     local build_number="${1}"
     local build_name="android-lcr-member-juno-n-premerge-ci"
-    local img_ext=".img.xz"
+    local img_ext=".tar.bz2"
     for job_url in ${juno_other_jobs} ${juno_weekly_jobs}; do
         submit_job "${job_url}" "${build_number}" "${build_name}" "${img_ext}"
     done
