@@ -25,3 +25,6 @@ But it'll be a good starting point.
 
 ttyl
 bero
+
+https://github.com/robherring/android_manifest/blob/master/linaro.xml
+robher-aosp-gendev.yaml and robher-aosp.yaml
