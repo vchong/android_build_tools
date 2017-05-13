@@ -157,12 +157,17 @@ function generateLinaroCtsPackage(){
 
             sudo -u yongqin.liu scp -r ${package_name_linaro} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
 
-            cd ${working_dir}/ && git clone https://git.linaro.org/qa/test-plans.git
             sudo -u yongqin.liu ssh testdata.validation.linaro.org ln -s /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip
 
             local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
             local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
-            cd test-plans && sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && git add . && git commit -s -m "update to cts version to ${new_cts_version}" && sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
+            cd ${working_dir}/ && \
+                sudo -u yongqin.liu git clone https://git.linaro.org/qa/test-plans.git && \
+                cd test-plans && \
+                sudo -u yongqin.liu sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
+                sudo -u yongqin.liu git add . && \
+                sudo -u yongqin.liu git commit -s -m "update to cts version to ${new_cts_version}" && \
+                sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
         fi
     else
         echo "No java command is found, please generate the linaro cts package manually"
@@ -195,8 +200,8 @@ function main(){
                 fi
             fi
         fi
-        irc_notify "${message}"
         generateLinaroCtsPackage
+        irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
     fi
