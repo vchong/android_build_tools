@@ -104,8 +104,8 @@ function main(){
         local message="There is new cts package released. The latest AOSP tag is: ${new_cts_version}"
         message="${message}, ${remote_url}"
         local testdata_remote_file="/home/testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
-        local test_data_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org ls /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name})
-        if [ "X${remote_file}" = "X${remote_file_to_check}" ]; then
+        local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org ls /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name})
+        if [ "X${testdata_remote_file}" = "X${testdata_remote_file_to_check}" ]; then
             message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
         else
             mkdir -p ${local_dir}
