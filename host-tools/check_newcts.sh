@@ -21,7 +21,7 @@ function get_latest_cts(){
 }
 
 function get_latest_for_lcr(){
-    local url_m_lcr_juno=$(getLCRURL)
+    local latest_lcr=$(getLCRURL)
     latest_lcr=${latest_lcr#http://testdata.validation.linaro.org/cts/android-cts-}
     latest_lcr=${latest_lcr%.zip}
     echo "${latest_lcr}"
