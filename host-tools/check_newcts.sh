@@ -162,7 +162,7 @@ function generateLinaroCtsPackage(){
 
             local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
             local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
-            cd test-plans && sed -i 's/${url_lcr}/${new_url}/' android/*/*.json && git add . && git commit -s -m "update to cts version to ${new_cts_version}" && sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
+            cd test-plans && sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && git add . && git commit -s -m "update to cts version to ${new_cts_version}" && sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
         fi
     else
         echo "No java command is found, please generate the linaro cts package manually"
