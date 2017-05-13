@@ -4,6 +4,7 @@
 IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
+URL_JUNO_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/lcr-member-juno-m/template-cts-focused1.json"
 
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
@@ -20,13 +21,7 @@ function get_latest_cts(){
 }
 
 function get_latest_for_lcr(){
-    local url_m_lcr_juno="https://git.linaro.org/qa/test-plans.git/plain/android/lcr-member-juno-m/template-cts-focused1.json"
-    local latest_lcr=$(curl ${url_m_lcr_juno}|grep CTS_URL|cut -d\" -f 4)
-    if [ -z "${latest_lcr}" ]; then
-        echo "Failed to get the tags information for LCR"
-        echo "Please check the status and try again"
-        exit 1
-    fi
+    local url_m_lcr_juno=$(getLCRURL)
     latest_lcr=${latest_lcr#http://testdata.validation.linaro.org/cts/android-cts-}
     latest_lcr=${latest_lcr%.zip}
     echo "${latest_lcr}"
@@ -95,6 +90,85 @@ __EOF__
     echo "IRC Notify Finished"
 }
 
+function getLCRURL(){
+    local url_lcr=$(curl -L ${URL_JUNO_CTS_TEMPLATE}|grep CTS_URL|cut -d\" -f 4)
+    if [ -z "${url_lcr}" ]; then
+        echo "Failed to get the url information for LCR via url ${URL_JUNO_CTS_TEMPLATE}"
+        echo "Please check the status and try again"
+        exit 1
+    fi
+    echo "${url_lcr}"
+}
+
+function prepareCtsDir(){
+    local work_dir=$1
+    local cts_url=$2
+
+    cd ${work_dir}
+    wget ${cts_url} -O "${work_dir}/cts.zip"
+    local f_modules_list="${work_dir}/modules.log"
+    local f_modules_sort="${work_dir}/modules.sort"
+    unzip cts.zip
+    ./android-cts/tools/cts-tradefed list modules |tee ${f_modules_list}
+    local pos_end=$(grep -n 'Saved log to' ${f_modules_list}  |cut -d: -f1)
+    local pos_start=$(grep -n 'Using commandline arguments' ${f_modules_list}  |cut -d: -f1)
+    local total_lines=$(wc -l ${f_modules_list})
+    local tail_num=$(echo "${total_lines},${pos_start}"|awk -F, '{printf "%d",$1 - $2;}')
+    local head_num=$(echo "${pos_start},${pos_end}"|awk -F, '{printf "%d",$2 - $1 - 1;}')
+    tail -n ${tail_num} ${f_modules_list} | head -n ${head_num} |sort > ${f_modules_sort}
+}
+
+function generateLinaroCtsPackage(){
+    local new_cts_version=$(get_latest_cts)
+    local local_dir=$(date +%y.%m)
+    local package_name_linaro="android-cts-${new_cts_version}-linux_x86-arm-linaro.zip"
+    local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org readlink /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro})
+    if [[ "X${testdata_remote_file_to_check}" =~ "${local_dir}/${package_name_linaro}" ]]; then
+        return
+    fi
+    if which java >/dev/null; then
+        local url_lcr=$(getLCRURL)
+        local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
+        local url_google="http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+        local working_dir=$(mktemp -d -p /tmp/ -d CTS-XXX)
+        sudo rm -fr /tmp/build-tools.tar.gz
+        sudo -u yongqin.liu scp testdata.validation.linaro.org:/home/testdata.validation.linaro.org/apks/workload-automation/build-tools.tar.gz /tmp/build-tools.tar.gz
+        tar -C ${working_dir} -xvf /tmp/build-tools.tar.gz
+        sudo rm -fr /tmp/build-tools.tar.gz
+        export PATH=${PATH}:${working_dir}/build-tools/android-4.4/
+        mkdir ${working_dir}/linaro ${working_dir}/google
+        prepareCtsDir "${working_dir}/linaro" "${url_lcr}"
+        prepareCtsDir "${working_dir}/google" "${url_google}"
+
+        if diff ${working_dir}/linaro//modules.sort ${working_dir}/google//modules.sort; then
+            cp ${working_dir}/google/android-cts/testcases/egl-master.txt ${working_dir}/google/egl-master.txt && \
+            cp ${working_dir}/google/android-cts/tools/tradefed-prebuilt.jar ${working_dir}/google/tradefed-prebuilt.jar && \
+            rm -fr ${working_dir}/google/android-cts
+
+            mkdir -p ${working_dir}/google/android-cts//testcases/ ${working_dir}/google/android-cts//tools
+            sed -i '/dEQP-EGL.functional.sharing.gles2.multithread.random.images.copyteximage2d/d' ${working_dir}/egl-master.txt > ${working_dir}/google/egl-master.txt
+
+            rm -fr ${working_dir}/linaro/android-cts/tools/config
+            cd ${working_dir}/linaro/android-cts/tools/ && jar -xf tradefed-prebuilt.jar config/cts- && mv config ${working_dir}/google/android-cts//tools
+
+            cp ${working_dir}/google/tradefed-prebuilt.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf tradefed-prebuilt.jar config/
+
+            cd ${working_dir}/google/ && zip -ru cts.zip android-cts && mv cts.zip ${package_name_linaro}
+
+            sudo -u yongqin.liu scp -r ${package_name_linaro} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
+
+            cd ${working_dir}/ && git clone https://git.linaro.org/qa/test-plans.git
+            sudo -u yongqin.liu ssh testdata.validation.linaro.org ln -s /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip
+
+            local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
+            local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
+            cd test-plans && sed -i 's/${url_lcr}/${new_url}/' android/*/*.json && git add . && git commit -s -m "update to cts version to ${new_cts_version}" && sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
+        fi
+    else
+        echo "No java command is found, please generate the linaro cts package manually"
+    fi
+}
+
 function main(){
     if has_new; then
         local new_cts_version=$(get_latest_cts)
@@ -121,8 +195,9 @@ function main(){
                 fi
             fi
         fi
-            irc_notify "${message}"
-        else
+        irc_notify "${message}"
+        generateLinaroCtsPackage
+    else
         echo "No new tags released in AOSP"
     fi
 }
