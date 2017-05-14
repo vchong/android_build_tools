@@ -103,9 +103,14 @@ function getLCRURL(){
 function prepareCtsDir(){
     local work_dir=$1
     local cts_url=$2
+    local local_pkg=$3
 
     cd ${work_dir}
-    wget ${cts_url} -O "${work_dir}/cts.zip"
+    if [ -f "${local_pkg}" ]; then
+        mv ${local_pkg} "${work_dir}/cts.zip"
+    else
+        wget ${cts_url} -O "${work_dir}/cts.zip"
+    fi
     local f_modules_list="${work_dir}/modules.log"
     local f_modules_sort="${work_dir}/modules.sort"
     unzip cts.zip
@@ -119,10 +124,11 @@ function prepareCtsDir(){
 }
 
 function generateLinaroCtsPackage(){
+    local local_google_pkg=$1
     local new_cts_version=$(get_latest_cts)
     local local_dir=$(date +%y.%m)
     local package_name_linaro="android-cts-${new_cts_version}-linux_x86-arm-linaro.zip"
-    local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org readlink /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro})
+    local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org readlink /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip)
     if [[ "X${testdata_remote_file_to_check}" =~ "${local_dir}/${package_name_linaro}" ]]; then
         return
     fi
@@ -138,7 +144,7 @@ function generateLinaroCtsPackage(){
         export PATH=${PATH}:${working_dir}/build-tools/android-4.4/
         mkdir ${working_dir}/linaro ${working_dir}/google
         prepareCtsDir "${working_dir}/linaro" "${url_lcr}"
-        prepareCtsDir "${working_dir}/google" "${url_google}"
+        prepareCtsDir "${working_dir}/google" "${url_google}" "${local_google_pkg}"
 
         if diff ${working_dir}/linaro//modules.sort ${working_dir}/google//modules.sort; then
             cp ${working_dir}/google/android-cts/testcases/egl-master.txt ${working_dir}/google/egl-master.txt && \
@@ -162,12 +168,18 @@ function generateLinaroCtsPackage(){
             local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
             local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
             cd ${working_dir}/ && \
-                sudo -u yongqin.liu git clone https://git.linaro.org/qa/test-plans.git && \
+                sudo chmod 777 ${working_dir} && \
+                sudo rm -fr test-plans && \
+                git clone https://git.linaro.org/qa/test-plans.git && \
                 cd test-plans && \
-                sudo -u yongqin.liu sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
-                sudo -u yongqin.liu git add . && \
-                sudo -u yongqin.liu git commit -s -m "update to cts version to ${new_cts_version}" && \
-                sudo -u yongqin.liu git push ssh://yongqin.liu@android-review.linaro.org:29418/android-build-configs HEAD:refs/for/master%${reviewers}
+                git config --global user.name "Yongqin Liu" && \
+                git config --global user.email yongqin.liu@linaro.org && \
+                sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
+                cp ../commit-msg .git/hooks/ && \
+                sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
+                git add . && \
+                git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
+                sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
         fi
     else
         echo "No java command is found, please generate the linaro cts package manually"
@@ -198,9 +210,11 @@ function main(){
                 else
                     message="${message}, failed to download it, please check manually"
                 fi
+                local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
+                generateLinaroCtsPackage "${abs_path}"
+                rmdir $(dirname ${abs_path})
             fi
         fi
-        generateLinaroCtsPackage
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
