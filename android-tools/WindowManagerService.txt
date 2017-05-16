@@ -1,0 +1,284 @@
+frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp:300:    ALOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
+frameworks/native/services/surfaceflinger/SurfaceFlinger_hwc1.cpp:297:    ALOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
+    void SurfaceFlinger::bootFinished() {
+        const nsecs_t now = systemTime();
+        const nsecs_t duration = now - mBootTime;
+        ALOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) ); /////////////////"Booot is finished" printed
+        mBootFinished = true;
+
+        // wait patiently for the window manager death
+        const String16 name("window");
+        sp<IBinder> window(defaultServiceManager()->getService(name));
+        if (window != 0) {
+            window->linkToDeath(static_cast<IBinder::DeathRecipient*>(this));
+        }
+
+        // stop boot animation
+        // formerly we would just kill the process, but we now ask it to exit so it
+        // can choose where to stop the animation.
+        property_set("service.bootanim.exit", "1");
+
+        const int LOGTAG_SF_STOP_BOOTANIM = 60110;
+        LOG_EVENT_LONG(LOGTAG_SF_STOP_BOOTANIM,
+                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+    }
+
+frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java
+    mDisplayEnabled
+    mSystemBooted
+    mShowingBootMessages
+    mForceDisplayEnabled
+    mBootAnimationStopped
+
+
+    // Async Handler
+    final class H extends Handler {
+        public void handleMessage(Message msg) {
+            ...
+            switch (msg.what) {
+                ...
+                case BOOT_TIMEOUT: {
+                    performBootTimeout();
+                    break;
+                }
+                ...
+            }
+            ...
+        }
+    }
+
+
+    public void enableScreenAfterBoot() {
+        synchronized(mWindowMap) {
+            if (DEBUG_BOOT) {
+                RuntimeException here = new RuntimeException("here");
+                here.fillInStackTrace();
+                Slog.i(TAG_WM, "enableScreenAfterBoot: mDisplayEnabled=" + mDisplayEnabled
+                + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                + " mShowingBootMessages=" + mShowingBootMessages
+                + " mSystemBooted=" + mSystemBooted, here);
+            }
+            if (mSystemBooted) {
+                return;
+            }
+            mSystemBooted = true;
+            hideBootMessagesLocked();
+            // If the screen still doesn't come up after 30 seconds, give
+            // up and turn it on.
+            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30*1000); <<<================== set an event to trigger after 30 seconds
+        }
+
+        mPolicy.systemBooted();
+
+        performEnableScreen(); <<<================= Only enable?
+    }
+
+    public void performBootTimeout() {
+        synchronized(mWindowMap) {
+            if (mDisplayEnabled) {
+                return;
+            }
+            Slog.w(TAG_WM, "***** BOOT TIMEOUT: forcing display enabled"); <===================== Force boot
+            mForceDisplayEnabled = true;
+        }
+        performEnableScreen(); <<<=================called again here after set mForceDisplayEnabled to true and mDisplayEnabled not set to true yet
+    }
+
+    public void performEnableScreen() {
+        synchronized(mWindowMap) {
+            if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
+                    + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                    + " mShowingBootMessages=" + mShowingBootMessages
+                    + " mSystemBooted=" + mSystemBooted
+                    + " mOnlyCore=" + mOnlyCore,
+                    new RuntimeException("here").fillInStackTrace());
+            if (mDisplayEnabled) {
+                return;
+            }
+            if (!mSystemBooted && !mShowingBootMessages) {
+                return;
+            }
+
+            // Don't enable the screen until all existing windows have been drawn.
+            if (!mForceDisplayEnabled && checkWaitingForWindowsLocked()) { //////////////////blocked here
+                return;
+            }
+
+            if (!mBootAnimationStopped) {
+                // Do this one time.
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
+                try {
+                    IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+                    if (surfaceFlinger != null) {
+                        //Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+                        Parcel data = Parcel.obtain();
+                        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                        surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
+                                data, null, 0); ////////////////////////"Boot is finished" is printed here
+                        data.recycle();
+                    }
+                } catch (RemoteException ex) {
+                    Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
+                }
+                mBootAnimationStopped = true;
+            }
+
+            if (!mForceDisplayEnabled && !checkBootAnimationCompleteLocked()) {
+                if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: Waiting for anim complete");
+                return;
+            }
+
+            EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
+            mDisplayEnabled = true; /////////////////////////////////////////////The only place to set mDisplayEnabled
+            if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG_WM, "******************** ENABLING SCREEN!");
+
+            // Enable input dispatch.
+            mInputMonitor.setEventDispatchingLw(mEventDispatchingEnabled);
+        }
+
+        try {
+            mActivityManager.bootAnimationComplete();
+        } catch (RemoteException e) {
+        }
+
+        mPolicy.enableScreenAfterBoot();
+
+        // Make sure the last requested orientation has been applied.
+        updateRotationUnchecked(false, false);
+    }
+
+    private boolean checkWaitingForWindowsLocked() {
+
+        boolean haveBootMsg = false;
+        boolean haveApp = false;
+        // if the wallpaper service is disabled on the device, we're never going to have
+        // wallpaper, don't bother waiting for it
+        boolean haveWallpaper = false;
+        boolean wallpaperEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableWallpaperService)
+                && !mOnlyCore;
+        boolean haveKeyguard = true;
+        // TODO(multidisplay): Expand to all displays?
+        final WindowList windows = getDefaultWindowListLocked();
+        final int N = windows.size();
+        for (int i=0; i<N; i++) {
+            WindowState w = windows.get(i);
+            if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
+                return true;
+            }
+            if (w.isDrawnLw()) {
+                if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
+                    haveBootMsg = true;
+                } else if (w.mAttrs.type == TYPE_APPLICATION
+                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
+                    haveApp = true;
+                } else if (w.mAttrs.type == TYPE_WALLPAPER) {
+                    haveWallpaper = true;
+                } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
+                    haveKeyguard = mPolicy.isKeyguardDrawnLw();
+                }
+            }
+        }
+
+        if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
+            Slog.i(TAG_WM, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
+                    + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
+                    + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
+                    + " haveKeyguard=" + haveKeyguard);
+        }
+
+        // If we are turning on the screen to show the boot message,
+        // don't do it until the boot message is actually displayed.
+        if (!mSystemBooted && !haveBootMsg) {
+            return true;
+        }
+
+        // If we are turning on the screen after the boot is completed
+        // normally, don't do so until we have the application and
+        // wallpaper.
+        if (mSystemBooted && ((!haveApp && !haveKeyguard) ||
+                (wallpaperEnabled && !haveWallpaper))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    performEnableScreen
+        <------enableScreenAfterBoot
+        <------performBootTimeout
+        <------showBootMessage
+        <------case ENABLE_SCREEN
+            <--------enableScreenIfNeededLocked
+                <--------enableScreenIfNeeded
+        <------case CHECK_IF_BOOT_ANIMATION_FINISHED:
+            <------checkBootAnimationCompleteLocked
+                <------performEnableScreen
+                <------case CHECK_IF_BOOT_ANIMATION_FINISHED
+                    <------checkBootAnimationCompleteLocked
+
+ ******** booted=true msg=false haveBoot=false haveApp=false haveWall=false wallEnabled=true haveKeyguard=true
+ boolean wallpaperEnabled = mContext.getResources().getBoolean(com.android.internal.R.bool.config_enableWallpaperService) && !mOnlyCore;
+
+frameworks/base/core/res/res/values/symbols.xml:276:  <java-symbol type="bool" name="config_enableWallpaperService" />
+frameworks/base/core/res/res/values/config.xml:1251:    <bool name="config_enableWallpaperService">true</bool>
+
+
+ W WindowManager: ======LIUYQ window= Window{55fc5c6 u0 com.android.systemui.ImageWallpaper}
+W WindowManager: ======LIUYQ haveWallpaper = true window= Window{55fc5c6 u0 com.android.systemui.ImageWallpaper}
+frameworks/base/packages/SystemUI/src/com/android/systemui/ImageWallpaper.java
+frameworks/base//core/java/android/service/wallpaper/WallpaperService.java
+frameworks/base/core/java/android/app/WallpaperManager.java
+
+19:22:16 liuyq: base$ grep -rn image_wallpaper_component ./
+./core/res/res/values/symbols.xml:1857:  <java-symbol type="string" name="image_wallpaper_component" />
+./core/res/res/values/config.xml:1248:    <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.ImageWallpaper</string>
+./services/core/java/com/android/server/wallpaper/WallpaperManagerService.java:885:                context.getResources().getString(R.string.image_wallpaper_component));
+19:23:02 liuyq: base$
+
+   public WallpaperManagerService(Context context) {
+       if (DEBUG) Slog.v(TAG, "WallpaperService startup");
+       mContext = context;
+       mShuttingDown = false;
+       mImageWallpaper = ComponentName.unflattenFromString(
+               context.getResources().getString(R.string.image_wallpaper_component)); <===================ImageWallpaper used here
+       mIWindowManager = IWindowManager.Stub.asInterface(
+               ServiceManager.getService(Context.WINDOW_SERVICE));
+       mIPackageManager = AppGlobals.getPackageManager();
+       mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+       mMonitor = new MyPackageMonitor();
+       mMonitor.register(context, null, UserHandle.ALL, true);
+       getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
+       loadSettingsLocked(UserHandle.USER_SYSTEM, false);
+   }
+
+
+01-01 00:00:31.065  1954  1954 I ActivityManager: Start proc 2043:com.android.systemui/u0a21 for service com.android.systemui/.ImageWallpaper
+01-01 00:00:31.065  1954  1954 I ActivityManager: java.lang.RuntimeException: here
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3874)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3665)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:3546)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActiveServices.bringUpServiceLocked(ActiveServices.java:1750)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActiveServices.bindServiceLocked(ActiveServices.java:1047)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActivityManagerService.bindService(ActivityManagerService.java:17308)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at android.app.ContextImpl.bindServiceCommon(ContextImpl.java:1476)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at android.app.ContextImpl.bindServiceAsUser(ContextImpl.java:1443)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.wallpaper.WallpaperManagerService.bindWallpaperComponentLocked(WallpaperManagerService.java:1702)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.wallpaper.WallpaperManagerService.clearWallpaperLocked(WallpaperManagerService.java:1181)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.wallpaper.WallpaperManagerService.systemReady(WallpaperManagerService.java:936)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.wallpaper.WallpaperManagerService$Lifecycle.onBootPhase(WallpaperManagerService.java:134)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.SystemServiceManager.startBootPhase(SystemServiceManager.java:142)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.SystemServer$2.run(SystemServer.java:1322)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.am.ActivityManagerService.systemReady(ActivityManagerService.java:13361)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.SystemServer.startOtherServices(SystemServer.java:1318)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.SystemServer.run(SystemServer.java:333)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.server.SystemServer.main(SystemServer.java:218)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at java.lang.reflect.Method.invoke(Native Method)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.internal.os.Zygote$MethodAndArgsCaller.run(Zygote.java:228)
+01-01 00:00:31.065  1954  1954 I ActivityManager:   at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:709)
+
+
+logcat main buffer cleared after time changed via networktime
+need to disable network time config.disable_networktime
+frameworks/base / services/core/java/com/android/server/NetworkTimeUpdateService.java
