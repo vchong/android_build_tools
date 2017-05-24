@@ -12,49 +12,48 @@ else
     exit 1
 fi
 
-branch="android-7.1.1_r28"
-branch="android-o-preview-1"
-#branch="master"
+branch="android-o-preview-2"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-o-preview"
 
 main "$@"
 
-#                          android-patchsets \
-#                          build \
+if true; then
 ${BASE}/sync-projects.sh  \
-                          bionic \
+                          android-patchsets \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
-                          frameworks/base \
-                          frameworks/av \
                           external/optee_test \
-                          external/optee_client \
-                          optee/optee_os \
 
-${BASE}/sync-projects.sh \
-                        system/extras \
-                        system/vold \
-                        system/core \
+#                          build \
 
-${BASE}/sync-projects.sh \
-                        device/ti/am57xevm \
-                        kernel/ti/x15/ \
+#${BASE}/sync-projects.sh \
+#                        system/extras \
+#                        system/vold \
+#                        system/core \
 
+#${BASE}/sync-projects.sh \
+#                        external/libdrm \
+#                        device/ti/am57xevm \
+
+#                        kernel/ti/x15/ \
 #                        ti/u-boot/ \
 #                          art \
 #                          external/opencv-upstream \
 
+fi
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
 func_apply_patch O-MLCR-PATCHSET
 #func_apply_patch juno-n-workarounds
 func_apply_patch hikey-o-workarounds
-func_apply_patch hikey-optee-n
-func_apply_patch hikey-clang-4.9
-func_apply_patch x15-n-workarounds
+func_apply_patch hikey-optee-master
+func_apply_patch hikey-optee-4.9
+func_apply_patch optee-240-workarounds
+#func_apply_patch hikey-clang-4.9
+#func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15

@@ -1,0 +1,40 @@
+4:59:16 liuyq: hisilicon$ grep -rn 'LSM_HOOK_INIT(capset' security/
+security/commoncap.c:1092:  LSM_HOOK_INIT(capset, cap_capset),
+security/selinux/hooks.c:6090:  LSM_HOOK_INIT(capset, selinux_capset),
+14:59:17 liuyq: hisilicon$
+
+security/security.c:
+int security_capset(struct cred *new, const struct cred *old,
+    const kernel_cap_t *effective,
+    const kernel_cap_t *inheritable,
+    const kernel_cap_t *permitted) {
+    return call_int_hook(capset, 0, new, old, effective, inheritable, permitted);
+}
+
+kernel/capability.c:
+SYSCALL_DEFINE2(capset, cap_user_header_t, header, const cap_user_data_t, data){
+    ....
+    ret = security_capset(new, current_cred(), &effective, &inheritable, &permitted);
+    if (ret < 0) goto error;
+    ....
+}
+
+
+external/libcap
+
+
+0:30:01 liuyq: master$ grep -rn CAP_AUDIT_CONTROL system/core/
+system/core/logd/main.cpp:129:                                auditd ? CAP_AUDIT_CONTROL : CAP_SETGID };
+system/core/logd/main.cpp:140:            "failed to set CAP_SETGID, CAP_SYSLOG or CAP_AUDIT_CONTROL (%d)",
+system/core/libcutils/include/private/android_filesystem_capability.h:102:#define CAP_AUDIT_CONTROL 30
+system/core/libcutils/fs_config.cpp:185:                                           CAP_MASK_LONG(CAP_AUDIT_CONTROL) |
+10:30:07 liuyq: master$
+
+static const struct fs_path_config android_files[] = {
+        ...
+        { 00550, AID_LOGD,      AID_LOGD,       CAP_MASK_LONG(CAP_SYSLOG) |
+                                                CAP_MASK_LONG(CAP_AUDIT_CONTROL) |
+                                                CAP_MASK_LONG(CAP_SETGID),
+                                                "system/bin/logd" },
+         ...
+}

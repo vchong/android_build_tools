@@ -44,9 +44,9 @@ function build_hikey(){
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
 #    export KERNEL_BUILD_WITH_CLANG=true
+    export TARGET_BUILD_UEFI=true
     build hikey
     targets="selinuxtarballs"
-    make -C device/linaro/hikey/bootloader TARGET_TEE_IS_OPTEE=true
 }
 
 function build_manta(){
