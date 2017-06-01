@@ -50,6 +50,7 @@ fi
 #export https_proxy=192.168.0.102:37586
 
 func_apply_patch MASTER-MLCR-PATCHSET
+func_apply_patch optee-master-workarounds
 #func_apply_patch juno-n-workarounds
 func_apply_patch hikey-o-workarounds
 func_apply_patch hikey-optee-master
