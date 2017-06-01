@@ -6,6 +6,9 @@ import re
 
 from lava_tool.authtoken import AuthenticatingServerProxy, KeyringAuthBackend
 
+## Filter the result with awk
+## awk -F ,  '{ if (($4 + 0 >50) || ($4 + 0 <-50)){print $0;} }' host-tools/x15-result.csv
+
 time_mem_units = [ "miliseconds", "ms", "ns", "s", "seconds", "kb"]
 
 #lava-tool job-details https://yongqin.liu@validation.linaro.org/RPC2/ 1504212
@@ -64,7 +67,7 @@ sub_cases_ids_ignored = [ "lava-test-shell-run",
                           "BOOTTIME_LOGCAT_EVENTS_COLLECT",
                           "BOOTTIME_DMESG_COLLECT",
                           "BOOTTIME_ANALYZE",
-                          "BOOTTIME_ANALYZE",
+                          "SERVICE_STARTED_ONCE",
                           "start_bootchart",
                           "enabled_bootchart",
                           "stop_bootchart",
@@ -75,8 +78,10 @@ sub_cases_ids_ignored = [ "lava-test-shell-run",
                           "optee-xtest-run",
                           "xtest-subtests-fail-rate",
                           "xtest-subtests-passes",
+                          "xtest-subtests-fails",
                           "xtest-tests-fail-rate",
                           "xtest-tests-fails",
+                          "xtest-tests-skipped",
                           "lava-test-shell-install" ]
 
 def getResultFromBundleOfOneJob(bundle=None):
@@ -229,8 +234,8 @@ def compareFor2Builds(build1_job_ids=[], build2_job_ids=[], result_csv=None):
                 build1_measurement = float(build1_test.get("measurement"))
                 if build2_measurement == 0 and build1_measurement == 0:
                     difference = 0
-                elif build1_measurement ==0:
-                    difference = 1000
+                elif build1_measurement == 0:
+                    difference = 100
                 else:
                     difference = (build2_measurement - build1_measurement) * 100 / build1_measurement
             except ValueError as e:
@@ -239,6 +244,13 @@ def compareFor2Builds(build1_job_ids=[], build2_job_ids=[], result_csv=None):
         else:
             # both measurement is None, then use the difference from result comparison
             pass
+
+        units = build1_test.get("units")
+        if units is None:
+            units = build2_test.get("units")
+
+        if units in time_mem_units:
+            difference = (-1) * difference
 
         print "%s %s %s %s" %(test_name, build1_str, build2_str, difference)
         if result_csv is not None:

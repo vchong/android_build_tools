@@ -33,6 +33,22 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
+function build_x20(){
+    #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
+    #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
+    targets="droid"
+#    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+#    export TARGET_USERDATAIMAGE_4GB=true
+#    export TARGET_USERDATAIMAGE_TYPE=f2fs
+    export TARGET_BUILD_KERNEL=true
+#    export TARGET_KERNEL_USE_4_1=true
+#    export TARGET_BOOTIMAGE_USE_FAT=true
+#    export KERNEL_BUILD_WITH_CLANG=true
+#    export TARGET_BUILD_UEFI=true
+    build full_amt6797_64_open
+    targets="selinuxtarballs"
+}
+
 function build_hikey(){
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
@@ -190,7 +206,8 @@ function build_x15(){
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-build_hikey
+#build_hikey
 #build_x15
+build_x20
 #build_flounder
 #build_flo

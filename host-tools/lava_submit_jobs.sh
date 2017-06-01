@@ -200,7 +200,8 @@ function submit_remain_jobs_for_juno_premerge(){
 }
 
 function main(){
-    submit_remain_jobs_for_x15_premerge 142
+    #submit_remain_jobs_for_x15_premerge 156
+    submit_remain_jobs_for_hikey_premerge 167
 }
 
 main "$@"
