@@ -22,8 +22,14 @@ function echoerror {
 
 function sync_aosp_mirror(){
 	echo "Started aosp-mirror sync:" `date` >>sync.timestamp
+	local try_count=1
 	while ! repo sync; do
-	    sleep 10
+	    sleep 3600
+            try_count=$((try_count + 1))
+            if [ ${try_count} -gt 10 ]; then
+                irc_notify "Failed to run repo sync for 10 times"
+                exit 1
+            fi
 	done
 	echo "Finished aosp-mirror sync:" `date` >>sync.timestamp
 	echo "===================================">>sync.timestamp
