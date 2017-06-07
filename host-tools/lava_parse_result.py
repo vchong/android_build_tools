@@ -24,12 +24,19 @@ hikey_build2_job_ids = [ "1504212", "1505519", "1505517", "1504908", "1504907", 
                    "1504879", "1504104", "1504102", "1504100", "1504098", "1504096",
                    "1504093", "1504091", "1504089", "1504087", "1504085", "1504083",
                    "1504082", "1504105"]
+# master build
+# https://validation.linaro.org/scheduler/device_type/hi6220-hikey?dt_length=100&dt_search=android-lcr-member-hikey-n-premerge-ci-167
+hikey_build2_job_ids = [ "1511854", "1511853", "1511851", "1511849", "1511847", "1511845", "1511843", "1511841", "1511839", "1511837", "1511835", "1511833", "1511831", "1511829", "1511827", "1511825", "1511822", "1511820", "1511818", "1511816", "1511814", "1511812", "1511810", "1511808", "1511806", "1511804", "1511802", "1511800", "1511799" ]
 
 # https://validation.linaro.org/scheduler/device_type/x15?dt_length=100&dt_search=android-lcr-reference-x15-n-95
 x15_build1_job_ids = [ "1502584", "1501715", "1501714", "1501712", "1501710", "1501708", "1501706", "1501704", "1501702", "1501700", "1501698", "1501696", "1501694", "1501692", "1501690", "1501688", "1501686", "1501684", "1501682", "1501680", "1501678", "1501676", "1501674", "1501672", "1501670", "1501668", "1501666", "1501665" ]
 
 # https://validation.linaro.org/scheduler/device_type/x15?dt_length=100&dt_search=android-lcr-member-x15-n-premerge-ci-153
-x15_build2_job_ids = ["1504877", "1504876", "1504874", "1504872", "1504870", "1504868", "1504866", "1504864", "1504862", "1504860", "1504858", "1504856", "1504854", "1504852", "1504850", "1504848", "1504846", "1504844", "1504842", "1504840", "1504838", "1504836", "1504834", "1504832", "1504830", "1504079", "1504078" ]
+#x15_build2_job_ids = ["1504877", "1504876", "1504874", "1504872", "1504870", "1504868", "1504866", "1504864", "1504862", "1504860", "1504858", "1504856", "1504854", "1504852", "1504850", "1504848", "1504846", "1504844", "1504842", "1504840", "1504838", "1504836", "1504834", "1504832", "1504830", "1504079", "1504078" ]
+
+# master build
+# https://validation.linaro.org/scheduler/device_type/x15?dt_length=100&dt_search=android-lcr-member-x15-n-premerge-ci-156#dt_
+x15_build2_job_ids = ["1511565", "1511564", "1511562", "1511560", "1511558", "1511556", "1511554", "1511552", "1511550", "1511548", "1511546", "1511544", "1511542", "1511540", "1511538", "1511536", "1511534", "1511532", "1511530", "1511528", "1511526", "1511524", "1511522", "1511520", "1511518", "1511142", "1511141"]
 
 
 lava_server_url = "https://yongqin.liu@validation.linaro.org/RPC2/"
@@ -167,12 +174,15 @@ def getResultForBuild(job_ids=None):
             continue
         else:
             print "Trying to get result for job(id=%s), bundle(id=%s)" % (job_id, bundle_id)
+            response = None
             try:
                 response = server.dashboard.get(bundle_id)
+            except Exception as e:
+                raise RuntimeError("job_id=%s, bundle_id=%s response=%s, e=%s" % (job_id, bundle_id, response, e))
+
+            if response is not None:
                 results_job = getResultFromBundleOfOneJob(bundle=json.loads(response["content"]))
                 mergeResult(totalResult=results_all, subResult=results_job)
-            except Exception as e:
-                raise RuntimeError("job_id=%s, bundle_id=%s e=%s" % (job_id, bundle_id, e))
 
     return results_all
 
@@ -245,8 +255,9 @@ def compareFor2Builds(build1_job_ids=[], build2_job_ids=[], result_csv=None):
             # both measurement is None, then use the difference from result comparison
             pass
 
-        units = build1_test.get("units")
-        if units is None:
+        if  build1_test is not None:
+            units = build1_test.get("units")
+        if units is None and build2_test is not None:
             units = build2_test.get("units")
 
         if units in time_mem_units:

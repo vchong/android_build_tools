@@ -1,3 +1,32 @@
+hackbox:
+[    0.000000] DMI: HP ProLiant DL380 G7, BIOS P67 05/05/2011
+cpu: X5690  @ 3.47GHz 24threads
+memory:  MemTotal:       24676376 kB
+Storage:
+scsi 2:3:0:0: RAID              HP       P410i            5.70 PQ: 0 ANSI: 5
+05:00.0 RAID bus controller: Hewlett-Packard Company Smart Array G6 controllers (rev 01)
+HP 1TB 3G SATA 7.2K rpm SFF (2.5-inch) Midline 1yr Warranty Hard Drive(625609-B21)  SATA2
+/dev/mapper/vg0-home  3.6T  1.2T  2.3T  35% /home
+/dev/sda1             435G  278G  136G  68% /
+======================================================
+2.5 inch:
+73G SAS 20RMB
+146G SAS 100RMB
+300G SAS 160RMB
+1T SATA 400RMB
+250G SSD 600RMB
+
+3.5 inch:
+73G SAS 20RMB
+146G SAS 80RMB
+300G SAS 160RMB
+1T SATA 140RMB
+
+=============================
+Memory:
+8GB DDR3 ECC REG 160RMB
+=============================
+==============================
 [    0.000000] DMI: HP ProLiant DL380 G7, BIOS P67 05/05/2011
 05:00.0 RAID bus controller: Hewlett-Packard Company Smart Array G6 controllers (rev 01)
 ========================================
@@ -153,20 +182,3 @@ TDP技术     支持TDP技术
 属性关键字 64位处理器,十核处理器
 
 ==================================================
-2.5 inch:
-73G SAS 20RMB
-146G SAS 100RMB
-300G SAS 160RMB
-1T SATA 400RMB
-250G SSD 600RMB
-
-3.5 inch:
-73G SAS 20RMB
-146G SAS 80RMB
-300G SAS 160RMB
-1T SATA 140RMB
-
-=============================
-Memory:
-8GB DDR3 ECC REG 160RMB
-=============================
