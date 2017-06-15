@@ -28,3 +28,7 @@ bero
 
 https://github.com/robherring/android_manifest/blob/master/linaro.xml
 robher-aosp-gendev.yaml and robher-aosp.yaml
+
+ndec
+https://github.com/96boards/documentation/blob/master/ConsumerEdition/DragonBoard-410c/Guides/AOSP.md
+

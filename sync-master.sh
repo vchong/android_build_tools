@@ -25,7 +25,6 @@ ${BASE}/sync-projects.sh  \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
-                          external/optee_test \
                           bionic \
                           frameworks/av \
 

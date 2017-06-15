@@ -33,6 +33,11 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
+function build_db410c(){
+    targets="droid"
+    build db410c
+    targets="selinuxtarballs"
+}
 function build_x20(){
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
@@ -209,6 +214,6 @@ function build_x15(){
 #build juno
 #build_hikey
 #build_x15
-build_x20
-#build_flounder
+#build_x20
+build_db410c
 #build_flo
