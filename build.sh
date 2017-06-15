@@ -46,6 +46,7 @@ function build_x20(){
 #    export TARGET_USERDATAIMAGE_4GB=true
 #    export TARGET_USERDATAIMAGE_TYPE=f2fs
     export TARGET_BUILD_KERNEL=true
+    export TARGET_GCC_VERSION_EXP=6.3-linaro
 #    export TARGET_KERNEL_USE_4_1=true
 #    export TARGET_BOOTIMAGE_USE_FAT=true
 #    export KERNEL_BUILD_WITH_CLANG=true
@@ -64,7 +65,7 @@ function build_hikey(){
     export TARGET_BUILD_KERNEL=true
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
-#    export KERNEL_BUILD_WITH_CLANG=true
+    export KERNEL_BUILD_WITH_CLANG=true
     export TARGET_BUILD_UEFI=true
 #    export CFG_SECURE_DATA_PATH=y
     build hikey
@@ -193,6 +194,7 @@ function build_x15(){
     export TARGET_BUILD_UBOOT=true
     export BOARD_USES_FULL_RECOVERY_IMAGE=true
     export TARGET_USES_MKE2FS=true
+    #export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
     targets="droidcore"
     build full_am57xevm
     targets="selinuxtarballs"

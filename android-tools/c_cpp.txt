@@ -12,3 +12,28 @@ gdbclient <pid|processname>
 when <optimized out> is printed with p var in gdb shell,
 it means we need to set the binary compilation to compile with -O0
 
+
+==========print debug information in bionic functions====:
+// write to console
+int klog_fd = open("/dev/kmsg", O_WRONLY | O_CLOEXEC);
+if (klog_fd < 0 ){
+    static const char* name = "/dev/__kmsg__";
+    if (mknod(name, S_IFCHR | 0600, (1 << 8) | 11) == 0) {
+        klog_fd = open(name, O_WRONLY | O_CLOEXEC);
+        unlink(name);
+    }
+}
+//int klog_fd = open("/data/local/tmp/", O_WRONLY | O_CLOEXEC);
+char buf[240];
+
+size_t msg_size = snprintf(buf, sizeof(buf), "=====LIUYQ writev=====%s:%d\n", __FILE__, __LINE__);
+iovec iov[1];
+iov[0].iov_base = buf;
+iov[0].iov_len = msg_size;
+
+writev(klog_fd, iov, 1);
+close(klog_fd);
+fflush(NULL);
+==========print in CPP file==============
+std::cout << "====LIUYQ===" << __FILE__ <<" :" << __LINE__ << std::endl;
+strerror(errno))
