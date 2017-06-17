@@ -125,7 +125,7 @@ files specified in LOCAL_SRC_FILES will be based on LOCAL_PATH
 ==============================================================================================
 Set USE_CLANG_PLATFORM_BUILD = false will cause it to use gcc as default
 ==============================================================================================
-jack outofmemory error
+jack outofmemory error with 3GB Memory PC
 in file prebuilts/sdk/tools/jack-admin
 JACK_SERVER_VM_ARGUMENTS="${JACK_SERVER_VM_ARGUMENTS} -Xmx2560M"
 
