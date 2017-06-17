@@ -209,6 +209,41 @@ function build_x15(){
     fi
 }
 
+clean_build() {
+    echo -e "\nINFO: Removing entire out dir. . .\n"
+    make clobber
+}
+
+build_android() {
+    echo -e "\nINFO: Build Android tree for $TARGET\n"
+    make $@ | tee $LOG_FILE.log
+}
+
+build_bootimg() {
+    echo -e "\nINFO: Build bootimage for $TARGET\n"
+    make bootimage $@ | tee $LOG_FILE.log
+}
+
+build_sysimg() {
+    echo -e "\nINFO: Build systemimage for $TARGET\n"
+    make systemimage $@ | tee $LOG_FILE.log
+}
+
+build_usrimg() {
+    echo -e "\nINFO: Build userdataimage for $TARGET\n"
+    make userdataimage $@ | tee $LOG_FILE.log
+}
+
+build_module() {
+    echo -e "\nINFO: Build $MODULE for $TARGET\n"
+    make $MODULE $@ | tee $LOG_FILE.log
+}
+
+build_project() {
+    echo -e "\nINFO: Build $PROJECT for $TARGET\n"
+    mmm $PROJECT | tee $LOG_FILE.log
+}
+
 #build_vexpress
 #build fvp
 # clean_for manta && build_manta
