@@ -7,6 +7,8 @@ if [ -d /SATA3/aosp-mirror/platform/manifest.git ]; then
     export MIRROR="/SATA3/aosp-mirror/platform/manifest.git"
 elif [ -d /home/yongqin.liu/aosp-mirror/platform/manifest.git ]; then
     export MIRROR="/home/yongqin.liu/aosp-mirror/platform/manifest.git"
+elif [ -d /development/android/aosp-mirror/platform/manifest.git ]; then
+    export MIRROR="/development/android/aosp-mirror/platform/manifest.git"
 else
     echo "Please specify value for MIRROR"
     exit 1
