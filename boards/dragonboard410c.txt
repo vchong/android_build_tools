@@ -14,6 +14,13 @@ Unfortunately, even freedreno relies on some firmware files we can't just add to
 https://developer.qualcomm.com/hardware/dragonboard-410c/tools
 and unzip it.
 
+Marshmallow support
+https://developer.qualcomm.com/qfile/29365/lm80-p0436-12_android_release_notes-revh.pdf
+
+https://developer.qualcomm.com/download/db410c/android_board_support_package_vla.br_.1.2.7-01010-8x16.0-4.zip
+https://developer.qualcomm.com/download/db410c/android_board_support_package_vla.br_.1.2.7-01010-8x16.0-4.zip
+
+
 to build:
 
 . build/envsetup.sh
