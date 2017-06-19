@@ -1,0 +1,112 @@
+https://en.wikipedia.org/wiki/Intel_HEX
+
+Intel HEX
+From Wikipedia, the free encyclopedia
+
+Intel HEX is a file format that conveys binary information in ASCII text form. It is commonly used for programming microcontrollers, EPROMs, and other types of programmable logic devices. In a typical application, a compiler or assembler converts a program's source code (such as in C or assembly language) to machine code and outputs it into a HEX file. The HEX file is then imported by a programmer to "burn" the machine code into a ROM, or is transferred to the target system for loading and execution.[1]
+
+Contents
+
+    1 Format
+        1.1 Record structure
+            1.1.1 Color legend
+            1.1.2 Checksum calculation
+        1.2 Text line terminators
+        1.3 Record types
+        1.4 Named formats
+    2 File example
+    3 See also
+    4 References
+    5 External links
+
+Format
+
+Intel HEX consists of lines of ASCII text that are separated by line feed or carriage return characters or both. Each text line contains hexadecimal characters that encode multiple binary numbers. The binary numbers may represent data, memory addresses, or other values, depending on their position in the line and the type and length of the line. Each text line is called a record.
+Record structure
+
+A record (line of text) consists of six fields (parts) that appear in order from left to right:
+
+    Start code, one character, an ASCII colon ':'.
+    Byte count, two hex digits, indicating the number of bytes (hex digit pairs) in the data field. The maximum byte count is 255 (0xFF). 16 (0x10) and 32 (0x20) are commonly used byte counts.
+    Address, four hex digits, representing the 16-bit beginning memory address offset of the data. The physical address of the data is computed by adding this offset to a previously established base address, thus allowing memory addressing beyond the 64 kilobyte limit of 16-bit addresses. The base address, which defaults to zero, can be changed by various types of records. Base addresses and address offsets are always expressed as big endian values.
+    Record type (see record types below), two hex digits, 00 to 05, defining the meaning of the data field.
+    Data, a sequence of n bytes of data, represented by 2n hex digits. Some records omit this field (n equals zero). The meaning and interpretation of data bytes depends on the application.
+    Checksum, two hex digits, a computed value that can be used to verify the record has no errors.
+
+Color legend
+
+As a visual aid, the fields of Intel HEX records are colored throughout this article as follows:
+
+  Start code   Byte count   Address   Record type   Data   Checksum
+Checksum calculation
+
+A record's checksum byte is the two's complement (negative) of the least significant byte (LSB) of the sum of all decoded byte values in the record preceding the checksum. It is computed by summing the decoded byte values and extracting the LSB of the sum (i.e., the data checksum), and then calculating the two's complement of the LSB (e.g., by inverting its bits and adding one).
+
+For example, in the case of the record :0300300002337A1E, the sum of the decoded byte values is 03 + 00 + 30 + 00 + 02 + 33 + 7A = E2. The two's complement of E2 is 1E, which is the checksum byte appearing at the end of the record.
+
+The validity of a record can be checked by computing its checksum and verifying that the computed checksum equals the checksum appearing in the record; an error is indicated if the checksums differ. Since the record's checksum byte is the negative of the data checksum, this process can be reduced to summing all decoded byte values — including the record's checksum — and verifying that the LSB of the sum is zero.
+Text line terminators
+
+Intel HEX records are separated by one or more ASCII line termination characters so that each record appears alone on a text line. This enhances legibility by visually delimiting the records and it also provides padding between records that can be used to improve machine parsing efficiency.
+
+Programs that create HEX records typically use line termination characters that conform to the conventions of their operating systems. For example, Linux programs use a single LF (line feed, hex value 0A) character to terminate lines, whereas Windows programs use a CR (carriage return, hex value 0D) followed by a LF.
+Record types
+
+Intel HEX has six standard record types:
+Hex code 	Record type 	Description 	Example
+00 	Data 	Contains data and a 16-bit starting address for the data. The byte count specifies number of data bytes in the record. The example shown to the right has 0B (decimal 11) data bytes (61, 64, 64, 72, 65, 73, 73, 20, 67, 61, 70) located at consecutive addresses beginning at address 0010. 	:0B0010006164647265737320676170A7
+01 	End Of File 	Must occur exactly once per file in the last line of the file. The data field is empty (thus byte count is 00) and the address field is typically 0000. 	:00000001FF
+02 	Extended Segment Address 	The data field contains a 16-bit segment base address (thus byte count is 02) compatible with 80x86 real mode addressing. The address field (typically 0000) is ignored. The segment address from the most recent 02 record is multiplied by 16 and added to each subsequent data record address to form the physical starting address for the data. This allows addressing up to one megabyte of address space. 	:020000021200EA
+03 	Start Segment Address 	For 80x86 processors, specifies the initial content of the CS:IP registers. The address field is 0000, the byte count is 04, the first two bytes are the CS value, the latter two are the IP value. 	:0400000300003800C1
+04 	Extended Linear Address 	Allows for 32 bit addressing (up to 4GiB). The address field is ignored (typically 0000) and the byte count is always 02. The two encoded, big endian data bytes specify the upper 16 bits of the 32 bit absolute address for all subsequent type 00 records; these upper address bits apply until the next 04 record. If no type 04 record precedes a 00 record, the upper 16 address bits default to 0000. The absolute address for a type 00 record is formed by combining the upper 16 address bits of the most recent 04 record with the low 16 address bits of the 00 record. 	:02000004FFFFFC
+05 	Start Linear Address 	The address field is 0000 (not used) and the byte count is 04. The four data bytes represent the 32-bit value loaded into the EIP register of the 80386 and higher CPU. 	:04000005000000CD2A
+Named formats
+
+Special names are sometimes used to denote the formats of HEX files that employ specific subsets of record types. For example:
+
+    I8HEX files use only record types 00 and 01 (16 bit addresses)
+    I16HEX files use only record types 00 through 03 (20 bit addresses)
+    I32HEX files use only record types 00, 01, 04, and 05 (32 bit addresses)
+
+File example
+
+This example shows a file that has four data records followed by an end-of-file record:
+
+:10010000214601360121470136007EFE09D2190140
+:100110002146017E17C20001FF5F16002148011928
+:10012000194E79234623965778239EDA3F01B2CAA7
+:100130003F0156702B5E712B722B732146013421C7
+:00000001FF
+
+See also
+
+Articles
+
+    Binary-to-text encoding, a survey and comparison of encoding algorithms
+    SREC, hex file format by Motorola
+    TekHex, hex file format by Tektronix
+
+Other
+
+    Template:Intel HEX, useful for displaying Intel Hex records in Wikipedia articles
+
+References
+
+    Hexadecimal Object File Format Specification (PDF) (Revision A ed.). Intel. 1988-01-06. Archived (PDF) from the original on 2016-06-07. Retrieved 2016-06-07.
+
+External links
+
+Documentation
+
+    Intel HEX format description
+    Intel HEX reference with examples
+
+Software Programs
+
+    binex - a converter between Intel HEX and binary for Windows.
+    SRecord, a converter between Intel HEX and binary for Linux (usage), C++ source code.
+
+Software Source Code
+
+    libgis, open source C library that converts Intel HEX, Motorola S-Record, Atmel Generic files.
+

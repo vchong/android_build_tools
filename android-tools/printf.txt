@@ -2,3 +2,5 @@ A printf format specifier follows the form %[flags][width][.precision][length]sp
 %lu is correct, while %ul is incorrect.
 u is a specifier meaning "unsigned decimal integer".
 l is a length modifier meaning "long".
+
+%zu for size_t type

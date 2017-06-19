@@ -2,3 +2,28 @@ http://www.96boards.org/blog/diy-drone-featuring-gumstix-96boards-take-flight-op
 
 http://workshopshed.com/2016/10/knight-v2/
 
+===============Zephyr==================================
+96B-Carbon
+https://wiki.zephyrproject.org/view/96B-Carbon
+
+Development Environment Setup on Linux
+https://www.zephyrproject.org/doc/getting_started/installation_linux.html
+
+96Boards Carbon
+https://www.zephyrproject.org/doc/boards/arm/96b_carbon/doc/96b_carbon.html
+
+===============96Boards==================================
+Documentation/IoTEdition/Carbon/Installation Linux Host
+http://www.96boards.org/documentation/IoTEdition/Carbon/Installation/LinuxUART.md/
+
+How to build the disco Zephyr application from source - Linux Host
+http://www.96boards.org/documentation/IoTEdition/Carbon/Building/LinuxBuild/BuildDisco.md/
+
+Carbon Hardware User Manual
+http://www.96boards.org/documentation/IoTEdition/Carbon/HardwareDocs/HardwareUserManual.md/
+
+Carbon_Schematics.pdf
+https://github.com/96boards/documentation/blob/master/IoTEdition/Carbon/HardwareDocs/Carbon_Schematics.pdf
+
+Documentation/IoTEdition/Carbon Using the Carbon
+http://www.96boards.org/documentation/IoTEdition/Carbon/README.md/

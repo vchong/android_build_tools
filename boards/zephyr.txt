@@ -1,5 +1,9 @@
-https://wiki.zephyrproject.org/view/96B-Carbon
+Intel HEX
+https://en.wikipedia.org/wiki/Intel_HEX
 
+
+Development Environment Setup on Linux
+https://www.zephyrproject.org/doc/getting_started/installation_linux.html
 
 https://www.zephyrproject.org/doc/doc/getting_started/getting_started.html
 sudo apt-get install git make gcc g++ python3-ply ncurses-dev
@@ -47,3 +51,10 @@ Step 1: Enter the STM32 Bootloader mode
 
 sudo stm32flash -b 115200 -g 0x0 -w /tmp/workspace/zephyr.bin /dev/ttyUSB0
 
+===========================================================
+96Boards Carbon
+https://wiki.zephyrproject.org/view/96B-Carbon
+https://www.zephyrproject.org/doc/boards/arm/96b_carbon/doc/96b_carbon.html
+
+ST Nucleo F401RE
+https://www.zephyrproject.org/doc/boards/arm/nucleo_f401re/doc/nucleof401re.html
