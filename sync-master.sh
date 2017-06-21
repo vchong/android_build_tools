@@ -37,12 +37,12 @@ ${BASE}/sync-projects.sh  \
 #                        system/vold \
 #                        system/core \
 
-#${BASE}/sync-projects.sh \
-#                        external/libdrm \
-#                        device/ti/am57xevm \
+${BASE}/sync-projects.sh \
+                        external/libdrm \
+                        device/ti/am57xevm \
+                        kernel/ti/x15/ \
+                        ti/u-boot/ \
 
-#                        kernel/ti/x15/ \
-#                        ti/u-boot/ \
 #                          art \
 #                          external/opencv-upstream \
 
@@ -52,12 +52,11 @@ fi
 
 func_apply_patch MASTER-MLCR-PATCHSET
 func_apply_patch optee-master-workarounds
-#func_apply_patch juno-n-workarounds
 func_apply_patch hikey-o-workarounds
 func_apply_patch hikey-optee-master
 func_apply_patch hikey-optee-4.9
-#func_apply_patch hikey-clang-4.9
-#func_apply_patch x15-n-workarounds
+func_apply_patch hikey-clang-4.9
+func_apply_patch x15-o-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
