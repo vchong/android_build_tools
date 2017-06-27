@@ -1,5 +1,0 @@
-./linaro-image-tools/linaro-android-media-create --mmc juno.img --image_size 2000M --dev vexpress --system out/target/product/juno/system.tar.bz2 --userdata out/target/product/juno/userdata.tar.bz2 --boot out/target/product/juno/boot.tar.bz2
-
-sudo losetup --show --find juno.img
-sudo kpartx -av /dev/loop1
-sudo mount -t ext4 /dev/mapper/loop1p2 raw2

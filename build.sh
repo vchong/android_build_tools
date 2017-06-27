@@ -59,6 +59,7 @@ function build_hikey(){
     export KERNEL_BUILD_WITH_CLANG=true
     export TARGET_BUILD_UEFI=true
     export CFG_SECURE_DATA_PATH=y
+#   export LLVM_PREBUILTS_VERSION=clang-4053586-linaro
     build hikey
     targets="selinuxtarballs"
 }

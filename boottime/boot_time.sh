@@ -171,16 +171,20 @@ function test_one_type(){
     fi
     for ((i=1; i<=${GLOBAL_COUNT}; i++)); do
         adb reboot
-        sleep 5
-        adb wait-for-device
-        adb root
-        sleep 2
+        #sleep 5
+        #adb wait-for-device
+        #adb root
+        #sleep 2
         #adb shell /data/local/tmp/disablesuspend.sh
-        adb shell disablesuspend.sh
-        sleep 5
-
+        #adb shell disablesuspend.sh
+        #sleep 5
+        sleep 60
+        adb connect 192.168.0.106
+        sleep 2
         adb shell dmesg >${log_path}/dmesg_$i.log
         adb logcat -d -v time *:V > ${log_path}/logcat_all_$i.log
+        adb logcat -d -b system -v time *:V > ${log_path}/logcat_system_$i.log
+        adb logcat -d -b main -v time *:V > ${log_path}/logcat_main_$i.log
         adb logcat -d -b events -v time *:V> ${log_path}/logcat_events_$i.log
     done
 }
