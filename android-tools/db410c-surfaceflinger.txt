@@ -1,0 +1,63 @@
+uint32_t HWComposer::getWidth(int disp) const {
+    size_t currentConfig = mDisplayData[disp].currentConfig;
+    return mDisplayData[disp].configs[currentConfig].width;
+}
+
+
+rameworks/native/services/surfaceflinger/DisplayHardware/HWComposer_hwc1.cpp:501:103: error: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Werror,-Wformat]
+    ALOGE("================LIUYQ=========%s:%d disp=%d currentConfig=%d\n", __FILE__, __LINE__, disp, currentConfig);
+                                                                     ~~                               ^~~~~~~~~~~~~
+                                                                     %zu
+frameworks/native/services/surfaceflinger/DisplayHardware/HWComposer_hwc1.cpp:501:104: error: format specifies type 'unsigned long' but the argument has type 'size_t' (aka 'unsigned int') [-Werror,-Wformat]
+    ALOGE("================LIUYQ=========%s:%d disp=%d currentConfig=%lu\n", __FILE__, __LINE__, disp, currentConfig);
+                                                                     ~~~                               ^~~~~~~~~~~~~
+                                                                     %zu
+E hwcomposer-drm: Failed to get connector for display 1
+
+services/surfaceflinger/SurfaceFlinger_hwc1.cpp
+void SurfaceFlinger::init() {
+    ...
+    // Initialize the H/W composer object.  There may or may not be an
+    // actual hardware composer underneath.
+    mHwc = new HWComposer(this,
+            *static_cast<HWComposer::EventHandler *>(this));
+    ...
+    // initialize our non-virtual displays
+    for (size_t i=0 ; i<DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES ; i++) {
+        DisplayDevice::DisplayType type((DisplayDevice::DisplayType)i);
+        // set-up the displays that are already connected
+        if (mHwc->isConnected(i) || type==DisplayDevice::DISPLAY_PRIMARY) {
+            ...
+            sp<FramebufferSurface> fbs = new FramebufferSurface(*mHwc, i, consumer);
+            ...
+        }
+    }
+    ...
+}
+
+services/surfaceflinger/DisplayHardware/FramebufferSurface.cpp
+
+FramebufferSurface::FramebufferSurface(HWComposer& hwc, int disp,
+        const sp<IGraphicBufferConsumer>& consumer) :
+    mHwc(hwc){
+    ....
+    mConsumer->setDefaultBufferFormat(mHwc.getFormat(disp));
+    mConsumer->setDefaultBufferSize(mHwc.getWidth(disp), mHwc.getHeight(disp));
+    ....
+}
+
+services/surfaceflinger/DisplayHardware/HWComposer_hwc1.cpp
+uint32_t HWComposer::getWidth(int disp) const {
+    size_t currentConfig = mDisplayData[disp].currentConfig;
+    ALOGE("================LIUYQ=========%s:%d disp=%d currentConfig=%zu\n", __FILE__, __LINE__, disp, currentConfig);
+    return mDisplayData[disp].configs[currentConfig].width;
+}
+
+
+1-01 09:49:02.938  2720  2720 D installd: Upgrading to /data/misc/user directories
+01-01 09:49:02.938  2686  2686 D SurfaceFlinger: ====LIUYQ=====frameworks/native/services/surfaceflinger/DisplayHardware/HWComposer_hwc1.cpp:369: error to getDisplayConfigs for disp=0, err=-1
+01-01 09:49:02.938  2686  2686 E hwc-drm-resources: DrmResources::GetConnectorForDisplay start display 1: external/drm_hwcomposer/drmresources.cpp:219
+01-01 09:49:02.938  2686  2686 E hwc-drm-resources: DrmResources::GetConnectorForDisplay for display 1: external/drm_hwcomposer/drmresources.cpp:221
+01-01 09:49:02.941  2686  2686 D SurfaceFlinger: ====LIUYQ=====frameworks/native/services/surfaceflinger/DisplayHardware/HWComposer_hwc1.cpp:369: error to getDisplayConfigs for disp=1, err=-1
+01-01 09:49:02.941  2686  2686 D SurfaceFlinger: ====LIUYQ=====frameworks/native/services/surfaceflinger/SurfaceFlinger_hwc1.cpp:489
+

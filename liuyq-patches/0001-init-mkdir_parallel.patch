@@ -1,0 +1,100 @@
+From 1dd5ad49e3bef971f09a4d574e62481d11a6a1e7 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Mon, 12 Dec 2016 10:11:38 +0800
+Subject: [PATCH 1/1] init: mkdir_parallel
+
+add mkdir_parallel builtin command
+
+Change-Id: I5c81bc6e0752e17d6e83b1541093f03bf3e992b7
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ init/builtins.cpp | 25 ++++++++++++++++++++++++-
+ rootdir/init.rc   | 10 ++++++----
+ 2 files changed, 30 insertions(+), 5 deletions(-)
+
+diff --git a/init/builtins.cpp b/init/builtins.cpp
+index 44217f0..e3997f1 100644
+--- a/init/builtins.cpp
++++ b/init/builtins.cpp
+@@ -45,6 +45,7 @@
+ #include <fs_mgr.h>
+ #include <android-base/file.h>
+ #include <android-base/parseint.h>
++#include <android-base/strings.h>
+ #include <android-base/stringprintf.h>
+ #include <bootloader_message/bootloader_message.h>
+ #include <cutils/partition_utils.h>
+@@ -296,7 +297,7 @@ static int do_insmod(const std::vector<std::string>& args) {
+     return insmod(args[1].c_str(), options.c_str());
+ }
+ 
+-static int do_mkdir(const std::vector<std::string>& args) {
++static int common_mkdir(const std::vector<std::string>& args) {
+     mode_t mode = 0755;
+     int ret;
+ 
+@@ -345,6 +346,27 @@ static int do_mkdir(const std::vector<std::string>& args) {
+     return 0;
+ }
+ 
++static int do_mkdir(const std::vector<std::string>& args) {
++    return common_mkdir(args);
++}
++
++static int do_mkdir_parallel(const std::vector<std::string>& args) {
++    int ret = 0;
++    // like /mnt/secure,0700,root,root /mnt/asec,0755,root,system
++    for (const auto& one_group : args){
++        std::vector<std::string> mkdir_args = android::base::Split(one_group, ",");
++        if (mkdir_args.size() != 4 ){
++            ERROR("Not right format for mkdir_parallel: %s", one_group.c_str());
++        }
++        ret = common_mkdir(mkdir_args);
++        if (ret != 0 ) {
++            ERROR("mkdir_parallel failed for group: %s", one_group.c_str());
++        }
++    }
++    // only return 0 at the moment
++    return ret;
++}
++
+ /* umount <path> */
+ static int do_umount(const std::vector<std::string>& args) {
+   return umount(args[1].c_str());
+@@ -1014,6 +1036,7 @@ BuiltinFunctionMap::Map& BuiltinFunctionMap::map() const {
+         {"load_system_props",       {0,     0,    do_load_system_props}},
+         {"loglevel",                {1,     1,    do_loglevel}},
+         {"mkdir",                   {1,     4,    do_mkdir}},
++        {"mkdir_parallel",          {1,     kMax, do_mkdir_parallel}},
+         {"mount_all",               {1,     kMax, do_mount_all}},
+         {"mount",                   {3,     kMax, do_mount}},
+         {"umount",                  {1,     1,    do_umount}},
+diff --git a/rootdir/init.rc b/rootdir/init.rc
+index a9b6af0..b0a2f66 100644
+--- a/rootdir/init.rc
++++ b/rootdir/init.rc
+@@ -74,15 +74,17 @@ on init
+     chmod 0775 /config/sdcardfs
+     chown system package_info /config/sdcardfs
+ 
+-    mkdir /mnt/secure 0700 root root
+-    mkdir /mnt/secure/asec 0700 root root
+-    mkdir /mnt/asec 0755 root system
++    mkdir_parallel /mnt/secure,0700,root,root /mnt/asec,0755,root,system
++
++    # mkdir /mnt/secure 0700 root root
++    # mkdir /mnt/asec 0755 root system
+     mkdir /mnt/obb 0755 root system
+     mkdir /mnt/media_rw 0750 root media_rw
+     mkdir /mnt/user 0755 root root
+-    mkdir /mnt/user/0 0755 root root
+     mkdir /mnt/expand 0771 system system
+     mkdir /mnt/appfuse 0711 root root
++    mkdir /mnt/user/0 0755 root root
++    mkdir /mnt/secure/asec 0700 root root
+ 
+     # Storage views to support runtime permissions
+     mkdir /mnt/runtime 0700 root root
+-- 
+1.9.1
+

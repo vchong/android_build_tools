@@ -1,0 +1,228 @@
+b573641f9ea02e40bede078f513b67c3613491f5
+
+system/core/liblog/include/log/log_system.h
+/*
+ * Simplified macro to send an info system log message using current LOG_TAG.
+ */
+#ifndef SLOGI
+#define SLOGI(...)                                                         \
+  ((void)__android_log_buf_print(LOG_ID_SYSTEM, ANDROID_LOG_INFO, LOG_TAG, \
+                                 __VA_ARGS__))
+#endif
+
+
+=============================================
+system/core/liblog/include/log/log_main.h
+/*
+ * Simplified macro to send an info log message using the current LOG_TAG.
+ */
+#ifndef ALOGI
+#define ALOGI(...) ((void)ALOG(LOG_INFO, LOG_TAG, __VA_ARGS__))
+#endif
+
+/*
+ * Basic log message macro.
+ *
+ * Example:
+ *  ALOG(LOG_WARN, NULL, "Failed with error %d", errno);
+ *
+ * The second argument may be NULL or "" to indicate the "global" tag.
+ */
+#ifndef ALOG
+#define ALOG(priority, tag, ...) LOG_PRI(ANDROID_##priority, tag, __VA_ARGS__)
+#endif
+
+
+/*
+ * Log macro that allows you to specify a number for the priority.
+ */
+#ifndef LOG_PRI
+#define LOG_PRI(priority, tag, ...) android_printLog(priority, tag, __VA_ARGS__)
+#endif
+
+#define android_printLog(prio, tag, ...) \
+  __android_log_print(prio, tag, __VA_ARGS__)
+
+==============================
+system/core/liblog/logger_write.c:
+
+LIBLOG_ABI_PUBLIC int __android_log_print(int prio, const char* tag,
+                                          const char* fmt, ...) {
+  va_list ap; 
+  char buf[LOG_BUF_SIZE];
+
+  va_start(ap, fmt);
+  vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
+  va_end(ap);
+
+  return __android_log_write(prio, tag, buf);
+}
+
+LIBLOG_ABI_PUBLIC int __android_log_write(int prio, const char* tag,
+                                          const char* msg) {
+  return __android_log_buf_write(LOG_ID_MAIN, prio, tag, msg);
+}
+
+
+LIBLOG_ABI_PUBLIC int __android_log_buf_print(int bufID, int prio,
+                                              const char* tag, const char* fmt,
+                                              ...) {
+  va_list ap; 
+  char buf[LOG_BUF_SIZE];
+
+  va_start(ap, fmt);
+  vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
+  va_end(ap);
+
+  return __android_log_buf_write(bufID, prio, tag, buf);
+}
+
+
+LIBLOG_ABI_PUBLIC int __android_log_buf_write(int bufID, int prio,
+                                              const char* tag, const char* msg) {
+  struct iovec vec[3];
+  char tmp_tag[32];
+
+  if (!tag) tag = "";
+
+  /* XXX: This needs to go! */
+  if (bufID != LOG_ID_RADIO) {
+    switch (tag[0]) {
+      case 'H':
+        if (strcmp(tag + 1, "HTC_RIL" + 1)) break;
+        goto inform;
+      case 'R':
+        /* Any log tag with "RIL" as the prefix */
+        if (strncmp(tag + 1, "RIL" + 1, strlen("RIL") - 1)) break;
+        goto inform;
+      case 'Q':
+        /* Any log tag with "QC_RIL" as the prefix */
+        if (strncmp(tag + 1, "QC_RIL" + 1, strlen("QC_RIL") - 1)) break;
+        goto inform;
+      case 'I':
+        /* Any log tag with "IMS" as the prefix */
+        if (strncmp(tag + 1, "IMS" + 1, strlen("IMS") - 1)) break;
+        goto inform;
+      case 'A':
+        if (strcmp(tag + 1, "AT" + 1)) break;
+        goto inform;
+      case 'G':
+        if (strcmp(tag + 1, "GSM" + 1)) break;
+        goto inform;
+      case 'S':
+        if (strcmp(tag + 1, "STK" + 1) && strcmp(tag + 1, "SMS" + 1)) break;
+        goto inform;
+      case 'C':
+        if (strcmp(tag + 1, "CDMA" + 1)) break;
+        goto inform;
+      case 'P':
+        if (strcmp(tag + 1, "PHONE" + 1)) break;
+      /* FALLTHRU */
+      inform:
+        bufID = LOG_ID_RADIO;
+        snprintf(tmp_tag, sizeof(tmp_tag), "use-Rlog/RLOG-%s", tag);
+        tag = tmp_tag;
+      /* FALLTHRU */
+      default:
+        break;
+    }
+  }
+
+#if __BIONIC__
+  if (prio == ANDROID_LOG_FATAL) {
+    android_set_abort_message(msg);
+  }
+#endif
+
+  vec[0].iov_base = (unsigned char*)&prio;
+  vec[0].iov_len = 1;
+  vec[1].iov_base = (void*)tag;
+  vec[1].iov_len = strlen(tag) + 1;
+  vec[2].iov_base = (void*)msg;
+  vec[2].iov_len = strlen(msg) + 1;
+
+  return write_to_log(bufID, vec, 3);
+}
+
+
+
+static int __write_to_log_init(log_id_t log_id, struct iovec* vec, size_t nr) {
+  __android_log_lock();
+
+  if (write_to_log == __write_to_log_init) {
+    int ret;
+
+    ret = __write_to_log_initialize();
+    if (ret < 0) {
+      __android_log_unlock();
+      if (!list_empty(&__android_log_persist_write)) {
+        __write_to_log_daemon(log_id, vec, nr);
+      }   
+      return ret;
+    }   
+
+    write_to_log = __write_to_log_daemon;
+  }
+
+  __android_log_unlock();
+
+  return write_to_log(log_id, vec, nr);
+}
+
+static int __write_to_log_daemon(log_id_t log_id, struct iovec* vec, size_t nr) {
+
+ ret = 0;
+  i = 1 << log_id;
+  write_transport_for_each(node, &__android_log_transport_write) {
+    if (node->logMask & i) {
+      ssize_t retval;
+      retval = (*node->write)(log_id, &ts, vec, nr);
+      if (ret >= 0) {
+        ret = retval;
+      }
+    }
+  }
+
+  write_transport_for_each(node, &__android_log_persist_write) {
+    if (node->logMask & i) {
+      (void)(*node->write)(log_id, &ts, vec, nr);
+    }
+  }
+
+  return ret;
+}
+
+==========================================
+android_logger_list_alloc_time
+android_logger_list_alloc
+dev->logger_list = logger_list;
+dev->logger = android_logger_open(logger_list,android_name_to_log_id(dev->device));
+
+android_logger_list_read
+
+android_log_processLogBuffer
+android_log_shouldPrintLine
+android_log_printLogLine
+
+
+android_logger_set_log_size
+android_log_logger_setSize,
+system/core/liblog/include/private/android_logger.h
+#define LOG_BUFFER_SIZE (256 * 1024) /* Tuned with ro.logd.size per-platform
+
+system/core/logd/LogBuffer.cpp
+__android_logger_get_buffer_size
+
+--------------------------------------------------------------------------------
+# Set default log size on userdebug/eng build to 1M
+ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
+PRODUCT_PROPERTY_OVERRIDES += ro.logd.size=1M
+endif
+
+--------------------------------------------------------------------------------
+system/core/logcat
+system/core/logd
+system/core/logwrapper
+system/core/liblog
+system/core/include/log/
+system/core/include/private/android_logger.h
