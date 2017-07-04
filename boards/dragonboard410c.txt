@@ -37,5 +37,7 @@ https://github.com/robherring/android_manifest/blob/master/linaro.xml
 robher-aosp-gendev.yaml and robher-aosp.yaml
 
 ndec
-https://github.com/96boards/documentation/blob/master/ConsumerEdition/DragonBoard-410c/Guides/AOSP.md
+https://github.com/96boards/documentation/blob/master/ConsumerEdition/DragonBoard-410c/BuildSource/AOSP.md
 
+Dragonboard 410c Installation Guide for Linux and Android
+https://github.com/96boards/documentation/wiki/Dragonboard-410c-Installation-Guide-for-Linux-and-Android#setting-up-the-uart-console
