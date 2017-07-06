@@ -1,0 +1,22 @@
+==16.04 packages need to be installed:
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install vim vim-common tree meld git git-core gitk git-review minicom screen wget bc time patch rsync zip curl unzip rar unrar dos2unix shellcheck
+    sudo apt-get install gnupg flex bison gperf build-essential zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc libgtk2.0-0 libgconf2-4 libgcrypt11 libnss3-1d libudev0 genisoimage lzop uuid-dev u-boot-tools acpica-tools mtools liblz4-tool openjdk-8-jdk
+    sudo apt-get install python-requests python-wand python-parted python-yaml python-mako python-crypto linaro-image-tools
+
+sudo apt-get install lava-tool
+
+sudo apt-get install language-pack-zh-hans language-pack-en-base ibus-pinyin ibus-sunpinyin
+
+sudo apt-get install qemu-system-x86
+sudo apt-get install openssh-server
+
+sudo apt-get install audio-recorder
+
+sudo apt-get install nfs-kernel-server nfs-common
+sudo apt-get install pybootchartgui
+sudo apt-get install owncloud-client
+sudo apt-get install python-virtualenv
+vncserver:
+1. I need to install vino. After that, once I execute vino-preferences in a terminal, then the Desktop Sharing is show up.
