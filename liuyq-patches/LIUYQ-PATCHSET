@@ -15,3 +15,5 @@ if ! [ -d "$AOSP" ] && ! [ -d "$AOSP/bionic" ] && [ -d "$AOSP"/build ]; then
         exit 1
 fi
 #==================================
+## config.xml: set to use pool.ntp.org as default ntp server
+## https://android-review.linaro.org/#/c/17779/

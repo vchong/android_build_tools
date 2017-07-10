@@ -12,7 +12,7 @@
   <project path="packages/apps/0xbench" name="platform/packages/apps/0xbench.git" revision="linaro-master" remote="linaro-android"/>
   <!-- https://git.linaro.org/people/yongqin.liu/public/bonnie.git -->
   <project path="external/bonnie" name="people/yongqin.liu/public/bonnie.git" revision="master" remote="linaro-other"/>
-  <project path="hardware/linaro/common" name="people/yongqin.liu/public/hardware/linaro/common.git" revision="master" remote="linaro-other" />
+  <project path="hardware/linaro/common" name="people/yongqin.liu/public/hardware/linaro/common.git" revision="linaro-android" remote="linaro-other" />
 <!--
   <project path="external/opencv-upstream" name="Itseez/opencv" revision="master" remote="github4liuyq" />
   <project path="external/ncurses" name="platform/external/ncurses" revision="linaro" groups="common" remote="linaro-android"/>

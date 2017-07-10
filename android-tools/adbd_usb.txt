@@ -1,0 +1,18 @@
+system/core/adb/adb.h
+hikey:/ # ls -l /dev/usb-ffs/adb/*
+-rw------- 1 shell shell 0 1970-01-01 00:00 /dev/usb-ffs/adb/ep0
+-rw------- 1 shell shell 0 1970-01-01 00:14 /dev/usb-ffs/adb/ep1
+-rw------- 1 shell shell 0 1970-01-01 00:14 /dev/usb-ffs/adb/ep2
+hikey:/ #
+
+USB_FFS_ADB_EP0 / USB_FFS_ADB_OUT / USB_FFS_ADB_IN
+
+system/netd/server/CommandListener.cpp
+127|hikey:/ # ls -l /sys/class/net/*
+lrwxrwxrwx 1 root root 0 1970-01-01 01:06 /sys/class/net/eth0 -> ../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1.2/1-1.2:1.0/net/eth0
+lrwxrwxrwx 1 root root 0 1970-01-01 00:00 /sys/class/net/lo -> ../../devices/virtual/net/lo
+lrwxrwxrwx 1 root root 0 1970-01-01 01:06 /sys/class/net/sit0 -> ../../devices/virtual/net/sit0
+lrwxrwxrwx 1 root root 0 1970-01-01 01:06 /sys/class/net/wlan0 -> ../../devices/platform/soc/f723f000.dwmmc2/mmc_host/mmc2/mmc2:0001/mmc2:0001:2/wl18xx.3.auto/net/wlan0
+hikey:/ #
+
+
