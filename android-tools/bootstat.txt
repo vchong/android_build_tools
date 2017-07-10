@@ -1,0 +1,133 @@
+system/core/bootstat/bootstat.rc
+    # Record boot complete metrics.
+    on property:sys.boot_completed=1 && property:sys.logbootcomplete=1
+    # Record boot_complete and related stats (decryption, etc).
+    exec - root root -- /system/bin/bootstat --record_boot_complete
+
+    # Record the boot reason.
+    exec - root root -- /system/bin/bootstat --record_boot_reason
+
+    # Record time since factory reset.
+    exec - root root -- /system/bin/bootstat --record_time_since_factory_reset
+
+    # Log all boot events.
+    exec - root root -- /system/bin/bootstat -l
+
+
+system/core/bootstat/README.md
+    # bootstat #
+
+    The bootstat command records boot events (e.g., `firmware_loaded`,
+    `boot_complete`) and the relative time at which these events occurred. The
+    command also aggregates boot event metrics locally and logs the metrics for
+    analysis.
+
+        Usage: bootstat [options]
+        options include:
+          -h, --help            Show this help
+          -l, --log             Log all metrics to logstorage
+          -p, --print           Dump the boot event records to the console
+          -r, --record          Record the timestamp of a named boot event
+          --record_boot_reason  Record the reason why the device booted
+          --record_time_since_factory_reset Record the time since the device was reset
+
+    ## Relative time ##
+
+    The timestamp recorded by bootstat is the uptime of the system, i.e., the
+    number of seconds since the system booted.
+
+    ## Recording boot events ##
+
+    To record the relative time of an event during the boot phase, call `bootstat`
+    with the `-r` option and the name of the boot event.
+
+        $ bootstat -r boot_complete
+
+    The relative time at which the command runs is recorded along with the name of
+    the boot event to be persisted.
+
+    ## Logging boot events ##
+
+    To log the persisted boot events, call `bootstat` with the `-l` option.
+
+        $ bootstat -l
+
+    bootstat logs all boot events recorded using the `-r` option to the EventLog
+    using the Tron histogram. These logs may be uploaded by interested parties
+    for aggregation and analysis of boot time across different devices and
+    versions.
+
+    ## Printing boot events ##
+
+    To print the set of persisted boot events, call `bootstat` with the `-p` option.
+
+        $ bootstat -p
+        Boot events:
+        ------------
+        boot_complete   71
+
+10:34:07 liuyq: master-backup$ tree  system/core/bootstat/
+system/core/bootstat/
+├── Android.bp
+├── AndroidTest.xml
+├── boot_event_record_store.cpp
+├── boot_event_record_store.h
+├── boot_event_record_store_test.cpp
+├── bootstat.cpp
+├── bootstat.rc
+├── README.md
+└── testrunner.cpp
+
+0 directories, 9 files
+10:34:13 liuyq: master-backup$
+
+
+const char BOOTSTAT_DATA_DIR[] = "/data/misc/bootstat/";
+
+
+========================================
+Boot timing
+-----------
+Init records some boot timing information in system properties.
+
+ `ro.boottime.init`
+ > Time after boot in ns (via the CLOCK\_BOOTTIME clock) at which the first
+  stage of init started.
+
+  `ro.boottime.init.selinux`
+  > How long it took the first stage to initialize SELinux.
+
+  `ro.boottime.init.cold_boot_wait`
+  > How long init waited for ueventd's coldboot phase to end.
+
+  `ro.boottime.<service-name>`
+  > Time after boot in ns (via the CLOCK\_BOOTTIME clock) that the service was
+    first started.
+
+  ro.boot.boottime: for BootloaderTimingMap, not reported on all devices
+  // |ro.boot.boottime| is of the form 'stage1:time1,...,stageN:timeN', where timeN is in milliseconds.
+
+
+
+
+RecordBootComplete
+    time_since_last_boot: only set when last_boot_time_utc has already set when the bootstat command with record_boot_complete option executed, unit is second
+    last_boot_time_utc: the time when the bootstat command with record_boot_complete option executed. normally the timing that property sys.boot_completed set to 1, unit is second
+    build_date: value from property ro.build.date.utc,  seconds since 1970-01-01 00:00:00 UTC at the build time, unit is second
+    factory_reset_boot_complete_no_encryption: uptime gotten with CLOCK_BOOTTIME, set when the bootstat command with record_boot_complete option executed. normally the timing that property sys.boot_completed set to 1, which means the uptime when the boot complete. unit is second
+    factory_reset_boot_complete:  same as factory_reset_boot_complete_no_encryption
+    ro.boottime.init: value get from property of ro.boottime.init, Time after boot in ns (via the CLOCK\_BOOTTIME clock) at which the first stage of init started.
+    ro.boottime.init.selinux: value get from property of ro.boottime.init.selinux, How long it took the first stage to initialize SELinux.
+    ro.boottime.init.cold_boot_wait: value get from property of ro.boottime.init.cold_boot_wait, How long init waited for ueventd's coldboot phase to end, unit is ms
+    boottime.bootloader.*: get from property of ro.boot.boottime where the unit is ms. this is not reported by all devices.
+    boottime.bootloader.total: the total time taken for bootloader. this is not reported by all devices. unit is ms
+    absolute_boot_time: total time that includes bootloader duration and the android boot time till property sys.boot_completed set to 1
+
+RecordBootReason:
+    boot_reason: get from property ro.boot.bootreason, and contvert it to integer representation. 1 for unknown reason
+
+    RecordFactoryReset: Records two metrics related to the user resetting a device: the time at which the device is reset, and the time since the user last reset the device.  The former is only set once per-factory reset.
+    factory_reset_current_time: the time when the bootstat command with record_time_since_factory_reset option executed. normally the timing that property sys.boot_completed set to 1, unit is second 
+    factory_reset:  The factory_reset boot event does not exist after the device is reset, so use this signal to mark the time of the factory reset.
+    factory_reset_record_value: only set when factory_reset has been set already. The value should be the same as factory_reset. 
+    time_since_factory_reset: only set when factory_reset has been set already. it's the diff between current_time_utc and factory_reset_utc.
