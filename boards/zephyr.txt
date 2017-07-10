@@ -60,5 +60,5 @@ ST Nucleo F401RE
 https://www.zephyrproject.org/doc/boards/arm/nucleo_f401re/doc/nucleof401re.html
 
 =========================
-Linaro foat system:
+Linaro foat system: This is the documentation for the Linaro Technologies Division.
 http://docs.linarotechnologies.org/index.html
