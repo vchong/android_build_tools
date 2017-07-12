@@ -56,6 +56,7 @@ func_apply_patch hikey-o-workarounds
 func_apply_patch hikey-optee-master
 func_apply_patch hikey-optee-4.9
 func_apply_patch hikey-clang-4.9
+func_apply_patch MASTER-CLANG-PATCHSET
 func_apply_patch x15-o-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15

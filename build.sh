@@ -46,7 +46,58 @@ function build_x20(){
     targets="selinuxtarballs"
 }
 
+######################
+# Build clang master #
+######################
+function build_llvm() {
+    LLVM_SRC=${ROOT_DIR}/clang-src/llvm
+    LLVM_BUILD_DIR="${ROOT_DIR}/out/target/product/hikey/clang"
+    mkdir -p "${LLVM_BUILD_DIR}"
+    cd ${LLVM_BUILD_DIR}
+    cmake -G "Unix Makefiles" ${LLVM_SRC} \
+             -DCMAKE_BUILD_TYPE=Release \
+             -DPYTHON_EXECUTABLE=/usr/bin/python2 \
+             -DCMAKE_INSTALL_PREFIX=${ROOT_DIR}/prebuilts/clang/host/linux-x86/clang-master \
+             -DLLVM_TARGETS_TO_BUILD="ARM;X86;AArch64"
+
+             #-O ${LLVM_BUILD_DIR} \
+
+    make install VERBOSE=1 -j8 #-j$CPUs too many n of cpus
+}
+
+#########
+# Setup #
+#########
+function setup_for_clang_upstream() {
+    # Adapt to the aosp toolchain folder hierarchy
+    ANDROID_CLANGVER=$(awk '{ if ($1 == "LLVM_PREBUILTS_VERSION") print $3 }' ${ROOT_DIR}/build/core/clang/versions.mk)
+    [ -z $ANDROID_CLANGVER ] && ANDROID_CLANGVER=clang-3217047 # aosp prebuilt build number at 2016/10/20 master
+
+    CLANG_MASTER_DIR="$ROOT_DIR/prebuilts/clang/host/linux-x86/clang-master/"
+    CLANG_AOSP_DIR="$ROOT_DIR/prebuilts/clang/host/linux-x86/${ANDROID_CLANGVER}/"
+    # 1. Handle libFuzzer.a and its headers
+    for i in host arm aarch64 i386 x86_64 mips; do
+        mkdir -p ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/$i
+        cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/$i/libFuzzer.a ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/$i
+    done
+    mkdir -p ${CLANG_MASTER_DIR}/prebuilt_include/llvm/lib/Fuzzer
+    cp -af  ${CLANG_AOSP_DIR}/prebuilt_include/llvm/lib/Fuzzer/*.h ${CLANG_MASTER_DIR}/prebuilt_include/llvm/lib/Fuzzer
+
+    # 2. Handle missing modules from Upstream clang
+    cp -af  ${CLANG_AOSP_DIR}/test ${CLANG_MASTER_DIR}/test
+}
+
 function build_hikey(){
+    export BUILD_CLANG_MASTER=false
+    if ${BUILD_CLANG_MASTER}; then
+        export LLVM_PREBUILTS_VERSION=clang-master
+        build_llvm && setup_for_clang_upstream
+        if [ $? -ne 0 ]; then
+            echo "Failed to compile clang master"
+            exit 1
+        fi
+    fi
+    cd ${ROOT_DIR}
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
     targets="droid"
@@ -59,7 +110,6 @@ function build_hikey(){
     export KERNEL_BUILD_WITH_CLANG=true
     export TARGET_BUILD_UEFI=true
     export CFG_SECURE_DATA_PATH=y
-#   export LLVM_PREBUILTS_VERSION=clang-4053586-linaro
     build hikey
     targets="selinuxtarballs"
 }
