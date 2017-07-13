@@ -51,6 +51,8 @@ function build_x20(){
 ######################
 function build_llvm() {
     LLVM_SRC=${ROOT_DIR}/clang-src/llvm
+    rm -fr ${LLVM_SRC}/.git/svn
+    rm -fr ${LLVM_SRC}/tools/clang/.git/svn
     LLVM_BUILD_DIR="${ROOT_DIR}/out/target/product/hikey/clang"
     mkdir -p "${LLVM_BUILD_DIR}"
     cd ${LLVM_BUILD_DIR}
@@ -62,7 +64,7 @@ function build_llvm() {
 
              #-O ${LLVM_BUILD_DIR} \
 
-    make install VERBOSE=1 -j8 #-j$CPUs too many n of cpus
+    make install VERBOSE=1 -j16 #-j$CPUs #too many n of cpus
 }
 
 #########
@@ -88,7 +90,8 @@ function setup_for_clang_upstream() {
 }
 
 function build_hikey(){
-    export BUILD_CLANG_MASTER=false
+    export BUILD_CLANG_MASTER=true
+    #export BUILD_CLANG_MASTER=false
     if ${BUILD_CLANG_MASTER}; then
         export LLVM_PREBUILTS_VERSION=clang-master
         build_llvm && setup_for_clang_upstream
