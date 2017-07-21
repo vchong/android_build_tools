@@ -25,4 +25,4 @@ apply frameworks/base 411340/3
 
 ## DeviceInfoSettingsTest.java: add test cases for kernel built with clang
 ## https://android-review.googlesource.com/434679
-apply packages/app/Settings 434679/1
+apply packages/apps/Settings 434679/1
