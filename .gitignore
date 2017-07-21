@@ -43,3 +43,4 @@ platform_testing/
 Android.bp
 bootstrap.bash
 kernel-3.18/
+clang-src/

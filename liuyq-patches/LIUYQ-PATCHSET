@@ -15,3 +15,14 @@ if ! [ -d "$AOSP" ] && ! [ -d "$AOSP/bionic" ] && [ -d "$AOSP"/build ]; then
         exit 1
 fi
 #==================================
+## config.xml: set to use pool.ntp.org as default ntp server
+## https://android-review.linaro.org/#/c/17779/
+apply --linaro device/linaro/hikey 17779/1
+
+## DeviceInfoUtils.java: support to show kernel version compiled with clang
+## https://android-review.googlesource.com/#/c/411340/
+apply frameworks/base 411340/3
+
+## DeviceInfoSettingsTest.java: add test cases for kernel built with clang
+## https://android-review.googlesource.com/434679
+apply packages/app/Settings 434679/1

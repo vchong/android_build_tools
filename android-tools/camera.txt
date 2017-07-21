@@ -1,0 +1,54 @@
+22:35:52 liu: master$ find out/target/product/hikey/system/ -iname '*camera*'
+out/target/product/hikey/system/etc/init/cameraserver.rc
+out/target/product/hikey/system/app/Camera2
+out/target/product/hikey/system/app/Camera2/oat/arm64/Camera2.vdex
+out/target/product/hikey/system/app/Camera2/oat/arm64/Camera2.odex
+out/target/product/hikey/system/app/Camera2/Camera2.apk
+out/target/product/hikey/system/lib64/libcamera_metadata.so
+out/target/product/hikey/system/lib64/libcameraservice.so
+out/target/product/hikey/system/lib64/hw/camera.usb.default.so
+out/target/product/hikey/system/lib64/libcamera_client.so
+out/target/product/hikey/system/lib64/libcamera2ndk.so
+out/target/product/hikey/system/lib/libcamera_metadata.so
+out/target/product/hikey/system/lib/libcameraservice.so
+out/target/product/hikey/system/lib/hw/camera.usb.default.so
+out/target/product/hikey/system/lib/libcamera_client.so
+out/target/product/hikey/system/lib/libcamera2ndk.so
+out/target/product/hikey/system/media/audio/ui/camera_focus.ogg
+out/target/product/hikey/system/media/audio/ui/camera_click.ogg
+out/target/product/hikey/system/bin/cameraserver
+22:36:03 liu: master$
+
+22:29:17 liu: master$ adb shell logcat -d|grep -i camera
+01-01 00:00:16.400  1903  1903 I cameraserver: ServiceManager: 0xf6027420
+01-01 00:00:16.400  1903  1903 I CameraService: CameraService started (pid=1903)
+01-01 00:00:16.400  1903  1903 I CameraService: CameraService process starting
+01-01 00:00:16.412  1903  1903 E CameraService: Could not load camera HAL module: -2 (No such file or directory)
+01-01 00:00:17.942  1854  1854 W zygote64: !bang JNI is deprecated. Switch to @FastNative for boolean android.view.RenderNode.nSetCameraDistance(long, float)
+01-01 00:00:17.945  1854  1854 W zygote64: !bang JNI is deprecated. Switch to @FastNative for float android.view.RenderNode.nGetCameraDistance(long)
+01-01 00:00:18.121  1856  1856 W zygote  : !bang JNI is deprecated. Switch to @FastNative for boolean android.view.RenderNode.nSetCameraDistance(long, float)
+01-01 00:00:18.122  1856  1856 W zygote  : !bang JNI is deprecated. Switch to @FastNative for float android.view.RenderNode.nGetCameraDistance(long)
+01-01 00:00:25.751  2007  2007 W PackageManager: Not granting permission android.permission.BIND_WALLPAPER to package com.android.camera2 (protectionLevel=18 flags=0x3058bc45)
+01-01 00:00:26.501  2007  2007 I SystemServer: Camera Service
+01-01 00:00:26.505  2007  2007 I SystemServiceManager: Starting com.android.server.camera.CameraService
+01-01 00:00:26.511  2007  2041 I ServiceThread: Enabled StrictMode logging for CameraService_proxy looper.
+01-01 00:00:27.074  2007  2052 W PackageManager: Not granting permission android.permission.BIND_WALLPAPER to package com.android.camera2 (protectionLevel=18 flags=0x30d8bc45)
+01-01 00:00:30.930  2096  2096 D ApplicationLoaders: ignored Vulkan layer search path /system/app/Camera2/lib/arm64:/system/app/Camera2/Camera2.apk!/lib/arm64-v8a:/system/lib64:/system/vendor/lib64 for namespace 0x7fb70eb110
+01-01 00:00:31.140  2096  2096 I CameraManagerGlobal: Connecting to camera service
+01-01 00:00:31.143  1903  1928 E CameraService: getCameraVendorTagDescriptor: camera hardware module doesn't exist
+22:29:31 liu: master$ 
+
+22:33:47 liu: master$ grep -rn 'Could not load camera HAL module' frameworks/
+frameworks/av/services/camera/libcameraservice/CameraService.cpp:178:        ALOGE("Could not load camera HAL module: %d (%s)", err, strerror(-err));
+frameworks/av/services/camera/libcameraservice/CameraService.cpp:179:        logServiceError("Could not load camera HAL module", err);
+22:33:52 liu: master$
+
+22:37:11 liu: master$ grep -rn "camera hardware module doesn" frameworks/av/services/
+frameworks/av/services/camera/libcameraservice/CameraService.cpp:592:        ALOGE("%s: camera hardware module doesn't exist", __FUNCTION__);
+frameworks/av/services/camera/libcameraservice/CameraService.cpp:668:        ALOGE("%s: camera hardware module doesn't exist", __FUNCTION__);
+22:37:16 liu: master$
+
+hardware/libhardware/hardware.c:154:int hw_get_module_by_class(const char *class_id, const char *inst,
+hardware/libhardware/hardware.c:207:int hw_get_module(const char *id, const struct hw_module_t **module)
+hardware/libhardware/hardware.c:209:    return hw_get_module_by_class(id, NULL, module);
+

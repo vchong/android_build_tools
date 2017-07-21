@@ -27,3 +27,6 @@ https://github.com/96boards/documentation/blob/master/IoTEdition/Carbon/Hardware
 
 Documentation/IoTEdition/Carbon Using the Carbon
 http://www.96boards.org/documentation/IoTEdition/Carbon/README.md/
+
+Zephyr support for 96Boards Carbon nRF51
+https://www.zephyrproject.org/doc/boards/arm/96b_carbon_nrf51/doc/96b_carbon_nrf51.html
