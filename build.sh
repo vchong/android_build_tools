@@ -3,6 +3,7 @@ CPUS=$(grep processor /proc/cpuinfo |wc -l)
 #CPUS=1
 ROOT_DIR=$(cd $(dirname $0); pwd)
 
+targets="droidcore"
 targets="selinuxtarballs"
 #targets="boottarball"
 variant="userdebug"
@@ -33,6 +34,12 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
+function build_juno(){
+    targets="droidcore boottarball"
+    export TARGET_BUILD_KERNEL=true
+    build juno
+    targets="selinuxtarballs"
+}
 function build_db410c(){
     targets="droid"
     build db410c
