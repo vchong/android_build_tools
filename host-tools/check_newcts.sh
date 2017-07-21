@@ -146,41 +146,58 @@ function generateLinaroCtsPackage(){
         prepareCtsDir "${working_dir}/linaro" "${url_lcr}"
         prepareCtsDir "${working_dir}/google" "${url_google}" "${local_google_pkg}"
 
-        if diff ${working_dir}/linaro//modules.sort ${working_dir}/google//modules.sort; then
-            cp ${working_dir}/google/android-cts/testcases/egl-master.txt ${working_dir}/google/egl-master.txt && \
-            cp ${working_dir}/google/android-cts/tools/tradefed-prebuilt.jar ${working_dir}/google/tradefed-prebuilt.jar && \
-            rm -fr ${working_dir}/google/android-cts
+        cp ${working_dir}/google/android-cts/testcases/egl-master.txt ${working_dir}/google/egl-master.txt && \
+        cp ${working_dir}/google/android-cts/tools/tradefed-prebuilt.jar ${working_dir}/google/tradefed-prebuilt.jar && \
+        rm -fr ${working_dir}/google/android-cts
 
-            mkdir -p ${working_dir}/google/android-cts//testcases/ ${working_dir}/google/android-cts//tools
-            sed -i '/dEQP-EGL.functional.sharing.gles2.multithread.random.images.copyteximage2d/d' ${working_dir}/google/egl-master.txt > ${working_dir}/google/android-cts/testcases/egl-master.txt
+        mkdir -p ${working_dir}/google/android-cts//testcases/ ${working_dir}/google/android-cts//tools
+        sed -i '/dEQP-EGL.functional.sharing.gles2.multithread.random.images.copyteximage2d/d' ${working_dir}/google/egl-master.txt > ${working_dir}/google/android-cts/testcases/egl-master.txt
 
-            rm -fr ${working_dir}/linaro/android-cts/tools/config
-            cd ${working_dir}/linaro/android-cts/tools/ && jar -xf tradefed-prebuilt.jar config/cts- && mv config ${working_dir}/google/android-cts//tools
+        rm -fr ${working_dir}/linaro/android-cts/tools/config
+        cd ${working_dir}/linaro/android-cts/tools/ && rm -fr config && jar -xf tradefed-prebuilt.jar && mv config ${working_dir}/google/android-cts//tools
+        if ! diff ${working_dir}/linaro//modules.sort ${working_dir}/google//modules.sort > ${working_dir}/diff.txt; then
+            grep '^>' ${working_dir}/diff.txt|awk '{print $2}' > ${working_dir}/modules-google-only.txt
+            grep '^<' ${working_dir}/diff.txt|awk '{print $2}' > ${working_dir}/modules-old-only.txt
+            cd ${working_dir}/google/android-cts//tools/config
 
-            cp ${working_dir}/google/tradefed-prebuilt.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf tradefed-prebuilt.jar config/
+            ## remove modules in old version
+            while read -r module_name; do
+                for config_f in `ls cts-*.xml`; do
+                    sed -i "/value=\"${module_name}\"/d" ${config_f}
+                    sed -i "/value=\"${module_name}\ /d" ${config_f}
+                done
+            done < ${working_dir}/modules-old-only.txt
 
-            cd ${working_dir}/google/ && zip -ru cts.zip android-cts && mv cts.zip ${package_name_linaro}
-
-            sudo -u yongqin.liu scp -r ${package_name_linaro} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
-
-            sudo -u yongqin.liu ssh testdata.validation.linaro.org ln -s /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip
-
-            local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
-            local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
-            cd ${working_dir}/ && \
-                sudo chmod 777 ${working_dir} && \
-                sudo rm -fr test-plans && \
-                git clone https://git.linaro.org/qa/test-plans.git && \
-                cd test-plans && \
-                git config --global user.name "Yongqin Liu" && \
-                git config --global user.email yongqin.liu@linaro.org && \
-                sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
-                cp ../commit-msg .git/hooks/ && \
-                sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
-                git add . && \
-                git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
-                sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
+            ## add modules in new version to cts-part4.xml
+            while read -r module_name; do
+                new_module_line="    <option name=\"compatibility:include-filter\" value=\"${module_name}\" />"
+                sed "/<\/configuration>/i ${new_module_line}" cts-part4.xml
+            done < ${working_dir}/modules-old-only.txt
         fi
+
+        cp ${working_dir}/google/tradefed-prebuilt.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf tradefed-prebuilt.jar config/
+
+        cd ${working_dir}/google/ && zip -ru cts.zip android-cts && mv cts.zip ${package_name_linaro}
+
+        sudo -u yongqin.liu scp -r ${package_name_linaro} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
+
+        sudo -u yongqin.liu ssh testdata.validation.linaro.org ln -s /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip
+
+        local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
+        local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
+        cd ${working_dir}/ && \
+            sudo chmod 777 ${working_dir} && \
+            sudo rm -fr test-plans && \
+            git clone https://git.linaro.org/qa/test-plans.git && \
+            cd test-plans && \
+            git config --global user.name "Yongqin Liu" && \
+            git config --global user.email yongqin.liu@linaro.org && \
+            sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
+            cp ../commit-msg .git/hooks/ && \
+            sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
+            git add . && \
+            git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
+            sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
     else
         echo "No java command is found, please generate the linaro cts package manually"
     fi
