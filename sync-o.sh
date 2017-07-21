@@ -14,7 +14,7 @@ else
     exit 1
 fi
 
-branch="android-o-preview-2"
+branch="android-o-preview-3"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-o-preview"
