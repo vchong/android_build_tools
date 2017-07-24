@@ -131,3 +131,59 @@ RecordBootReason:
     factory_reset:  The factory_reset boot event does not exist after the device is reset, so use this signal to mark the time of the factory reset.
     factory_reset_record_value: only set when factory_reset has been set already. The value should be the same as factory_reset. 
     time_since_factory_reset: only set when factory_reset has been set already. it's the diff between current_time_utc and factory_reset_utc.
+
+
+================================
+hikey:/ # date
+Mon Jul 10 07:16:36 GMT 2017
+hikey:/ # bootstat -p
+Boot events:
+------------
+last_boot_time_utc      1499670715
+build_date      1499338003
+factory_reset_boot_complete_no_encryption       59
+factory_reset_boot_complete     59
+ro.boottime.init        5766
+ro.boottime.init.selinux        148
+ro.boottime.init.cold_boot_wait 399
+boottime.bootloader.total       0
+absolute_boot_time      59
+boot_reason     1
+factory_reset_current_time      1499670715
+factory_reset   1499670715
+hikey:/ #
+--------------------------------------
+hikey:/ # date
+Mon Jul 10 07:19:39 GMT 2017
+hikey:/ # bootstat -p
+Boot events:
+------------
+last_boot_time_utc      1499671056
+build_date      1499338003
+factory_reset_boot_complete_no_encryption       59
+factory_reset_boot_complete     59
+ro.boottime.init        5758
+ro.boottime.init.selinux        160
+ro.boottime.init.cold_boot_wait 429
+boottime.bootloader.total       0
+absolute_boot_time      26
+boot_reason     1
+factory_reset_current_time      1499671056
+factory_reset   1499670715
+time_since_last_boot    341
+boot_complete_no_encryption     26
+boot_complete   26
+factory_reset_record_value      1499670715
+time_since_factory_reset        341
+hikey:/ #
+================================================
+
+auto time_since_epoch = android::base::boot_clock::now().time_since_epoch();
+auto uptime = std::chrono::duration_cast<std::chrono::seconds>(time_since_epoch);
+uptime.count()
+
+time_t current_time_utc = time(nullptr);
+-------------------------------------
+#type=1400 audit(1499683876.156:131): avc: denied { write } for pid=2435 comm="bootstat" name="logd" dev="tmpfs" ino=10352 scontext=u:r:bootstat:s0 tcontext=u:object_r:logd_socket:s0 tclass=sock_file permissive=1
+#type=1400 audit(31.215:138): avc: denied { connectto } for pid=2378 comm="bootstat" path="/dev/socket/logd" scontext=u:r:bootstat:s0 tcontext=u:r:logd:s0 tclass=unix_stream_socket permissive=1
+---------------------------------------
