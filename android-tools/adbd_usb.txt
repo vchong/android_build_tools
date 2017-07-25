@@ -1,3 +1,11 @@
+1. why stopping adbd service will cause the usb state change?
+
+--------------------------
+
+https://www.kernel.org/doc/Documentation/usb/functionfs.txt
+
+"ep0" is used for receiving events and handling setup requests.
+
 system/core/adb/adb.h
 hikey:/ # ls -l /dev/usb-ffs/adb/*
 -rw------- 1 shell shell 0 1970-01-01 00:00 /dev/usb-ffs/adb/ep0
@@ -104,3 +112,468 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.u
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
+
+====================
+https://validation.linaro.org/scheduler/job/1565561/log_file#L_575_3:
+hi6220-hikey-07:
+ asix 1-1.1:1.0 eth0: register 'asix' at usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet, 00:50:b6:14:c8:7c
+ asix 1-1.1:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet
+ dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+ android_work: did not send uevent (0 0 (null))
+ dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 14 - ChHltd set, but reason is unknown
+ dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200009
+ dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 12 - ChHltd set, but reason is unknown
+ dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200009
+ dwc2 f72c0000.usb: dwc2_update_urb_state_abn(): trimming xfer length
+
+https://validation.linaro.org/scheduler/job/1570927/log_file#L_1305_7
+hi6220-hikey-03:
+ MOSCHIP usb-ethernet driver 1-1.1:1.0 eth0: unregister 'MOSCHIP usb-ethernet driver' usb-f72c0000.usb-1.1, MOSCHIP 7830/7832/7730 usb-NET adapter
+
+ dwc2 f72c0000.usb: Set speed to high-speed
+ usb 1-1: device descriptor read/64, error -110
+ usb 1-1: device not accepting address 7, error -110
+ usb usb1-port1: unable to enumerate USB device
+ hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+ usb usb1-port1: enable change, status 00000501
+ hub 1-0:1.0: hub_suspend
+ hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+ hub 1-0:1.0: port_wait_reset: err = -16
+ usb usb1-port1: not enabled, trying reset again...
+ usb usb1-port1: debounce total 100ms stable 100ms status 0x501
+
+hi6220-hikey-09:
+ smsc75xx 1-1.1:1.0 eth0: register 'smsc75xx' at usb-f72c0000.usb-1.1, smsc75xx USB 2.0 Gigabit Ethernet, 80:3f:5d:08:5d:c
+Local side:
+[    9.468395] dwc2 f72c0000.usb: bound driver configfs-gadget
+[   12.008588] usb 1-1: unregistering device
+[   12.163786] usb usb1-port1: debounce total 100ms stable 100ms status 0x101
+[   12.355669] dwc2 f72c0000.usb: Set speed to full-speed
+[   12.361093] usb 1-1: new full-speed USB device number 7 using dwc2
+[   12.555569] dwc2 f72c0000.usb: Set speed to full-speed
+[   12.580419] usb 1-1: not running at top speed; connect to a high speed hub
+[   12.588483] usb 1-1: udev 7, busnum 1, minor = 6
+[   12.602661] hub 1-1:1.0: USB hub found
+[   12.606870] hub 1-1:1.0: 3 ports detected
+[   12.611013] hub 1-1:1.0: standalone hub
+[   12.615196] hub 1-1:1.0: individual port power switching
+[   12.620794] hub 1-1:1.0: individual port over-current protection
+[   12.627065] hub 1-1:1.0: power on to power good time: 100ms
+[   12.633161] hub 1-1:1.0: local power source is good
+[   12.638517] hub 1-1:1.0: enabling power on all ports
+[   12.644367] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[   12.650056] usb usb1-port1: enable change, status 00000103
+[   12.752182] usb 1-1-port2: status 0101 change 0001
+[   12.859535] hub 1-1:1.0: state 7 ports 3 chg 0004 evt 0000
+[   12.865458] usb 1-1-port2: status 0101, change 0000, 12 Mb/s
+[   12.951473] dwc2 f72c0000.usb: Set speed to full-speed
+[   12.957875] usb 1-1.2: new full-speed USB device number 8 using dwc2
+[   13.051526] dwc2 f72c0000.usb: Set speed to full-speed
+[   13.080452] usb 1-1.2: udev 8, busnum 1, minor = 7
+[   13.151144] dm9601 1-1.2:1.0 eth0: register 'dm9601' at usb-f72c0000.usb-1.2, Davicom DM96xx USB 10/100 Ethernet, 00:e0:4c:53:44:58
+[   13.164080] hub 1-1:1.0: state 7 ports 3 chg 0000 evt 0004
+
+
+-------------------
+[ 3470.193354] dwc2 f72c0000.usb: gintsts=14008029  gintmsk=d0bc3cc4
+[ 3470.193377] dwc2 f72c0000.usb:  ++Connector ID Status Change Interrupt++  (Host)
+[ 3470.193461] dwc2 f72c0000.usb: dwc2_conn_id_status_change()
+[ 3470.193486] dwc2 f72c0000.usb: gotgctl=2200000
+[ 3470.193512] dwc2 f72c0000.usb: gotgctl.b.conidsts=0
+[ 3470.193536] dwc2 f72c0000.usb: connId A
+[ 3470.193562] dwc2 f72c0000.usb: dwc2_core_init(ffffffc07410a018)
+[ 3470.255949] dwc2 f72c0000.usb: dwc2_hsotg_vbus_session: is_active: 0
+[ 3470.256022] dwc2 f72c0000.usb: complete: ep ffffffc07434c418 ep0, req ffffffc074017e80, -108 => ffffff80087158a0
+[ 3470.256064] dwc2 f72c0000.usb: dwc2_hsotg_complete_setup: failed -108
+[ 3470.256128] dwc2 f72c0000.usb: complete: ep ffffffc07434c618 ep1out, req ffffffc070eb6400, -108 => ffffff800874aa7c
+[ 3470.256325] configfs-gadget gadget: reset config
+[ 3470.256360] dwc2 f72c0000.usb: dwc2_hsotg_ep_disable(ep ffffffc07434c618)
+[ 3470.256390] dwc2 f72c0000.usb: dwc2_hsotg_ep_disable: DxEPCTL=0x08000000
+[ 3470.256421] dwc2 f72c0000.usb: dwc2_hsotg_ep_disable(ep ffffffc07434c518)
+[ 3470.256450] dwc2 f72c0000.usb: dwc2_hsotg_ep_disable: DxEPCTL=0x08000000
+[ 3470.261564] android_work: sent uevent USB_STATE=DISCONNECTED
+[ 3470.352105] dwc2 f72c0000.usb: Internal DMA Mode
+[ 3470.352177] dwc2 f72c0000.usb: dma_enable:1 dma_desc_enable:0
+[ 3470.352225] dwc2 f72c0000.usb: Using Buffer DMA mode
+[ 3470.352277] dwc2 f72c0000.usb: OTG VER PARAM: 0
+[ 3470.352327] dwc2 f72c0000.usb: Host Mode
+[ 3470.407993] dwc2 f72c0000.usb: dwc2_hcd_start_func() ffffffc07410a018
+[ 3470.408047] dwc2 f72c0000.usb: DWC OTG HCD START
+[ 3470.408119] dwc2 f72c0000.usb: dwc2_core_host_init(ffffffc07410a018)
+[ 3470.408148] dwc2 f72c0000.usb: Initializing HCFG.FSLSPClkSel to 00000000
+[ 3470.408177] dwc2 f72c0000.usb: initial grxfsiz=00000800
+[ 3470.408202] dwc2 f72c0000.usb: new grxfsiz=00000200
+[ 3470.408229] dwc2 f72c0000.usb: initial gnptxfsiz=08000800
+[ 3470.408255] dwc2 f72c0000.usb: new gnptxfsiz=02000200
+[ 3470.408281] dwc2 f72c0000.usb: initial hptxfsiz=08001000
+[ 3470.408306] dwc2 f72c0000.usb: new hptxfsiz=02000400
+[ 3470.408357] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 0
+[ 3470.408386] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 1
+[ 3470.408413] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 2
+[ 3470.408440] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 3
+[ 3470.408468] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 4
+[ 3470.408494] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 5
+[ 3470.408521] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 6
+[ 3470.408549] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 7
+[ 3470.408576] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 8
+[ 3470.408603] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 9
+[ 3470.408631] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 10
+[ 3470.408658] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 11
+[ 3470.408685] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 12
+[ 3470.408713] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 13
+[ 3470.408740] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 14
+[ 3470.408768] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 15
+[ 3470.408795] dwc2 f72c0000.usb: Init: Port Power? op_state=9
+[ 3470.408820] dwc2 f72c0000.usb: Init: Power Port (0)
+[ 3470.408846] dwc2 f72c0000.usb: dwc2_enable_host_interrupts()
+[ 3470.408873] dwc2 f72c0000.usb: DWC OTG HCD Has Root Hub
+[ 3470.408957] dwc2 f72c0000.usb: gintsts=05000021  gintmsk=f3000806
+[ 3470.409070] usb usb1: usb wakeup-resume
+[ 3470.413264] hub 1-0:1.0: hub_resume
+[ 3470.419604] usb usb1-port1: status 0101 change 0001
+[ 3470.424729] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_CONNECTION
+[ 3470.532038] hub 1-0:1.0: state 7 ports 1 chg 0002 evt 0000
+[ 3470.537937] usb usb1-port1: status 0101, change 0000, 12 Mb/s
+[ 3470.544092] dwc2 f72c0000.usb: SetPortFeature
+[ 3470.544143] dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_RESET
+[ 3470.544195] dwc2 f72c0000.usb: In host mode, hprt0=00021501
+[ 3470.615253] dwc2 f72c0000.usb: gintsts=05000021  gintmsk=f3000806
+[ 3470.671985] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_RESET
+[ 3470.732415] dwc2 f72c0000.usb: Set speed to high-speed
+[ 3470.737877] usb 1-1: new high-speed USB device number 2 using dwc2
+[ 3470.744679] dwc2 f72c0000.usb: SetPortFeature
+[ 3470.744731] dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_RESET
+[ 3470.744783] dwc2 f72c0000.usb: In host mode, hprt0=00001101
+[ 3470.744843] dwc2 f72c0000.usb: gintsts=05000029  gintmsk=f3000806
+[ 3470.815915] dwc2 f72c0000.usb: gintsts=05000029  gintmsk=f3000806
+[ 3470.876643] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_RESET
+[ 3470.924172] dwc2 f72c0000.usb: DWC OTG HCD HUB STATUS DATA: Root port status changed
+[ 3470.924325] dwc2 f72c0000.usb:   port_connect_status_change: 0
+[ 3470.924351] dwc2 f72c0000.usb:   port_reset_change: 0
+[ 3470.924375] dwc2 f72c0000.usb:   port_enable_change: 1
+[ 3470.924399] dwc2 f72c0000.usb:   port_suspend_change: 0
+[ 3470.924422] dwc2 f72c0000.usb:   port_over_current_change: 0
+[ 3470.936397] dwc2 f72c0000.usb: Set speed to high-speed
+[ 3470.942084] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=ffffffc070d22c00
+[ 3470.942163] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3470.942220] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3470.961452] usb 1-1: udev 2, busnum 1, minor = 1
+[ 3470.982886] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x81
+[ 3470.985608] hub 1-1:1.0: USB hub found
+[ 3470.989869] hub 1-1:1.0: 3 ports detected
+[ 3470.996579] hub 1-1:1.0: standalone hub
+[ 3471.000590] hub 1-1:1.0: individual port power switching
+[ 3471.006356] hub 1-1:1.0: individual port over-current protection
+[ 3471.013165] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81, ep->hcpriv=          (null)
+[ 3471.013185] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x81
+[ 3471.013366] hub 1-1:1.0: TT per port
+[ 3471.017049] hub 1-1:1.0: TT requires at most 8 FS bit times (666 ns)
+[ 3471.023822] hub 1-1:1.0: power on to power good time: 100ms
+[ 3471.029805] hub 1-1:1.0: local power source is good
+[ 3471.035335] hub 1-1:1.0: enabling power on all ports
+[ 3471.040852] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[ 3471.046559] usb usb1-port1: enable change, status 00000503
+[ 3471.052235] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_ENABLE
+[ 3471.147381] usb 1-1-port2: status 0101 change 0001
+[ 3471.256737] hub 1-1:1.0: state 7 ports 3 chg 0004 evt 0000
+[ 3471.263055] usb 1-1-port2: status 0101, change 0000, 12 Mb/s
+[ 3471.351681] dwc2 f72c0000.usb: Set speed to full-speed
+[ 3471.357559] usb 1-1.2: new full-speed USB device number 3 using dwc2
+[ 3471.357762] dwc2 f72c0000.usb: dwc2_conn_id_status_change()
+[ 3471.357795] dwc2 f72c0000.usb: gotgctl=2200000
+[ 3471.357824] dwc2 f72c0000.usb: gotgctl.b.conidsts=0
+[ 3471.357851] dwc2 f72c0000.usb: connId A
+[ 3471.357882] dwc2 f72c0000.usb: dwc2_core_init(ffffffc07410a018)
+[ 3471.515995] dwc2 f72c0000.usb: Internal DMA Mode
+[ 3471.516065] dwc2 f72c0000.usb: dma_enable:1 dma_desc_enable:0
+[ 3471.516112] dwc2 f72c0000.usb: Using Buffer DMA mode
+[ 3471.516163] dwc2 f72c0000.usb: OTG VER PARAM: 0
+[ 3471.516212] dwc2 f72c0000.usb: Host Mode
+[ 3471.571994] dwc2 f72c0000.usb: dwc2_hcd_start_func() ffffffc07410a018
+[ 3471.572055] dwc2 f72c0000.usb: DWC OTG HCD START
+[ 3471.572129] dwc2 f72c0000.usb: dwc2_core_host_init(ffffffc07410a018)
+[ 3471.572159] dwc2 f72c0000.usb: Initializing HCFG.FSLSPClkSel to 00000000
+[ 3471.572188] dwc2 f72c0000.usb: initial grxfsiz=00000800
+[ 3471.572214] dwc2 f72c0000.usb: new grxfsiz=00000200
+[ 3471.572240] dwc2 f72c0000.usb: initial gnptxfsiz=08000800
+[ 3471.572266] dwc2 f72c0000.usb: new gnptxfsiz=02000200
+[ 3471.572292] dwc2 f72c0000.usb: initial hptxfsiz=08001000
+[ 3471.572318] dwc2 f72c0000.usb: new hptxfsiz=02000400
+[ 3471.572370] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 0
+[ 3471.572399] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 1
+[ 3471.572427] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 2
+[ 3471.572454] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 3
+[ 3471.572481] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 4
+[ 3471.572508] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 5
+[ 3471.572535] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 6
+[ 3471.572563] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 7
+[ 3471.572590] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 8
+[ 3471.572617] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 9
+[ 3471.572646] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 10
+[ 3471.572673] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 11
+[ 3471.572700] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 12
+[ 3471.572727] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 13
+[ 3471.572755] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 14
+[ 3471.572782] dwc2 f72c0000.usb: dwc2_core_host_init: Halt channel 15
+[ 3471.572808] dwc2 f72c0000.usb: Init: Port Power? op_state=9
+[ 3471.572832] dwc2 f72c0000.usb: Init: Power Port (0)
+[ 3471.572858] dwc2 f72c0000.usb: dwc2_enable_host_interrupts()
+[ 3471.572885] dwc2 f72c0000.usb: DWC OTG HCD Has Root Hub
+[ 3471.573166] dwc2 f72c0000.usb: gintsts=05000021  gintmsk=f3000806
+[ 3471.667911] dwc2 f72c0000.usb: DWC OTG HCD HUB STATUS DATA: Root port status changed
+[ 3471.668059] dwc2 f72c0000.usb:   port_connect_status_change: 1
+[ 3471.668085] dwc2 f72c0000.usb:   port_reset_change: 0
+[ 3471.668109] dwc2 f72c0000.usb:   port_enable_change: 0
+[ 3471.668133] dwc2 f72c0000.usb:   port_suspend_change: 0
+[ 3471.668157] dwc2 f72c0000.usb:   port_over_current_change: 0
+[ 3471.668538] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[ 3471.674556] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_CONNECTION
+[ 3471.674711] usb usb1-port1: status 0101, change 0001, 12 Mb/s
+[ 3471.680734] usb 1-1: USB disconnect, device number 2
+[ 3476.456748] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3476.456877] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3476.456911] dwc2 f72c0000.usb:   urb->status = -115
+[ 3476.457168] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=ffffffc033175400
+[ 3476.457247] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.457303] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3476.457482] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.457546] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.457600] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3476.457738] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.457802] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.457856] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3476.458082] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.458146] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.458200] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3476.458455] usb 1-1: unregistering device
+[ 3476.463855] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3476.463966] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3476.463993] dwc2 f72c0000.usb:   urb->status = -115
+[ 3476.467610] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=ffffffc070d22c00
+[ 3476.467687] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3476.467750] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81, ep->hcpriv=ffffffc070d22a00
+[ 3476.616345] usb usb1-port1: debounce total 100ms stable 100ms status 0x101
+[ 3476.623730] dwc2 f72c0000.usb: SetPortFeature
+[ 3476.623783] dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_RESET
+[ 3476.623836] dwc2 f72c0000.usb: In host mode, hprt0=00021501
+[ 3476.694396] dwc2 f72c0000.usb: gintsts=07000021  gintmsk=f3000806
+[ 3476.752661] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_RESET
+[ 3476.812010] dwc2 f72c0000.usb: Set speed to full-speed
+[ 3476.817487] usb 1-1: new full-speed USB device number 7 using dwc2
+[ 3476.825123] dwc2 f72c0000.usb: SetPortFeature
+[ 3476.825176] dwc2 f72c0000.usb: SetPortFeature - USB_PORT_FEAT_RESET
+[ 3476.825230] dwc2 f72c0000.usb: In host mode, hprt0=00021501
+[ 3476.825291] dwc2 f72c0000.usb: gintsts=05000029  gintmsk=f3000806
+[ 3476.876253] dwc2 f72c0000.usb: DWC OTG HCD HUB STATUS DATA: Root port status changed
+[ 3476.876374] dwc2 f72c0000.usb:   port_connect_status_change: 0
+[ 3476.876399] dwc2 f72c0000.usb:   port_reset_change: 0
+[ 3476.876423] dwc2 f72c0000.usb:   port_enable_change: 1
+[ 3476.876447] dwc2 f72c0000.usb:   port_suspend_change: 0
+[ 3476.876471] dwc2 f72c0000.usb:   port_over_current_change: 0
+[ 3476.876741] dwc2 f72c0000.usb: gintsts=05000029  gintmsk=f3000806
+[ 3476.936376] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_RESET
+[ 3476.996553] dwc2 f72c0000.usb: Set speed to full-speed
+[ 3477.002579] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=ffffffc070d22a00
+[ 3477.002659] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3477.002716] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3477.020631] usb 1-1: not running at top speed; connect to a high speed hub
+[ 3477.028521] usb 1-1: udev 7, busnum 1, minor = 6
+[ 3477.042953] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x81
+[ 3477.048070] hub 1-1:1.0: USB hub found
+[ 3477.053250] hub 1-1:1.0: 3 ports detected
+[ 3477.057401] hub 1-1:1.0: standalone hub
+[ 3477.061369] hub 1-1:1.0: individual port power switching
+[ 3477.066829] hub 1-1:1.0: individual port over-current protection
+[ 3477.073558] hub 1-1:1.0: power on to power good time: 100ms
+[ 3477.079758] hub 1-1:1.0: local power source is good
+[ 3477.085111] hub 1-1:1.0: enabling power on all ports
+[ 3477.091025] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[ 3477.096731] usb usb1-port1: enable change, status 00000103
+[ 3477.102525] dwc2 f72c0000.usb: ClearPortFeature USB_PORT_FEAT_C_ENABLE
+[ 3477.195498] usb 1-1-port2: status 0101 change 0001
+[ 3477.304649] hub 1-1:1.0: state 7 ports 3 chg 0004 evt 0000
+[ 3477.311653] usb 1-1-port2: status 0101, change 0000, 12 Mb/s
+[ 3477.396285] dwc2 f72c0000.usb: Set speed to full-speed
+[ 3477.401741] usb 1-1.2: new full-speed USB device number 8 using dwc2
+[ 3477.487734] dwc2 f72c0000.usb: Set speed to full-speed
+[ 3477.494281] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=ffffffc070d27000
+[ 3477.494364] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x00, ep->hcpriv=          (null)
+[ 3477.494421] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x00
+[ 3477.520485] usb 1-1.2: udev 8, busnum 1, minor = 7
+[ 3477.534962] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x81
+[ 3477.535029] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x02
+[ 3477.535086] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x83
+[ 3477.542063] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x81, ep->hcpriv=          (null)
+[ 3477.542139] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x02, ep->hcpriv=          (null)
+[ 3477.542203] dwc2 f72c0000.usb: DWC OTG HCD EP DISABLE: bEndpointAddress=0x83, ep->hcpriv=          (null)
+[ 3477.542261] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x81
+[ 3477.542316] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x02
+[ 3477.542370] dwc2 f72c0000.usb: DWC OTG HCD EP RESET: bEndpointAddress=0x83
+[ 3477.600092] type=1400 audit(1861.571:30): avc: denied { associate } for pid=1855 comm="Binder:1855_2" name="globalAlert" scontext=u:object_r:proc_net:s0 tcontext=u:object_r:proc:s0 tclass=filesystem permissive=1
+[ 3477.606176] dm9601 1-1.2:1.0 eth0: register 'dm9601' at usb-f72c0000.usb-1.2, Davicom DM96xx USB 10/100 Ethernet, 00:e0:4c:53:44:58
+[ 3477.633015] type=1400 audit(3482.995:31): avc: denied { module_request } for pid=1855 comm="Binder:1855_2" kmod="netdev-eth0" scontext=u:r:netd:s0 tcontext=u:r:kernel:s0 tclass=system permissive=1
+[ 3477.709644] dm9601 1-1.2:1.0 eth0: link up, 100Mbps, full-duplex, lpa 0xFFFF
+[ 3477.779985] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3477.780028] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3477.780035] dwc2 f72c0000.usb:   urb->status = -115
+[ 3477.780067] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3477.780080] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3477.780085] dwc2 f72c0000.usb:   urb->status = -115
+[ 3477.780093] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3477.780122] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3477.780128] dwc2 f72c0000.usb:   urb->status = -115
+[ 3477.780150] dwc2 f72c0000.usb: DWC OTG HCD URB Dequeue
+[ 3477.780163] dwc2 f72c0000.usb: Called usb_hcd_giveback_urb()
+[ 3477.780168] dwc2 f72c0000.usb:   urb->status = -115
+[ 3479.505966] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.512592] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.521505] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.528875] dwc2 f72c0000.usb: --Host Channel 12 Interrupt: Frame Overrun--
+[ 3479.530430] dwc2 f72c0000.usb: --Host Channel 13 Interrupt: Frame Overrun--
+[ 3479.530912] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.537445] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.544927] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.551399] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.558843] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.565127] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.572936] dm9601 1-1.2:1.0 eth0: kevent 4 may have been dropped
+[ 3479.620674] dm9601 1-1.2:1.0 eth0: link up, 100Mbps, full-duplex, lpa 0xFFFF
+[ 3479.755604] dm9601 1-1.2:1.0 eth0: link up, 100Mbps, full-duplex, lpa 0xFFFF
+[ 3480.809683] init: processing action (sys.sysctl.tcp_def_init_rwnd=*) from (/init.rc:689)
+[ 3492.217518] dwc2 f72c0000.usb: --Host Channel 13 Interrupt: Frame Overrun--
+[ 3492.222763] dwc2 f72c0000.usb: --Host Channel 15 Interrupt: Frame Overrun--
+[ 3492.223809] dwc2 f72c0000.usb: --Host Channel 5 Interrupt: Frame Overrun--
+[ 3494.563634] dwc2 f72c0000.usb: --Host Channel 12 Interrupt: Frame Overrun--
+------------------------------------------------------------------------
+"stop adbd" will cause "64 bytes from 192.168.0.103: icmp_seq=4982 ttl=64 time=3005 ms"
+
+hikey:/ # stop adbd
+[   35.867371] init: Sending signal 9 to service 'adbd' (pid 1888) process group...
+[   35.877885] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.890222] android_work: did not send uevent (0 0           (null))
+[   35.897499] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.904946] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.912467] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.919845] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.927230] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.934604] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.941981] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.949352] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.956763] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.964117] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.971490] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.978865] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.986240] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   35.993609] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.000968] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.008320] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.015680] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.023032] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.030389] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.037747] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.045103] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.052490] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.059849] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.067201] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.074578] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.082062] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.089678] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.098316] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+hikey:/ # [   36.101325] init: Failed to kill process cgroup uid 0 pid 1888 in 226ms, 1 processes remain
+[   36.115165] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[   36.125091] init: Service 'adbd' (pid 1888) killed by signal 9
+[   36.131089] init: Sending signal 9 to service 'adbd' (pid 1888) process group...
+[   36.139554] init: Successfully killed process cgroup uid 0 pid 1888 in 0ms
+[   36.149212] init: processing action (init.svc.adbd=stopped) from (init.hikey.usb.rc:32)
+[   36.157796] init: processing action (init.svc.adbd=stopped) from (/init.usb.configfs.rc:15)
+
+23:07:49 liu: master$ grep -rn "did not send uevent" kernel/linaro/hisilicon/drivers/usb/
+kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:1449:     pr_info("%s: did not send uevent (%d %d %p)\n", __func__,
+23:08:15 liu: master$
+
+kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c
+#ifdef CONFIG_USB_CONFIGFS_UEVENT
+static void android_work(struct work_struct *data)
+{
+	struct gadget_info *gi = container_of(data, struct gadget_info, work);
+	struct usb_composite_dev *cdev = &gi->cdev;
+	char *disconnected[2] = { "USB_STATE=DISCONNECTED", NULL };
+	char *connected[2]    = { "USB_STATE=CONNECTED", NULL };
+	char *configured[2]   = { "USB_STATE=CONFIGURED", NULL };
+	/* 0-connected 1-configured 2-disconnected*/
+	bool status[3] = { false, false, false };
+	unsigned long flags;
+	bool uevent_sent = false;
+
+	spin_lock_irqsave(&cdev->lock, flags);
+	if (cdev->config)
+		status[1] = true;
+
+	if (gi->connected != gi->sw_connected) {
+		if (gi->connected)
+			status[0] = true;
+		else
+			status[2] = true;
+		gi->sw_connected = gi->connected;
+	}
+	spin_unlock_irqrestore(&cdev->lock, flags);
+
+	if (status[0]) {
+		kobject_uevent_env(&android_device->kobj,
+					KOBJ_CHANGE, connected);
+		pr_info("%s: sent uevent %s\n", __func__, connected[0]);
+		uevent_sent = true;
+	}
+
+	if (status[1]) {
+		kobject_uevent_env(&android_device->kobj,
+					KOBJ_CHANGE, configured);
+		pr_info("%s: sent uevent %s\n", __func__, configured[0]);
+		uevent_sent = true;
+	}
+
+	if (status[2]) {
+		kobject_uevent_env(&android_device->kobj,
+					KOBJ_CHANGE, disconnected);
+		pr_info("%s: sent uevent %s\n", __func__, disconnected[0]);
+		uevent_sent = true;
+	}
+
+	if (!uevent_sent) {
+		pr_info("%s: did not send uevent (%d %d %p)\n", __func__,
+			gi->connected, gi->sw_connected, cdev->config);
+	}
+}
+#endif
+
+127|hikey:/ # ls -l /config/usb_gadget/g1/
+total 0
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 UDC
+-rw-r--r-- 1 root root 4096 2017-07-26 15:22 bDeviceClass
+-rw-r--r-- 1 root root 4096 2017-07-26 15:22 bDeviceProtocol
+-rw-r--r-- 1 root root 4096 2017-07-26 15:22 bDeviceSubClass
+-rw-r--r-- 1 root root 4096 2017-07-26 15:22 bMaxPacketSize0
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 bcdDevice
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 bcdUSB
+drwxr-xr-x 3 root root    0 1970-01-01 00:00 configs
+drwxr-xr-x 8 root root    0 1970-01-01 00:00 functions
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 idProduct
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 idVendor
+drwxr-xr-x 2 root root    0 1970-01-01 00:00 os_desc
+drwxr-xr-x 3 root root    0 1970-01-01 00:00 strings
+hikey:/ #
+
+hikey:/ # ls -l /sys/class/android_usb/
+total 0
+lrwxrwxrwx 1 root root 0 1970-01-01 00:00 android0 -> ../../devices/virtual/android_usb/android0
+lrwxrwxrwx 1 root root 0 2017-07-26 15:24 f_audio_source -> ../../devices/virtual/android_usb/android0/f_audio_source
+lrwxrwxrwx 1 root root 0 2017-07-26 15:24 f_midi -> ../../devices/virtual/android_usb/android0/f_midi
+hikey:/ # ls -l /sys/class/android_usb/android0/
+total 0
+drwxr-xr-x 3 root root    0 1970-01-01 00:00 f_audio_source
+drwxr-xr-x 3 root root    0 1970-01-01 00:00 f_midi
+drwxr-xr-x 2 root root    0 2017-07-26 15:25 power
+-r--r--r-- 1 root root 4096 1970-01-01 00:00 state
+lrwxrwxrwx 1 root root    0 2017-07-26 15:25 subsystem -> ../../../../class/android_usb
+-rw-r--r-- 1 root root 4096 2017-07-26 15:25 uevent
+hikey:/ #
