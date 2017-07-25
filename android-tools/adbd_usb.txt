@@ -16,3 +16,91 @@ lrwxrwxrwx 1 root root 0 1970-01-01 01:06 /sys/class/net/wlan0 -> ../../devices/
 hikey:/ #
 
 
+android_work: did not send uevent (0 0 (null))
+dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+dwc2 f72c0000.usb: dwc2_update_urb_state(): trimming xfer length
+asix 1-1.1:1.0 eth0: asix_rx_fixup() Bad Header Length 0x1404, offset 4
+
+dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 14 - ChHltd set, but reason is unknown
+dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200009
+asix 1-1.1:1.0 eth0: asix_rx_fixup() Bad Header Length 0x0, offset 6
+
+usb usb1-port1: Cannot enable. Maybe the USB cable is bad?
+usb usb1-port1: unable to enumerate USB device
+
+usb usb1-port1: disabled by hub (EMI?), re-enabling...
+
+=================
+[   96.444789] init: Service 'adbd' (pid 1881) killed by signal 9
+[   96.453015] init: processing action (init.svc.adbd=stopped) from (init.hikey.usb.rc:32)
+[   96.463676] init: processing action (init.svc.adbd=stopped) from (/init.usb.configfs.rc:15)
+[  106.585981] init: starting service 'adbd'...
+[  106.592537] init: property_set("ro.boottime.adbd", "106584125822") failed: property already set
+[  106.594269] init: Created socket '/dev/socket/adbd', mode 660, user 1000, group 1000
+[  106.608315] read descriptors
+[  106.608327] read strings
+[  106.617024] init: processing action (sys.usb.config=adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.usb.configfs.rc:21)
+[  106.631154] init: starting service 'mdnsd'...
+[  106.637982] dwc2 f72c0000.usb: bound driver configfs-gadget
+========================:
+
+15:21:27 liu: master$ grep -rn USB_DWC2 out/target/product/hikey/obj/kernel/.config
+3394:CONFIG_USB_DWC2=y
+3395:# CONFIG_USB_DWC2_HOST is not set
+3400:# CONFIG_USB_DWC2_PERIPHERAL is not set
+3401:CONFIG_USB_DWC2_DUAL_ROLE=y
+3402:# CONFIG_USB_DWC2_PCI is not set
+3403:# CONFIG_USB_DWC2_DEBUG is not set
+3404:# CONFIG_USB_DWC2_TRACK_MISSED_SOFS is not set
+15:21:49 liu: master$
+15:24:54 liu: master$ ll kernel/linaro/hisilicon/drivers/usb/
+总用量 128
+drwxrwxr-x  24 liu liu  4096 Jul 21 15:17 ./
+drwxrwxr-x 130 liu liu  4096 Jun 17 21:48 ../
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 atm/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 c67x00/
+drwxrwxr-x   2 liu liu  4096 Jun 20 16:19 chipidea/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 class/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 common/
+drwxrwxr-x   2 liu liu  4096 Jul 18 16:40 core/
+drwxrwxr-x   2 liu liu  4096 Jul 21 15:24 dwc2/
+drwxrwxr-x   2 liu liu  4096 Jun 28 13:02 dwc3/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 early/
+drwxrwxr-x   5 liu liu  4096 Jun 28 13:02 gadget/
+drwxrwxr-x   3 liu liu  4096 Jun 28 13:02 host/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 image/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 isp1760/
+-rw-rw-r--   1 liu liu  5490 Jun 17 21:48 Kconfig
+-rw-rw-r--   1 liu liu  1642 Jun 17 21:48 Makefile
+drwxrwxr-x   3 liu liu  4096 Jun 17 21:48 misc/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 mon/
+drwxrwxr-x   2 liu liu  4096 Jun 28 13:02 musb/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 phy/
+-rw-rw-r--   1 liu liu  2427 Jun 17 21:48 README
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 renesas_usbhs/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 serial/
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 storage/
+drwxrwxr-x   2 liu liu  4096 Jun 28 13:02 usbip/
+-rw-rw-r--   1 liu liu 15973 Jun 17 21:48 usb-skeleton.c
+drwxrwxr-x   2 liu liu  4096 Jun 17 21:48 wusbcore/
+15:25:16 liu: master$
+15:26:32 liu: master$ ll  kernel/linaro/hisilicon/drivers/net/usb/asix*
+-rw-rw-r-- 1 liu liu 19353 Jun 17 21:48 kernel/linaro/hisilicon/drivers/net/usb/asix_common.c
+-rw-rw-r-- 1 liu liu 36456 Jun 17 21:48 kernel/linaro/hisilicon/drivers/net/usb/asix_devices.c
+-rw-rw-r-- 1 liu liu  8037 Jun 17 21:48 kernel/linaro/hisilicon/drivers/net/usb/asix.h
+15:26:48 liu: master$
+
+dm9601 1-1.2:1.0 eth0: register 'dm9601' at usb-f72c0000.usb-1.2, Davicom DM96xx USB 10/100 Ethernet, 00:e0:4c:53:44:5
+kernel/linaro/hisilicon/drivers/net/usb/dm9601.c
+
+system/core/rootdir/init.usb.configfs.rc:
+
+on property:init.svc.adbd=stopped
+    setprop sys.usb.ffs.ready 0
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
