@@ -118,6 +118,7 @@ function build_hikey(){
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
     export KERNEL_BUILD_WITH_CLANG=true
+    export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true
     export CFG_SECURE_DATA_PATH=y
     build hikey

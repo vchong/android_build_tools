@@ -62,3 +62,85 @@ https://www.zephyrproject.org/doc/boards/arm/nucleo_f401re/doc/nucleof401re.html
 =========================
 Linaro foat system: This is the documentation for the Linaro Technologies Division.
 http://docs.linarotechnologies.org/index.html
+
+=============================
+toolchain files:
+0.8.2 sdk
+zephyr-sdk/sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/
+21:07:02 liu: zephyr-sdk$ ll sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-*
+-rwxr-xr-x 1 liu liu  800952 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-addr2line*
+-rwxr-xr-x 1 liu liu  830616 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-ar*
+-rwxr-xr-x 1 liu liu 1384312 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-as*
+-rwxr-xr-x 1 liu liu  798616 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-c++filt*
+-rwxr-xr-x 1 liu liu  824128 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-cpp*
+-rwxr-xr-x 1 liu liu 3261392 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-dwp*
+-rwxr-xr-x 1 liu liu   31172 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-elfedit*
+-rwxr-xr-x 1 liu liu  825792 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-g++*
+-rwxr-xr-x 1 liu liu  822752 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcc*
+-rwxr-xr-x 1 liu liu   27948 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcc-ar*
+-rwxr-xr-x 1 liu liu   27884 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcc-nm*
+-rwxr-xr-x 1 liu liu   27920 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcc-ranlib*
+-rwxr-xr-x 1 liu liu  471232 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcov*
+-rwxr-xr-x 1 liu liu  436092 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gcov-tool*
+-rwxr-xr-x 1 liu liu 4721104 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gdb*
+-rwxr-xr-x 1 liu liu  878772 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-gprof*
+-rwxr-xr-x 2 liu liu 1136472 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-ld*
+-rwxr-xr-x 2 liu liu 1136472 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-ld.bfd*
+-rwxr-xr-x 1 liu liu 4978292 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-ld.gold*
+-rwxr-xr-x 1 liu liu  812916 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-nm*
+-rwxr-xr-x 1 liu liu  998712 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-objcopy*
+-rwxr-xr-x 1 liu liu 1224632 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-objdump*
+-rwxr-xr-x 1 liu liu  830620 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-ranlib*
+-rwxr-xr-x 1 liu liu  460392 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-readelf*
+-rwxr-xr-x 1 liu liu  802228 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-size*
+-rwxr-xr-x 1 liu liu  801208 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-strings*
+-rwxr-xr-x 1 liu liu  998708 Feb  6 21:41 sysroots/i686-pokysdk-linux//usr/bin/arm-poky-eabi/arm-poky-eabi-strip*
+21:08:40 liu: zephyr-sdk$ pwd
+/development/IOT/zephyr/zephyr-sdk
+21:17:19 liu: zephyr-sdk$ 
+----
+0.9.1 sdk
+00:57:10 liu: zephyr-sdk$ ll ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-*
+-rwxr-xr-x 1 liu liu  832640 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-addr2line*
+-rwxr-xr-x 1 liu liu  861184 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-ar*
+-rwxr-xr-x 1 liu liu 1463560 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-as*
+-rwxr-xr-x 1 liu liu  832184 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-c++filt*
+-rwxr-xr-x 1 liu liu  850128 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-cpp*
+-rwxr-xr-x 1 liu liu 2252584 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-dwp*
+-rwxr-xr-x 1 liu liu   35560 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-elfedit*
+-rwxr-xr-x 1 liu liu  854224 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-g++*
+-rwxr-xr-x 1 liu liu  850128 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcc*
+-rwxr-xr-x 1 liu liu   31160 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcc-ar*
+-rwxr-xr-x 1 liu liu   31160 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcc-nm*
+-rwxr-xr-x 1 liu liu   31168 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcc-ranlib*
+-rwxr-xr-x 1 liu liu  437552 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcov*
+-rwxr-xr-x 1 liu liu  396552 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gcov-tool*
+-rwxr-xr-x 1 liu liu 4768344 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gdb*
+-rwxr-xr-x 1 liu liu  899416 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-gprof*
+-rwxr-xr-x 2 liu liu 1177320 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-ld*
+-rwxr-xr-x 2 liu liu 1177320 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-ld.bfd*
+-rwxr-xr-x 1 liu liu 4354984 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-ld.gold*
+-rwxr-xr-x 1 liu liu  845528 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-nm*
+-rwxr-xr-x 1 liu liu 1024696 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-objcopy*
+-rwxr-xr-x 1 liu liu 1304536 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-objdump*
+-rwxr-xr-x 1 liu liu  861184 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-ranlib*
+-rwxr-xr-x 1 liu liu  522088 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-readelf*
+-rwxr-xr-x 1 liu liu  836568 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-size*
+-rwxr-xr-x 1 liu liu  832600 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-strings*
+-rwxr-xr-x 1 liu liu 1024696 Jul 25 23:06 ./sysroots/x86_64-pokysdk-linux/usr/bin/arm-zephyr-eabi/arm-zephyr-eabi-strip*
+00:57:25 liu: zephyr-sdk$ pwd
+/development/IOT/zephyr/zephyr-sdk
+00:57:27 liu: zephyr-sdk$ 
+
+
+-----------------------
+Installing pyOCD
+http://zephyr-docs.s3-website-us-east-1.amazonaws.com/online/dev/boards/arm/96b_nitrogen/doc/96b_nitrogen.html#installing-pyocd
+The latest stable version of pyOCD can be installed via pip as follows:
+    $ pip install --pre -U pyocd
+To install the latest development version (master branch), do the following:
+    $ pip install --pre -U git+https://github.com/mbedmicro/pyOCD.git#egg=pyOCD
+You can then verify that your board is detected by pyOCD by running:
+    $ pyocd-flashtool -l
+
+https://www.zephyrproject.org/doc/boards/arm/frdm_kl25z/doc/frdm_kl25z.html
