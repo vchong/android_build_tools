@@ -91,7 +91,7 @@ function setup_for_clang_upstream() {
 
 function build_hikey(){
     export BUILD_CLANG_MASTER=true
-    #export BUILD_CLANG_MASTER=false
+    export BUILD_CLANG_MASTER=false
     if ${BUILD_CLANG_MASTER}; then
         export LLVM_PREBUILTS_VERSION=clang-master
         build_llvm && setup_for_clang_upstream

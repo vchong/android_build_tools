@@ -55,7 +55,7 @@ func_apply_patch juno-n-workarounds
 #func_apply_patch marshmallow-gcc6-patchset
 func_apply_patch hikey-n-workarounds
 func_apply_patch hikey-optee-4.9
-func_apply_patch optee-240-workarounds
+#func_apply_patch optee-240-workarounds
 func_apply_patch x15-n-workarounds
 #func_apply_patch nexus9-workarounds
 #func_apply_patch get-hikey-blobs
