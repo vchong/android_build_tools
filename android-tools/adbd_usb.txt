@@ -115,7 +115,9 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.u
 
 ====================
 https://validation.linaro.org/scheduler/job/1565561/log_file#L_575_3:
+hi6220-hikey-05:
 hi6220-hikey-07:
+hi6220-hikey-08:
  asix 1-1.1:1.0 eth0: register 'asix' at usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet, 00:50:b6:14:c8:7c
  asix 1-1.1:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet
  dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode

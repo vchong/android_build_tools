@@ -1,0 +1,20 @@
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04
+https://www.postgresql.org/download/linux/ubuntu/
+https://help.ubuntu.com/community/PostgreSQL
+
+1. Create the file /etc/apt/sources.list.d/pgdg.list, and add a line for the repository
+   deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main
+
+2. Import the repository signing key, and update the package lists
+   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+   sudo apt-get update
+
+3. apt-get install postgresql-9.6
+   The repository contains many different packages including third party addons. The most common and important packages are (substitute the version number as required):
+
+    postgresql-client-9.6 - client libraries and client binaries
+    postgresql-9.6 - core database server
+    postgresql-contrib-9.6 - additional supplied modules
+    libpq-dev - libraries and headers for C language frontend development
+    postgresql-server-dev-9.6 - libraries and headers for C language backend development
+    pgadmin3 - pgAdmin III graphical administration utility
