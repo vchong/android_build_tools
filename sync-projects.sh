@@ -1,7 +1,7 @@
 #!/bin/bash
 export BASE=$(cd $(dirname $0);pwd)
 
-source ${BASE}/scripts-common/sync-common.sh
+#source ${BASE}/scripts-common/sync-common.sh
 
 sync_init_with_depth(){
     while ! repo init --depth=1; do

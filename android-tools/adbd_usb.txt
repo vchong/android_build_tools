@@ -115,9 +115,13 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=adb && property:sys.u
 
 ====================
 https://validation.linaro.org/scheduler/job/1565561/log_file#L_575_3:
+hi6220-hikey-01:
+hi6220-hikey-02:
 hi6220-hikey-05:
+hi6220-hikey-06:
 hi6220-hikey-07:
 hi6220-hikey-08:
+hi6220-hikey-10:
  asix 1-1.1:1.0 eth0: register 'asix' at usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet, 00:50:b6:14:c8:7c
  asix 1-1.1:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet
  dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
@@ -130,6 +134,7 @@ hi6220-hikey-08:
 
 https://validation.linaro.org/scheduler/job/1570927/log_file#L_1305_7
 hi6220-hikey-03:
+hi6220-hikey-04:
  MOSCHIP usb-ethernet driver 1-1.1:1.0 eth0: unregister 'MOSCHIP usb-ethernet driver' usb-f72c0000.usb-1.1, MOSCHIP 7830/7832/7730 usb-NET adapter
 
  dwc2 f72c0000.usb: Set speed to high-speed
@@ -764,3 +769,16 @@ Implementation design
         usb_get_function_instance(), which, in turn, calls request_module. So, provided that modprobe works, modules for particular functions
         are loaded automatically. Please note that the converse is not true: after a gadget is disabled and torn down, the modules remain loaded.
 ------------------------------------------------------------------------------------------------------------------------------------------------
+include/uapi/linux/usb/ch9.h
+
+/* USB 2.0 defines three speeds, here's how Linux identifies them */
+
+enum usb_device_speed {
+    USB_SPEED_UNKNOWN = 0,          /* enumerating */
+    USB_SPEED_LOW, USB_SPEED_FULL,      /* usb 1.1 */
+    USB_SPEED_HIGH,             /* usb 2.0 */
+    USB_SPEED_WIRELESS,         /* wireless (usb 2.5) */
+    USB_SPEED_SUPER,            /* usb 3.0 */
+    USB_SPEED_SUPER_PLUS,           /* usb 3.1 */
+};
+------------------------------------------------------------
