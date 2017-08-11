@@ -47,3 +47,8 @@ p2: how to compile:
     ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-release-unsigned.apk
     ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-debug.apk
     11:26:26 liuyq: owncloud$ 
+
+
+
+change from sqlite to postgres
+https://doc.owncloud.org/server/8.0/admin_manual/configuration_database/db_conversion.html

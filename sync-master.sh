@@ -50,13 +50,13 @@ fi
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-#func_apply_patch MASTER-MLCR-PATCHSET
-#func_apply_patch optee-master-workarounds
+func_apply_patch MASTER-MLCR-PATCHSET
+func_apply_patch optee-master-workarounds
 func_apply_patch hikey-o-workarounds
-#func_apply_patch hikey-optee-master
-#func_apply_patch hikey-optee-4.9
-#func_apply_patch hikey-clang-4.9
-#func_apply_patch MASTER-CLANG-PATCHSET
+func_apply_patch hikey-optee-master
+func_apply_patch hikey-optee-4.9
+func_apply_patch hikey-clang-4.9
+func_apply_patch MASTER-CLANG-PATCHSET
 #func_apply_patch x15-o-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15

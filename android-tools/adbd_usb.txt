@@ -1,4 +1,68 @@
+The USB composite framework
+https://lwn.net/Articles/395712/
+
+USB in a NutShell
+http://www.beyondlogic.org/usbnutshell/usb1.shtml
+
+1. fix https://lkml.org/lkml/2017/8/9/1160
+
 1. why stopping adbd service will cause the usb state change?
+   We've found that while in host mode on HiKey using Android, if
+   one runs the command:
+     stop adbd
+
+     The existing usb devices being utilized in host mode are disconnected.
+     This is most visible with usb networking devices.
+
+     This seems to be due to adbd closing the file:
+       /dev/usb-ffs/adb/ep0
+       Which calls ffs_ep0_release() and the following backtrace:
+
+       [<ffffff800875a430>] dwc2_hsotg_ep_disable+0x148/0x150
+       [<ffffff800875a498>] dwc2_hsotg_udc_stop+0x60/0x110
+       [<ffffff8008787950>] usb_gadget_remove_driver+0x58/0x78
+       [<ffffff80087879e4>] usb_gadget_unregister_driver+0x74/0xe8
+       [<ffffff80087850c0>] unregister_gadget+0x28/0x58
+       [<ffffff800878511c>] unregister_gadget_item+0x2c/0x40
+       [<ffffff8008790ea8>] ffs_data_clear+0xe8/0xf8
+       [<ffffff8008790ed8>] ffs_data_reset+0x20/0x58
+       [<ffffff8008793218>] ffs_data_closed+0x98/0xe8
+       [<ffffff80087932d8>] ffs_ep0_release+0x20/0x30
+
+       Then when dwc2_hsotg_ep_disable() is called, we call
+       kill_all_requests() which causes a bunch of the following
+       messages:
+
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+       init: Service 'adbd' (pid 1915) killed by signal 9
+       init: Sending signal 9 to service 'adbd' (pid 1915) process group...
+       init: Successfully killed process cgroup uid 0 pid 1915 in 0ms
+       init: processing action (init.svc.adbd=stopped) from (/init.usb.configfs.rc:15)
+       dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 8 - ChHltd set, but reason is unknown
+       dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200029
+       dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 12 - ChHltd set, but reason is unknown
+       dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200029
+       dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 15 - ChHltd set, but reason is unknown
+       dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200029
+       dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 3 - ChHltd set, but reason is unknown
+       dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200029
+       dwc2 f72c0000.usb: dwc2_hc_chhltd_intr_dma: Channel 4 - ChHltd set, but reason is unknown
+       dwc2 f72c0000.usb: hcint 0x00000002, intsts 0x04200029
+       dwc2 f72c0000.usb: dwc2_update_urb_state_abn(): trimming xfer length
+
+       And the usb devices connected are basically hung at this point.
+
+       It seems like if we're in host mode, we probably shouldn't run
+       the dwc2_hostg_ep_disable logic, so this patch returns an error
+       in that case.
+
 
 --------------------------
 
@@ -782,3 +846,168 @@ enum usb_device_speed {
     USB_SPEED_SUPER_PLUS,           /* usb 3.1 */
 };
 ------------------------------------------------------------
+
+/sys/class/udc/f72c0000.usb/current_speed
+
+hikey:/ # cat /sys/bus/usb/devices/*/product
+AX88772B
+DWC OTG Controller
+hikey:/ # ll /sys/bus/usb/devices/*/product
+-r--r--r-- 1 root root 4096 2017-08-08 09:28 /sys/bus/usb/devices/1-1.2/product
+-r--r--r-- 1 root root 4096 2017-08-08 09:14 /sys/bus/usb/devices/usb1/product
+hikey:/ # cat /sys/bus/usb/devices/*/manufacturer
+ASIX Elec. Corp.
+Linux 4.9.39-g5bc4705-dirty dwc2_hsotg
+hikey:/ # ll /sys/bus/usb/devices/*/manufacturer
+-r--r--r-- 1 root root 4096 2017-08-08 09:29 /sys/bus/usb/devices/1-1.2/manufacturer
+-r--r--r-- 1 root root 4096 2017-08-08 09:14 /sys/bus/usb/devices/usb1/manufacturer
+hikey:/ # ll  /sys/bus/usb/devices/*/uevent
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 /sys/bus/usb/devices/1-0:1.0/uevent
+-rw-r--r-- 1 root root 4096 2017-08-08 09:20 /sys/bus/usb/devices/1-1.2/uevent
+-rw-r--r-- 1 root root 4096 2017-08-08 09:20 /sys/bus/usb/devices/1-1.2:1.0/uevent
+-rw-r--r-- 1 root root 4096 2017-08-08 09:20 /sys/bus/usb/devices/1-1/uevent
+-rw-r--r-- 1 root root 4096 2017-08-08 09:20 /sys/bus/usb/devices/1-1:1.0/uevent
+-rw-r--r-- 1 root root 4096 1970-01-01 00:00 /sys/bus/usb/devices/usb1/uevent
+hikey:/ #
+
+hikey:/ # cat /sys/bus/usb/devices/*/product
+AX88772B
+USB 2.0 10/100M Ethernet Adaptor
+DWC OTG Controller
+hikey:/ #
+hikey:/ #
+hikey:/ #
+hikey:/ # ll /sys/bus/usb/devices/*/product
+-r--r--r-- 1 root root 4096 2017-08-08 10:41 /sys/bus/usb/devices/1-1.1/product
+-r--r--r-- 1 root root 4096 2017-08-08 10:41 /sys/bus/usb/devices/1-1.2/product
+-r--r--r-- 1 root root 4096 1970-01-01 00:02 /sys/bus/usb/devices/usb1/product
+hikey:/ # ll -1d /sys/bus/usb/devices/*
+lrwxrwxrwx 1 root root 0 1970-01-01 00:02 /sys/bus/usb/devices/1-0:1.0 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-0:1.0
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1.1 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1.1
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1.1:1.0 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1.1/1-1.1:1.0
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1.2 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1.2
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1.2:1.0 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1.2/1-1.2:1.0
+lrwxrwxrwx 1 root root 0 2017-08-08 10:41 /sys/bus/usb/devices/1-1:1.0 -> ../../../devices/platform/soc/f72c0000.usb/usb1/1-1/1-1:1.0
+lrwxrwxrwx 1 root root 0 1970-01-01 00:02 /sys/bus/usb/devices/usb1 -> ../../../devices/platform/soc/f72c0000.usb/usb1
+hikey:/ # lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux 4.9.39-g5bc4705-dirty dwc2_hsotg DWC OTG Controller
+Bus 001 Device 028: ID 0b95:772b ASIX Elec. Corp. AX88772B
+Bus 001 Device 027: ID 0424:2513
+Bus 001 Device 029: ID 0fe6:9700 USB 2.0 10/100M Ethernet Adaptor
+hikey:/ #
+
+-----------------------------------
+used by the adb command on host side
+    system/core/adb/adb_io.cpp
+    system/core/adb/adb_client.cpp
+-----------------------------------
+
+hikey:/ # stop adbd
+[  643.268789] init: Sending signal 9 to service 'adbd' (pid 1895) process group...
+[  643.279810] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1183 ffs_epfile_release before call __ffs_epfile_read_buffer_free
+[  643.296302] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1185 ffs_epfile_release before call ffs_data_closed
+[  643.309995] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1183 ffs_epfile_release before call __ffs_epfile_read_buffer_free
+[  643.324869] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1185 ffs_epfile_release before call ffs_data_closed
+[  643.338568] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:620 ffs_ep0_release before call ffs_data_closed
+[  643.351861] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1624 ffs_data_closed before call ffs_data_reset
+[  643.365166] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1685 ffs_data_reset step into, and before call ffs_data_clear
+[  643.379804] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1664 ffs_data_clear step into, and before call ffs_closed
+[  643.393991] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:3732 ffs_closed before call unregister_gadget_item
+[  643.407551] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:1754 unregister_gadget_item in list_for_each_entry
+[  643.420669] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:276 unregister_gadget
+[  643.431241] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1366 usb_gadget_unregister_driver step into
+[  643.443744] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1376 usb_gadget_unregister_driver before call usb_gadget_remove_driver
+[  643.458628] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1231 147874216
+[  643.474540] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1235 147874216 after kobject_uevent
+[  643.491713] dwc2 f72c0000.usb: /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/gadget.c:3559 dwc2_hsotg_pullup: is_on: 0 op_state: 9
+[  643.495442] init: Failed to kill process cgroup uid 0 pid 1895 in 218ms, 1 processes remain
+[  643.514934] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1237 147874216 after usb_gadget_disconnect
+[  643.532722] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c: 1547  step into android_disconnect
+[  643.544551] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:1414 android_work step into
+[  643.555659] android_work: did not send uevent (0 0           (null))  /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:1462
+[  643.555824] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1239 147874216 after udc->driver->disconnect(udc->gadget);
+[  643.555846] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c: 1479 configfs_composite_unbind
+[  643.556167] BUG: recent printk recursion!
+[  643.556172] configfs-gadget gadget: unbind function 'Function FS Gadget'/ffffffc072b01e38 /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/configfs.c:1256 
+[  643.556173] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1241 147874216 after udc->driver->unbind(udc->gadget);
+[  643.556180] dwc2 f72c0000.usb: /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/gadget.c:3509 dwc2_hsotg_udc_stop
+[  643.556749] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[  643.556771] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[  643.556785] configfs-gadget f72c0000.usb: unregistering UDC driver [g1], /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1243 147874216 after usb_gadget_udc_stop(udc);
+[  643.556792] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1378 usb_gadget_unregister_driver set to USB_STATE_NOTATTACHED via usb_gadget_set_state
+[  643.556795] dwc2 f72c0000.usb: Mode Mismatch Interrupt: currently in Host mode
+[  643.556811] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/udc/core.c:1393 usb_gadget_unregister_driver in list_for_each_entry
+[  643.556818] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:3734 ffs_closed after call unregister_gadget_item
+[  643.556823] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1666 ffs_data_clear step into, and after call ffs_closed
+[  643.556862] /development/android/master/kernel/linaro/hisilicon/drivers/usb/gadget/function/f_fs.c:1687 ffs_data_reset step into, and after call ffs_data_clear
+[  643.558971] init: Service 'adbd' (pid 1895) killed by signal 9
+[  643.559000] init: Sending signal 9 to service 'adbd' (pid 1895) process group...
+[  643.559170] init: Successfully killed process cgroup uid 0 pid 1895 in 0ms
+[  643.561291] init: processing action (init.svc.adbd=stopped) from (/init.usb.configfs.rc:15)
+
+[  643.760043] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[  643.760103] usb usb1-port1: enable change, status 00000101 /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:5060 port_event
+[  643.760137] usb usb1-port1: disabled by hub (EMI?), re-enabling... /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:5070 port_event
+[  643.760144] usb usb1-port1: status 0101, change 0002, 12 Mb/s
+[  643.760154] usb 1-1: set to USB_STATE_NOTATTACHED via usb_set_device_state /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2104 usb_disconnect
+[  643.760162] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:1919 recursively_mark_NOTATTACHED set to USB_STATE_NOTATTACHED via udev->state 
+[  643.760166] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:1919 recursively_mark_NOTATTACHED set to USB_STATE_NOTATTACHED via udev->state 
+[  643.760173] usb 1-1: USB disconnect, device number udev->devnum=2, udev->speed=2, USB_SPEED_HIGH=3, /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2107 usb_disconnect
+[  643.760181] usb 1-1: change_bus_speed(hcd, 0) /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2112 usb_disconnect
+[  643.760258] usb 1-1.1: set to USB_STATE_NOTATTACHED via usb_set_device_state /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2104 usb_disconnect
+[  643.760266] usb 1-1.1: USB disconnect, device number udev->devnum=3, udev->speed=2, USB_SPEED_HIGH=3, /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2107 usb_disconnect
+[  643.760273] usb 1-1.1: change_bus_speed(hcd, 0) /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2112 usb_disconnect
+[  643.760280] usb 1-1.1: unregistering device
+[  643.760803] asix 1-1.1:1.0 eth0: unregister 'asix' usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet
+[  643.898905] dwc2 f72c0000.usb: Set speed to default high-speed via dwc2_change_bus_speed /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/hcd.c:4921 dwc2_free_dev
+[  643.898925] usb 1-1: unregistering device
+[  644.153177] usb usb1-port1: debounce total 175ms stable 100ms status 0x101
+[  644.160477] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4388 hub_port_init before calling hub_port_reset
+[  644.364393] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2860 hub_port_reset before calling hcd->driver->reset_device
+[  644.378093] dwc2 f72c0000.usb: Set speed to high-speed via dwc2_change_bus_speed /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/hcd.c:4934 dwc2_reset_device
+[  644.394608] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2862 hub_port_reset after calling hcd->driver->reset_device
+[  644.408007] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4390 hub_port_init after calling hub_port_reset retval=0
+[  644.421159] /development/android/master/kernel/linaro/hisilicon/drivers/usb/common/common.c:59 usb_speed_string speed=3
+[  644.432113] usb 1-1: new high-speed USB device number 4 using dwc2 /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4442 hub_port_init
+[  644.447029] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4531 hub_port_init before calling hub_port_reset
+[  644.648760] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2860 hub_port_reset before calling hcd->driver->reset_device
+[  644.662459] dwc2 f72c0000.usb: Set speed to high-speed via dwc2_change_bus_speed /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/hcd.c:4934 dwc2_reset_device
+[  644.679879] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2862 hub_port_reset after calling hcd->driver->reset_device
+[  644.693507] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4533 hub_port_init after calling hub_port_reset retval=0
+[  644.727028] usb 1-1: udev 4, busnum 1, minor = 3
+[  644.748364] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c: 1666  step into hub_probe
+[  644.759762] hub 1-1:1.0: USB hub found /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:1763 hub_probe
+[  644.773421] hub 1-1:1.0: 3 ports detected
+[  644.777610] hub 1-1:1.0: standalone hub
+[  644.781603] hub 1-1:1.0: individual port power switching
+[  644.787094] hub 1-1:1.0: individual port over-current protection
+[  644.794446] hub 1-1:1.0: TT per port
+[  644.798147] hub 1-1:1.0: TT requires at most 8 FS bit times (666 ns)
+[  644.804636] hub 1-1:1.0: power on to power good time: 100ms
+[  644.810869] hub 1-1:1.0: local power source is good
+[  644.816346] hub 1-1:1.0: enabling power on all ports
+[  644.822153] hub 1-0:1.0: state 7 ports 1 chg 0000 evt 0002
+[  644.827780] usb usb1-port1: enable change, status 00000503 /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:5060 port_event
+[  644.925259] usb 1-1-port1: status 0101 change 0001
+[  645.033080] hub 1-1:1.0: state 7 ports 3 chg 0002 evt 0000
+[  645.039543] usb 1-1-port1: status 0101, change 0000, 12 Mb/s
+[  645.045693] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4388 hub_port_init before calling hub_port_reset
+[  645.136056] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2860 hub_port_reset before calling hcd->driver->reset_device
+[  645.149801] dwc2 f72c0000.usb: Set speed to high-speed via dwc2_change_bus_speed /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/hcd.c:4934 dwc2_reset_device
+[  645.166316] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2862 hub_port_reset after calling hcd->driver->reset_device
+[  645.180382] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4390 hub_port_init after calling hub_port_reset retval=0
+[  645.193646] /development/android/master/kernel/linaro/hisilicon/drivers/usb/common/common.c:59 usb_speed_string speed=3
+[  645.204656] usb 1-1.1: new high-speed USB device number 5 using dwc2 /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4442 hub_port_init
+[  645.221339] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4531 hub_port_init before calling hub_port_reset
+[  645.312039] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2860 hub_port_reset before calling hcd->driver->reset_device
+[  645.325716] dwc2 f72c0000.usb: Set speed to high-speed via dwc2_change_bus_speed /development/android/master/kernel/linaro/hisilicon/drivers/usb/dwc2/hcd.c:4934 dwc2_reset_device
+[  645.342861] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:2862 hub_port_reset after calling hcd->driver->reset_device
+[  645.356277] /development/android/master/kernel/linaro/hisilicon/drivers/usb/core/hub.c:4533 hub_port_init after calling hub_port_reset retval=0
+[  645.400821] usb 1-1.1: udev 5, busnum 1, minor = 4
+[  645.858121] asix 1-1.1:1.0 eth0: register 'asix' at usb-f72c0000.usb-1.1, ASIX AX88772B USB 2.0 Ethernet, 00:00:00:00:67:13
+[  645.878835] IPv6: ADDRCONF(NETDEV_UP): eth0: link is not ready
+[  647.420315] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[  647.450520] asix 1-1.1:1.0 eth0: link up, 100Mbps, full-duplex, lpa 0x45E1
+hikey:/ #
+---------------------------------------------

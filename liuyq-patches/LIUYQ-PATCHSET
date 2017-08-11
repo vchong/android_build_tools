@@ -26,3 +26,7 @@ apply frameworks/base 411340/3
 ## DeviceInfoSettingsTest.java: add test cases for kernel built with clang
 ## https://android-review.googlesource.com/434679
 apply packages/apps/Settings 434679/1
+
+## lsusb.c: output manufacturer and product as well
+## http://android-review.linaro.org/17812
+apply --linaro external/toybox 17812/1
