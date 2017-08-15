@@ -1,6 +1,60 @@
 https://download.owncloud.org/download/repositories/stable/owncloud/
 
+------------------------------------
+22:36:32 liu: master$ find  /etc/apache2/ -name *owncloud*
+/etc/apache2/conf-enabled/owncloud.conf
+/etc/apache2/conf-available/owncloud.conf
+22:38:34 liu: master$ vi /etc/apache2/conf-enabled/owncloud.conf
+22:38:47 liu: master$ ll  /etc/apache2/conf-enabled/owncloud.conf
+lrwxrwxrwx 1 root root 31 Aug 14 22:12 /etc/apache2/conf-enabled/owncloud.conf -> ../conf-available/owncloud.conf
+22:38:51 liu: master$
 
+/var/www/owncloud/
+
+PostgreSQL Database for owncloud
+https://doc.owncloud.org/server/9.0/admin_manual/configuration_database/linux_database_configuration.html#postgresql-database
+
+-----------------------------------
+https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-owncloud-on-ubuntu-16-04
+
+ubuntu 16.04
+
+curl https://download.owncloud.org/download/repositories/stable/Ubuntu_16.04/Release.key | sudo apt-key add -
+echo 'deb https://download.owncloud.org/download/repositories/stable/Ubuntu_16.04/ /' | sudo tee /etc/apt/sources.list.d/owncloud.list
+sudo apt-get update
+sudo apt-get install owncloud
+sudo systemctl reload apache2
+sudo systemctl restart apache2
+sudo systemctl status apache2
+
+sudo apt-get install php-bz2 php-curl php-gd php-imagick php-intl php-mbstring php-xml php-zip
+
+22:08:36 liu: ~$ sudo apt-get install owncloud
+正在读取软件包列表... 完成
+正在分析软件包的依赖关系树
+正在读取状态信息... 完成
+下列软件包是自动安装的并且现在不需要了：
+  linux-headers-4.4.0-87 linux-headers-4.4.0-87-generic linux-image-4.4.0-87-generic linux-image-extra-4.4.0-87-generic
+使用'sudo apt autoremove'来卸载它(它们)。
+将会同时安装下列软件：
+  apache2 apache2-bin apache2-data apache2-utils libapache2-mod-php7.0 libaprutil1-dbd-sqlite3 libaprutil1-ldap libc-client2007e liblua5.1-0 libmcrypt4 libzip4 mlock owncloud-deps-php7.0 owncloud-files php-common php7.0-cli
+  php7.0-common php7.0-curl php7.0-gd php7.0-imap php7.0-intl php7.0-json php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-pgsql php7.0-readline php7.0-sqlite3 php7.0-xml php7.0-zip
+建议安装：
+  apache2-doc apache2-suexec-pristine | apache2-suexec-custom php-pear uw-mailutils libmcrypt-dev mcrypt php7.0-ldap
+推荐安装：
+  mysql-server | mariadb-server | postgresql exim4 | mail-transport-agent
+下列【新】软件包将被安装：
+  apache2 apache2-bin apache2-data apache2-utils libapache2-mod-php7.0 libaprutil1-dbd-sqlite3 libaprutil1-ldap libc-client2007e liblua5.1-0 libmcrypt4 libzip4 mlock owncloud owncloud-deps-php7.0 owncloud-files php-common
+  php7.0-cli php7.0-common php7.0-curl php7.0-gd php7.0-imap php7.0-intl php7.0-json php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-pgsql php7.0-readline php7.0-sqlite3 php7.0-xml php7.0-zip
+升级了 0 个软件包，新安装了 32 个软件包，要卸载 0 个软件包，有 16 个软件包未被升级。
+需要下载 31.7 MB 的归档。
+解压缩后会消耗 126 MB 的额外空间。
+您希望继续执行吗？ [Y/n]
+
+
+How To Install Linux, Apache, MySQL, PHP (LAMP) stack on Ubuntu 16.04
+https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-ubuntu-16-04
+---------------------------------------------------------
 
 Ubuntu_14.04 owncloud-9.1.2-1.1
 
@@ -35,7 +89,7 @@ apt-get install owncloud-files
 Android Client:
 https://github.com/owncloud/android.git
 
-p1: Error:Configuration with name 'default' not found. 
+p1: Error:Configuration with name 'default' not found.
     submodules not checked out. run "git submodule update --init"
 p2: how to compile:
      export ANDROID_HOME=/home/liuyq/Android/Sdk/
@@ -46,9 +100,83 @@ p2: how to compile:
     ./build/outputs/apk/owncloud_2.2.0-debug.apk
     ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-release-unsigned.apk
     ./oc_jb_workaround/build/outputs/apk/oc_jb_workaround_1.0.33-debug.apk
-    11:26:26 liuyq: owncloud$ 
+    11:26:26 liuyq: owncloud$
 
-
-
+=================================================================================
 change from sqlite to postgres
 https://doc.owncloud.org/server/8.0/admin_manual/configuration_database/db_conversion.html
+-------------
+create database owncloud for owncloud instand with the postgres database
+21:20:53 liu: owncloud$ sudo su - postgres
+postgres@dl380p:~$ psql
+psql (9.6.4)
+输入 "help" 来获取帮助信息.
+
+postgres=# CREATE USER owncloud WITH PASSWORD 'passwd';
+CREATE ROLE
+postgres=# CREATE DATABASE owncloud TEMPLATE template0 ENCODING 'UNICODE';
+CREATE DATABASE
+postgres=# ALTER DATABASE owncloud OWNER TO owncloud;
+ALTER DATABASE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE owncloud TO owncloud;
+GRANT
+postgres=# /q
+postgres-# \q
+postgres@dl380p:~$ 注销
+21:26:34 liu: owncloud$
+-----------------
+sudo -u www-data ./occ db:convert-type --all-apps pgsql owncloud 127.0.0.1 owncloud
+
+==================================
+https://doc.owncloud.org/server/latest/admin_manual/installation/changing_the_web_route.html
+1. move existing owncloud instance out of /var/www/, and change the owncloud name to non ownlcoud name:
+
+   15:28:59 liu: master$ cat /etc/apache2/conf-available/owncloud-old.conf
+    Alias /owncloud-old "/services/owncloud/owncloud-old/"
+    <Directory "/services/owncloud/owncloud-old/">
+        Options +FollowSymLinks
+        AllowOverride All
+        # this line is necessary, otherwise the access will be denied
+        Require all granted
+
+        <IfModule mod_dav.c>
+            Dav off
+        </IfModule>
+
+        SetEnv HOME /services/owncloud/owncloud-old
+        SetEnv HTTP_HOME /services/owncloud/owncloud-old
+    </Directory>
+
+    <Directory "/services/owncloud/owncloud-old/data/">
+        # just in case if .htaccess gets disabled
+        Require all denied
+    </Directory>
+
+    15:29:05 liu: master$
+
+2. edit file config/config.php
+    15:30:58 liu: master$ sudo cat /services/owncloud/owncloud-old/config/config.php
+    <?php
+    $CONFIG = array (
+        'updatechecker' => false,
+        'instanceid' => 'ocb4rw9tejsx',
+        'passwordsalt' => 'NJBuZD1QxgIIFcdEOraV11Q7712KM2',
+        'secret' => 'TLRM9UgtiWXb7OCiVe2g2l7GAmjQRnq5EBFQGVkXSJqaGjwO',
+        'trusted_domains' =>
+            array (
+            0 => 'localhost',
+            1 => '192.168.0.124',
+            ),
+        'datadirectory' => '/services/owncloud/owncloud-old/data/',
+        'overwrite.cli.url' => 'http://localhost/owncloud-old',
+        'dbtype' => 'sqlite3',
+        'version' => '9.1.4.2',
+        'logtimezone' => 'UTC',
+        'installed' => true,
+        'maintenance' => false,
+        'theme' => '',
+        'loglevel' => 2,
+    );
+    15:31:03 liu: master$
+
+3. /services/owncloud/  need to be chmod to 755

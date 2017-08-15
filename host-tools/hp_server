@@ -1,3 +1,104 @@
+=================================================================================================================
+HP ProLiant DL380p Gen8 12 LFF Configure-to-order Server    665552-B21
+Factory Integrated Model ships with:
+
+1 FlexibleLOM connector: (see Step 2: HP FlexibleLOM section below for NIC choices to populate the embedded connector)
+Smart Array P420i Controller w/ Zero Memory (ZM)
+I/O slots - 3 Slots come standard:
+
+Slot 1 - FL/FH x16 PCIe 3.0 (x16 connector)
+Slot 2 - HL/FH x8 PCIe 3.0 (x8 connector)
+Slot 3 - HL/FH x4 PCIe 2.0 (x8 connector)
+Additional Slots may be added via selections from the PCI Information and Options subsection
+
+System Fans - 4 (2 additional fans included with second processor)
+Drive Cage - 12LFF (with built-in expander)
+USB - 4 Rear, 2 Front, 1 Internal, 1 SD slot
+HP iLO Management Engine (standard)
+NOTE: Power Supply & Rail Kit not included - choose from Step 3 & 4 sections below
+NOTE: Customer can only choose from 115W or lower E5-2600 processors.
+NOTE: This chassis comes with a built-in expander. All drives are a driven off of the embedded P420i controller.
+NOTE: Customers must add a minimum of a 512MB controller cache module when choosing this CTO server.
+NOTE: If a P822 controller is required, it cannot be populated in slot 3.
+NOTE: If a P421 controller is required, it cannot be populated in slot 1.
+NOTE: HyperCloud DIMMs, Q4000, and Q6000 options are not supported in this CTO server.
+NOTE: Customer will not be able to get an optical drive, SID, second front USB, and ID label.
+
+https://www.serversupply.com/SERVERS/PROLIANT%20DL380P/XEON/HP/665552-B21.htm
+HOME > SERVERS > PROLIANT DL380P > XEON > HP > 665552-B21
+GENERAL INFORMATION :
+MANUFACTURER : HEWLETT PACKARD
+MANUFACTURER PART NUMBER : 665552-B21
+MANUFACTURER WEBSITE ADDRESS : WWW.HP.COM
+PRODUCT NAME : PROLIANT DL380P G8 CTO RACK SERVER
+
+PROCESSOR & CHIPSET :
+PROCESSOR TYPE : INTEL E5-2600 PROCESSOR FAMILY
+INSTALLED PROCESSOR : NO CPU
+MAX SUPPORTED QTY : 2
+UPGRADABILITY : UPGRADABLE
+CHIPSET TYPE : INTEL C600
+SOCKETS SUPPORTED : FCLGA2011
+
+MEMORY :
+INSTALLED SIZE : NONE
+MAXIMUM SIZE : 384 GB
+TECHNOLOGY : DDR3 SDRAM
+FORM FACTOR : DIMM 240-PIN
+FEATURES : QUAD CHANNEL MEMORY ARCHITECTURE, HP SMART MEMORY
+
+STORAGE & STORAGE CONTROLLER :
+HARD DRIVE : NONE, DRIVE CAGE - 12LFF (WITH BUILT-IN EXPANDER)
+STORAGE CONTROLLER TYPE : 1 X RAID - PLUG-IN CARD - PCI EXPRESS 3.0 X8
+CONTROLLER INTERFACE TYPE : SERIAL ATA-300 / SAS 2.0
+STORAGE CONTROLLER NAME : SMART ARRAY P420I
+RAID LEVEL : RAID 0, RAID 1, RAID 10
+
+CARD READER :
+CARD READER TYPE : CARD READER
+SUPPORTED FLASH MEMORY CARDS : SD MEMORY CARD
+
+DISPLAY & GRAPHICS CONTROLLERS :
+GRAPHICS CONTROLLER TYPE : INTEGRATED
+GRAPHICS PROCESSOR : MATROX G200
+
+EXPANSIONS & CONNECTIVITY :
+EXPANSION BAYS TOTAL (FREE) :
+1 (TOTAL) / 1 (FREE) X FRONT ACCESSIBLE - 5.25IN SLIM LINE
+12 (TOTAL) / 12 (FREE) X HOT-SWAP - 2.5IN LFF
+
+EXPANSION SLOTS TOTAL (FREE) :
+2 (TOTAL) / 2 (FREE) X PROCESSOR
+24 (TOTAL) / 24 (FREE) X MEMORY - DIMM 240-PIN
+1 (TOTAL) / 1 (FREE) X PCI EXPRESS 3.0 X16 - FULL-LENGTH, FULL-HEIGHT
+1 (TOTAL) / 1 (FREE) X PCI EXPRESS 3.0 X8 - HALF-LENGTH, FULL-HEIGHT
+1 (TOTAL) / 1 (FREE) X PCI EXPRESS 2.0 X8 - HALF-LENGTH, FULL-HEIGHT ( X4 MODE )
+
+INTERFACES & PORTS :
+1 X SERIAL - RS-232 - 9 PIN D-SUB (DB-9)
+2 X DISPLAY / VIDEO - VGA - 15 PIN HD D-SUB (HD-15) ( 1 FRONT, 1 REAR )
+1 X MANAGEMENT - HP ILO - RJ-45
+4 X HI-SPEED USB - 4 PIN USB TYPE A ( 2 FRONT, 1 INTERNAL, 1 SD SLOT )
+
+POWER DEVICE :
+DEVICE TYPE : POWER SUPPLY - HOT-PLUG
+POWER REDUNDANCY : OPTIONAL
+POWER REDUNDANCY SCHEME : 1+1 (WITH OPTIONAL POWER SUPPLY)
+INSTALLED QTY : 0
+MAX SUPPORTED QTY : 2
+VOLTAGE REQUIRED : AC 120/230 V ( 50/60 HZ )
+
+DIMENSIONS & WEIGHT :
+WIDTH : 17.6 IN
+DEPTH : 29.5 IN
+HEIGHT : 3.4 IN
+WEIGHT : 41 LBS
+
+AVAILABILITY : IN STOCK.
+CONDITION : HP RENEW.
+MFG WARRANTY : STANDARD HP WARRANTY.
+OUR WARRANTY : 30 DAYS. 
+=================================================================================================================
 hackbox:
 [    0.000000] DMI: HP ProLiant DL380 G7, BIOS P67 05/05/2011
 cpu: X5690  @ 3.47GHz 24threads
