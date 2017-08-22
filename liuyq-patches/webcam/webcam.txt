@@ -1,0 +1,479 @@
+==================================================================
+16:12:47 liu: master$ /development/android/master/development/scripts/stack /tmp/crash.log 
+Searching for native crashes in /tmp/crash.log
+Reading symbols from /development/android/master/out/target/product/hikey/symbols
+signal 11 (SIGSEGV), code 1, fault addr 0xf71b0000 in tid 2922 (CameraPreviewTh), pid 2859 (cameraserver)
+Revision: '0'
+pid: 2859, tid: 2922, name: CameraPreviewTh  >>> /system/bin/cameraserver <<<
+signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xf71b0000
+r0 00000004  r1 f71b0000  r2 00000420  r3 f5118ffe
+r4 00052000  r5 00000000  r6 f5118ffc  r7 00000000
+r8 f50c7000  r9 f715e000  sl 00096000  fp 00000000
+ip 00000087  sp f57ff890  lr ffff2200  pc f6460092  cpsr 80070030
+Using arm toolchain from: /development/android/master/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/
+
+Stack Trace:
+RELADDR   FUNCTION                                                FILE:LINE
+00007092  convertYUYVtoRGB565+30                                  hardware/linaro/common/libcamera/rgbconvert.c:45
+00006191  android::CameraHardware::previewThread()+196            hardware/linaro/common/libcamera/CameraHardware.cpp:208
+00006fe1  android::CameraHardware::PreviewThread::threadLoop()+4  hardware/linaro/common/libcamera/CameraHardware.h:126
+0000e617  android::Thread::_threadLoop(void*)+274                 system/core/libutils/Threads.cpp:754
+0004739b  __pthread_start(void*)+22                               bionic/libc/bionic/pthread_create.cpp:214
+0001ad01  __start_thread+32                                       bionic/libc/bionic/clone.cpp:47
+16:12:51 liu: master$ 
+16:12:52 liu: master$ file out/target/product/hikey/system/bin/cameraserver 
+out/target/product/hikey/system/bin/cameraserver: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /system/bin/linker, BuildID[md5/uuid]=25792f1aaa30a9f848094ffaf6eb2cde, stripped
+16:13:46 liu: master$ 
+===================================================================
+LOCAL_MODULE_RELATIVE_PATH := hw
+
+14:08:07 liu: master$ grep -rn 'camera HAL module not loaded' frameworks/av/
+frameworks/av/services/camera/libcameraservice/CameraService.cpp:946:        ALOGE("CameraService::connect X (PID %d) rejected (camera HAL module not loaded)",
+14:08:14 liu: master$
+
+ 08-21 06:05:35.156  1891  1913 E CameraService: CameraService::connect X (PID 3198) rejected (camera HAL module not loaded)
+ 08-21 06:05:35.158  3198  3426 W CameraBase: An error occurred while connecting to camera 0: Status(-8): '4: validateConnectLocked:949: No camera HAL module available to open camera device "0"'
+ 08-21 06:05:35.158  3198  3426 E CameraHolder: fail to connect Camera
+ 08-21 06:05:35.158  3198  3426 E CameraHolder: java.lang.RuntimeException: Fail to connect to camera service
+
+==========================================================================
+Settings->Apps->Camera->Permissions enable all the permissions
+
+08-18 10:52:07.349  1891  1912 I CameraService: CameraService::connect call (PID -1 "com.android.camera", camera ID 0) for HAL version default and Camera API version 1
+08-18 10:52:07.352  1891  1912 W ServiceManager: Permission failure: android.permission.CAMERA from uid=10045 pid=3177 <---frameworks/native/libs/binder/IServiceManager.cpp +91
+08-18 10:52:07.352  1891  1912 E CameraService: Permission Denial: can't use the camera pid=3177, uid=10045
+08-18 10:52:07.357  3177  3244 W CameraBase: An error occurred while connecting to camera 0: Status(-8): '1: validateClientPermissionsLocked:1012: Caller "com.android.camera" (PID 10045, UID 3177) cannot open camera "0" without camera permission'
+08-18 10:52:07.359  3177  3244 E CameraHolder: fail to connect Camera
+08-18 10:52:07.359  3177  3244 E CameraHolder: java.lang.RuntimeException: Fail to connect to camera service
+
+
+frameworks/native/libs/binder/IServiceManager.cpp checkPermission
+    --> ./frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+        -->  PermissionController.checkPermission
+            mActivityManagerService.checkPermission
+                ActivityManager.checkComponentPermission
+                    AppGlobals.getPackageManager().checkUidPermission(permission, uid);
+                        frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java:3778:
+                            frameworks/base/core/java/com/android/server/SystemConfig.java
+                                mSystemPermissions = systemConfig.getSystemPermissions();
+                                    frameworks/base/core/java/com/android/server/SystemConfig.java readPermissionsFromXml
+
+
+19:12:23 liu: master$ ll frameworks/av/services/camera/libcameraservice/
+总用量 236
+drwxrwxr-x 9 liu liu   4096 Aug 18 19:03 ./
+drwxrwxr-x 3 liu liu   4096 Jun 23 15:07 ../
+-rw-rw-r-- 1 liu liu   2509 Jun 23 15:07 Android.mk
+drwxrwxr-x 3 liu liu   4096 Jun 17 21:47 api1/
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 api2/
+-rw-rw-r-- 1 liu liu  27749 Jun 17 21:47 CameraFlashlight.cpp
+-rw-rw-r-- 1 liu liu   8298 Jun 17 21:47 CameraFlashlight.h
+-rw-rw-r-- 1 liu liu 104376 Jun 17 21:47 CameraService.cpp
+-rw-rw-r-- 1 liu liu  39116 Jun 17 21:47 CameraService.h
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 common/
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 device1/
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 device3/
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 gui/
+-rw-rw-r-- 1 liu liu      0 Jun 17 21:47 MODULE_LICENSE_APACHE2
+-rw-rw-r-- 1 liu liu  10695 Jun 17 21:47 NOTICE
+drwxrwxr-x 2 liu liu   4096 Jun 17 21:47 utils/
+19:12:26 liu: master$
+19:10:23 liu: master$ ll frameworks/av/camera/
+总用量 220
+drwxrwxr-x  8 liu liu  4096 Aug 18 19:08 ./
+drwxrwxr-x 12 liu liu  4096 Jun 23 15:07 ../
+drwxrwxr-x  3 liu liu  4096 Jun 17 21:47 aidl/
+-rw-rw-r--  1 liu liu  2423 Jun 17 21:47 Android.bp
+-rw-rw-r--  1 liu liu   634 Jun 17 21:47 Android.mk
+drwxrwxr-x  2 liu liu  4096 Jun 17 21:47 camera2/
+-rw-rw-r--  1 liu liu  8355 Jun 17 21:47 CameraBase.cpp
+-rw-rw-r--  1 liu liu 13347 Jun 17 21:47 Camera.cpp
+-rw-rw-r--  1 liu liu 25760 Jun 17 21:47 CameraMetadata.cpp
+-rw-rw-r--  1 liu liu 10090 Jun 17 21:47 CameraParameters2.cpp
+-rw-rw-r--  1 liu liu 19574 Jun 17 21:47 CameraParameters.cpp
+drwxrwxr-x  2 liu liu  4096 Jun 17 21:47 cameraserver/
+-rw-rw-r--  1 liu liu  4219 Jun 17 21:47 CameraUtils.cpp
+-rw-rw-r--  1 liu liu  3486 Jun 17 21:47 CaptureResult.cpp
+-rw-rw-r--  1 liu liu  6327 Jun 17 21:47 ICameraClient.cpp
+-rw-rw-r--  1 liu liu 16010 Jun 17 21:47 ICamera.cpp
+-rw-rw-r--  1 liu liu  4573 Jun 17 21:47 ICameraRecordingProxy.cpp
+-rw-rw-r--  1 liu liu  4288 Jun 17 21:47 ICameraRecordingProxyListener.cpp
+-rw-rw-r--  1 liu liu  2510 Jun 17 21:47 ICameraServiceProxy.cpp
+drwxrwxr-x  3 liu liu  4096 Jun 17 21:47 include/
+-rw-rw-r--  1 liu liu     0 Jun 17 21:47 MODULE_LICENSE_APACHE2
+drwxrwxr-x  4 liu liu  4096 Jun 23 15:07 ndk/
+-rw-rw-r--  1 liu liu 10695 Jun 17 21:47 NOTICE
+-rw-rw-r--  1 liu liu   120 Jun 23 15:07 OWNERS
+drwxrwxr-x  2 liu liu  4096 Jun 17 21:47 tests/
+-rw-rw-r--  1 liu liu 17178 Jun 17 21:47 VendorTagDescriptor.cpp
+19:10:49 liu: master$
+==========================================================================
+ $(call inherit-product-if-exists, hardware/linaro/common/webcam.mk)
+=====================common-device.mk======================================
+ $(call inherit-product-if-exists, hardware/linaro/common/webcam.mk)
+====================ueventd.common.rc=======================
+# V4L camera
+/dev/video*               0660   system    camera
+
+=========================configs for kernel==============================
+diff --git a/arch/arm64/configs/hikey_defconfig b/arch/arm64/configs/hikey_defconfig
+index ae96f71..8dba8e1 100644
+--- a/arch/arm64/configs/hikey_defconfig
++++ b/arch/arm64/configs/hikey_defconfig
+@@ -511,3 +511,15 @@ CONFIG_CRYPTO_AES_ARM64_CE_BLK=y
+ CONFIG_CRYPTO_AES_ARM64_NEON_BLK=y
+ CONFIG_CRC_CCITT=y
+ CONFIG_CRC_T10DIF=y
++CONFIG_FRAME_VECTOR=y
++CONFIG_VIDEOBUF2_MEMOPS=y
++CONFIG_USB_F_UVC=y
++CONFIG_USB_CONFIGFS_F_UVC=y
++CONFIG_MEDIA_CAMERA_SUPPORT=y
++CONFIG_MEDIA_CONTROLLER=y
++CONFIG_VIDEO_V4L2_SUBDEV_API=y
++CONFIG_VIDEOBUF2_CORE=y
++CONFIG_VIDEOBUF2_VMALLOC=y
++CONFIG_MEDIA_USB_SUPPORT=y
++CONFIG_USB_VIDEO_CLASS=y
++CONFIG_USB_VIDEO_CLASS_INPUT_EVDEV=y
+=================================================================================
+19:13:03 liu: master$ find frameworks/ -iname '*camera*'
+frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml
+frameworks/native/data/etc/android.hardware.camera.external.xml
+frameworks/native/data/etc/android.hardware.camera.xml
+frameworks/native/data/etc/android.hardware.camera.autofocus.xml
+frameworks/native/data/etc/android.hardware.camera.raw.xml
+frameworks/native/data/etc/android.hardware.camera.manual_postprocessing.xml
+frameworks/native/data/etc/android.hardware.camera.front.xml
+frameworks/native/data/etc/android.hardware.camera.full.xml
+frameworks/native/data/etc/android.hardware.camera.manual_sensor.xml
+frameworks/native/opengl/tests/gl2_cameraeye
+frameworks/native/opengl/tests/gl2_cameraeye/src/com/android/gl2cameraeye
+frameworks/native/opengl/tests/gl2_cameraeye/src/com/android/gl2cameraeye/GL2CameraEye.java
+frameworks/native/docs/images/camera2
+frameworks/base/data/sounds/effects/ogg/camera_click_48k.ogg
+frameworks/base/data/sounds/effects/ogg/camera_focus.ogg
+frameworks/base/data/sounds/effects/ogg/camera_click.ogg
+frameworks/base/data/sounds/effects/camera_click.wav
+frameworks/base/data/sounds/effects/wav/CameraClick.wav
+frameworks/base/data/sounds/effects/wav/CameraFocus.wav
+frameworks/base/data/sounds/effects/material/ogg/camera_click_48k.ogg
+frameworks/base/data/sounds/effects/material/ogg/camera_click.ogg
+frameworks/base/data/sounds/effects/camera_click.ogg
+frameworks/base/tests/LotsOfApps/res/drawable/ic_launcher_video_camera.png
+frameworks/base/tests/LotsOfApps/res/drawable/ic_launcher_camera.png
+frameworks/base/tests/LotsOfApps/res/drawable/ic_launcher_camera_record.png
+frameworks/base/tests/Camera2Tests
+frameworks/base/tests/Camera2Tests/CameraToo
+frameworks/base/tests/Camera2Tests/CameraToo/tests/src/com/example/android/camera2
+frameworks/base/tests/Camera2Tests/CameraToo/tests/src/com/example/android/camera2/cameratoo
+frameworks/base/tests/Camera2Tests/CameraToo/tests/src/com/example/android/camera2/cameratoo/CameraTooTest.java
+frameworks/base/tests/Camera2Tests/CameraToo/src/com/example/android/camera2
+frameworks/base/tests/Camera2Tests/CameraToo/src/com/example/android/camera2/cameratoo
+frameworks/base/tests/Camera2Tests/CameraToo/src/com/example/android/camera2/cameratoo/CameraTooActivity.java
+frameworks/base/tests/Camera2Tests/SmartCamera
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/tests/src/androidx/media/filterfw/samples/simplecamera
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/src/androidx/media/filterfw/CameraStreamer.java
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/src/androidx/media/filterfw/samples/simplecamera
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/src/androidx/media/filterfw/samples/simplecamera/SmartCamera.java
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/src/androidx/media/filterfw/samples/simplecamera/Camera2Source.java
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/src/androidx/media/filterfw/samples/simplecamera/CameraTestThread.java
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/res/raw/camera_graph.xml
+frameworks/base/tests/Camera2Tests/SmartCamera/SimpleCamera/res/layout/simplecamera.xml
+frameworks/base/tests/CameraPrewarmTest
+frameworks/base/tests/CameraPrewarmTest/src/com/google/android/test/cameraprewarm
+frameworks/base/tests/CameraPrewarmTest/src/com/google/android/test/cameraprewarm/CameraActivity.java
+frameworks/base/tests/CameraPrewarmTest/src/com/google/android/test/cameraprewarm/SecureCameraActivity.java
+frameworks/base/tests/CameraPrewarmTest/res/layout/camera_activity.xml
+frameworks/base/packages/SystemUI/res/drawable-mdpi/ic_camera_alt_24dp.png
+frameworks/base/packages/SystemUI/res/drawable-xxhdpi/ic_camera_alt_24dp.png
+frameworks/base/packages/SystemUI/res/drawable-hdpi/ic_camera_alt_24dp.png
+frameworks/base/packages/SystemUI/res/drawable-xhdpi/ic_camera_alt_24dp.png
+frameworks/base/packages/SystemUI/res/drawable-xxxhdpi/ic_camera_alt_24dp.png
+frameworks/base/graphics/java/android/graphics/Camera.java
+frameworks/base/core/java/com/android/internal/os/CameraPowerCalculator.java
+frameworks/base/core/java/android/service/media/CameraPrewarmService.java
+frameworks/base/core/java/android/hardware/camera2
+frameworks/base/core/java/android/hardware/camera2/CameraDevice.java
+frameworks/base/core/java/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession.java
+frameworks/base/core/java/android/hardware/camera2/impl/ICameraDeviceUserWrapper.java
+frameworks/base/core/java/android/hardware/camera2/impl/CameraCaptureSessionImpl.java
+frameworks/base/core/java/android/hardware/camera2/impl/CameraConstrainedHighSpeedCaptureSessionImpl.java
+frameworks/base/core/java/android/hardware/camera2/impl/CameraMetadataNative.java
+frameworks/base/core/java/android/hardware/camera2/impl/CameraCaptureSessionCore.java
+frameworks/base/core/java/android/hardware/camera2/impl/CameraDeviceImpl.java
+frameworks/base/core/java/android/hardware/camera2/CameraCharacteristics.java
+frameworks/base/core/java/android/hardware/camera2/CameraCaptureSession.java
+frameworks/base/core/java/android/hardware/camera2/CameraMetadata.java
+frameworks/base/core/java/android/hardware/camera2/CameraAccessException.java
+frameworks/base/core/java/android/hardware/camera2/CameraManager.java
+frameworks/base/core/java/android/hardware/camera2/legacy/CameraDeviceUserShim.java
+frameworks/base/core/java/android/hardware/camera2/legacy/LegacyCameraDevice.java
+frameworks/base/core/java/android/hardware/camera2/legacy/CameraDeviceState.java
+frameworks/base/core/java/android/hardware/Camera.java
+frameworks/base/core/java/android/hardware/CameraInfo.java
+frameworks/base/core/res/res/drawable-mdpi/ic_menu_camera.png
+frameworks/base/core/res/res/drawable/perm_group_camera.xml
+frameworks/base/core/res/res/drawable-xxhdpi/ic_lockscreen_camera_normal.png
+frameworks/base/core/res/res/drawable-xxhdpi/ic_perm_group_camera.png
+frameworks/base/core/res/res/drawable-xxhdpi/ic_menu_camera.png
+frameworks/base/core/res/res/drawable-xxhdpi/ic_lockscreen_camera_activated.png
+frameworks/base/core/res/res/drawable-ldpi/ic_menu_camera.png
+frameworks/base/core/res/res/drawable-hdpi/ic_menu_camera.png
+frameworks/base/core/res/res/drawable-xhdpi/ic_menu_camera.png
+frameworks/base/core/jni/android_hardware_camera2_CameraMetadata.cpp
+frameworks/base/core/jni/android_hardware_camera2_legacy_LegacyCameraDevice.cpp
+frameworks/base/core/jni/include/android_runtime/android_hardware_camera2_CameraMetadata.h
+frameworks/base/core/jni/android_hardware_Camera.cpp
+frameworks/base/core/jni/android/graphics/Camera.cpp
+frameworks/base/core/jni/android_hardware_camera2_legacy_PerfMeasurement.cpp
+frameworks/base/core/jni/android_hardware_camera2_DngCreator.cpp
+frameworks/base/services/core/java/com/android/server/camera
+frameworks/base/services/core/java/com/android/server/camera/CameraService.java
+frameworks/base/media/java/android/media/CameraProfile.java
+frameworks/base/media/tests/CameraBrowser
+frameworks/base/media/tests/CameraBrowser/src/com/android/camerabrowser
+frameworks/base/media/tests/CameraBrowser/src/com/android/camerabrowser/CameraBrowserApplication.java
+frameworks/base/media/tests/CameraBrowser/src/com/android/camerabrowser/CameraBrowser.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/functional/CameraTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/functional/camera
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/functional/camera/CameraFunctionalTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/functional/camera/CameraPairwiseTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/unit/CameraOpenTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/unit/CameraUtilsTypeReferenceTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/unit/CameraMetadataTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/unit/CameraUtilsUncheckedThrowTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/CameraTestHelper.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/Camera2Focuser.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/CameraTestResultPrinter.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/CameraUtils.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/CameraTestUtils.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/helpers/CameraErrorCollector.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/Camera2SurfaceViewActivity.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/Camera2InstrumentationTestRunner.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/CameraStressTestRunner.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/integration/CameraBinderTestUtils.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/integration/CameraBinderTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/integration/CameraDeviceBinderTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/Camera2SurfaceViewTestCase.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/Camera2CaptureRequestTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/Camera2StillCaptureTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/CameraStressTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/Camera2RecordingTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/Camera2ReprocessCaptureTest.java
+frameworks/base/media/tests/MediaFrameworkTest/src/com/android/mediaframeworktest/stress/Camera2SwitchPreviewTest.java
+frameworks/base/media/mca/tests/src/android/camera
+frameworks/base/media/mca/filterpacks/java/android/filterpacks/videosrc/CameraSource.java
+frameworks/base/media/mca/samples/CameraEffectsRecordingSample
+frameworks/base/media/mca/samples/CameraEffectsRecordingSample/java/android/media/filterfw/samples/CameraEffectsRecordingSample.java
+frameworks/base/media/mca/samples/CameraEffectsRecordingSample/res/raw/cameraeffectsrecordingsample.graph
+frameworks/base/docs/html/training/camera
+frameworks/base/docs/html/training/camera/cameradirect.jd
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CameraCaptureSession.CaptureCallback.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.Camera.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CameraDevice.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CameraCharacteristics.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/pkg_android.hardware.camera2.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CameraMetadata.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CaptureRequest.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/android.hardware.camera2.CaptureResult.html
+frameworks/base/docs/html/sdk/api_diff/24/changes/pkg_android.hardware.camera2.params.html
+frameworks/base/docs/html/sdk/api_diff/22/changes/pkg_android.hardware.camera2.html
+frameworks/base/docs/html/sdk/api_diff/22/changes/android.hardware.camera2.CameraMetadata.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.Camera.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraDevice.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.params.StreamConfigurationMap.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraCharacteristics.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/pkg_android.hardware.camera2.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraAccessException.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraMetadata.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraCaptureSession.StateCallback.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraCaptureSession.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CaptureRequest.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CaptureResult.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/pkg_android.hardware.camera2.params.html
+frameworks/base/docs/html/sdk/api_diff/23/changes/android.hardware.camera2.CameraManager.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.CameraInfo.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.AutoFocusCallback.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.Size.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.PictureCallback.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.AutoFocusMoveCallback.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.Face.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.Parameters.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.OnZoomChangeListener.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.Area.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.PreviewCallback.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.FaceDetectionListener.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.ErrorCallback.html
+frameworks/base/docs/html/sdk/api_diff/21/changes/android.hardware.Camera.ShutterCallback.html
+frameworks/base/docs/html/sdk/images/4.0/lock-camera-lg.png
+frameworks/base/docs/html/sdk/images/4.0/camera.png
+frameworks/base/docs/html/sdk/images/4.0/lock-camera.png
+frameworks/base/docs/html/sdk/images/4.0/camera-lg.png
+frameworks/base/docs/html/sdk/images/3.0/camera.png
+frameworks/base/docs/html/sdk/images/3.0/camera_full.png
+frameworks/base/docs/html/sdk/images/camera.png
+frameworks/base/docs/html/sdk/images/2.0/camera-modes.png
+frameworks/base/docs/html/guide/topics/media/camera.jd
+frameworks/base/docs/html/guide/topics/media/images/camera-area-coordinates.png
+frameworks/base/docs/html/images/camera2
+frameworks/base/docs/html/images/icon_design/ic_launcher_video_camera.png
+frameworks/base/docs/html/images/icon_design/ic_launcher_camera.png
+frameworks/base/docs/html/images/icon_design/ic_menu_camera_video_view.png
+frameworks/base/docs/html/images/icon_design/ic_menu_camera.png
+frameworks/base/docs/html/images/tools/as-camera-icon.png
+frameworks/rs/tests/java_api/LivePreview/src/com/android/rs/livepreview/CameraPreviewActivity.java
+frameworks/rs/tests/java_api/RsCameraDemo
+frameworks/rs/tests/java_api/RsCameraDemo/src/com/android/example/rscamera
+frameworks/rs/tests/java_api/RsCameraDemo/src/com/android/example/rscamera/CameraView.java
+frameworks/rs/tests/java_api/RsCameraDemo/src/com/android/example/rscamera/CameraOps.java
+frameworks/rs/tests/java_api/RsCameraDemo/res/drawable-mdpi/camera.png
+frameworks/rs/tests/java_api/RsCameraDemo/res/drawable-xxhdpi/camera.png
+frameworks/rs/tests/java_api/RsCameraDemo/res/drawable-hdpi/camera.png
+frameworks/rs/tests/java_api/RsCameraDemo/res/drawable-xhdpi/camera.png
+frameworks/rs/tests/java_api/Refocus/src/com/android/rs/test/camera_response_fast.rsh
+frameworks/rs/tests/java_api/Refocus/src/com/android/rs/test/camera_response.rsh
+frameworks/rs/tests/java_api/CannyLive/src/com/android/example/cannylive/CameraView.java
+frameworks/rs/tests/java_api/CannyLive/src/com/android/example/cannylive/CameraOps.java
+frameworks/rs/tests/java_api/CannyLive/res/drawable-mdpi/camera.png
+frameworks/rs/tests/java_api/CannyLive/res/drawable-xxhdpi/camera.png
+frameworks/rs/tests/java_api/CannyLive/res/drawable-hdpi/camera.png
+frameworks/rs/tests/java_api/CannyLive/res/drawable-xhdpi/camera.png
+frameworks/av/include/camera
+frameworks/av/services/camera
+frameworks/av/services/camera/libcameraservice
+frameworks/av/services/camera/libcameraservice/api1/CameraClient.h
+frameworks/av/services/camera/libcameraservice/api1/CameraClient.cpp
+frameworks/av/services/camera/libcameraservice/api1/Camera2Client.cpp
+frameworks/av/services/camera/libcameraservice/api1/Camera2Client.h
+frameworks/av/services/camera/libcameraservice/api1/client2/Camera2Heap.h
+frameworks/av/services/camera/libcameraservice/utils/CameraTraces.cpp
+frameworks/av/services/camera/libcameraservice/utils/CameraTraces.h
+frameworks/av/services/camera/libcameraservice/api2/CameraDeviceClient.h
+frameworks/av/services/camera/libcameraservice/api2/CameraDeviceClient.cpp
+frameworks/av/services/camera/libcameraservice/CameraService.h
+frameworks/av/services/camera/libcameraservice/CameraFlashlight.h
+frameworks/av/services/camera/libcameraservice/CameraService.cpp
+frameworks/av/services/camera/libcameraservice/common/CameraDeviceBase.cpp
+frameworks/av/services/camera/libcameraservice/common/CameraModule.cpp
+frameworks/av/services/camera/libcameraservice/common/Camera2ClientBase.h
+frameworks/av/services/camera/libcameraservice/common/CameraDeviceBase.h
+frameworks/av/services/camera/libcameraservice/common/CameraModule.h
+frameworks/av/services/camera/libcameraservice/common/Camera2ClientBase.cpp
+frameworks/av/services/camera/libcameraservice/CameraFlashlight.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3Device.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3StreamBufferListener.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3Stream.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3Stream.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3Device.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3ZslStream.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3InputStream.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3IOStreamBase.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3StreamInterface.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3DummyStream.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3OutputStream.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3InputStream.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3ZslStream.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3OutputStreamInterface.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3BufferManager.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3BufferManager.h
+frameworks/av/services/camera/libcameraservice/device3/Camera3DummyStream.cpp
+frameworks/av/services/camera/libcameraservice/device3/Camera3IOStreamBase.h
+frameworks/av/services/camera/libcameraservice/device1/CameraHardwareInterface.h
+frameworks/av/camera
+frameworks/av/camera/tests/CameraBinderTests.cpp
+frameworks/av/camera/ICamera.cpp
+frameworks/av/camera/CameraParameters.cpp
+frameworks/av/camera/CameraParameters2.cpp
+frameworks/av/camera/ICameraRecordingProxyListener.cpp
+frameworks/av/camera/CameraMetadata.cpp
+frameworks/av/camera/include/camera
+frameworks/av/camera/include/camera/CameraMetadata.h
+frameworks/av/camera/include/camera/CameraParameters.h
+frameworks/av/camera/include/camera/ICameraRecordingProxyListener.h
+frameworks/av/camera/include/camera/CameraParameters2.h
+frameworks/av/camera/include/camera/CameraUtils.h
+frameworks/av/camera/include/camera/camera2
+frameworks/av/camera/include/camera/ICameraRecordingProxy.h
+frameworks/av/camera/include/camera/CameraBase.h
+frameworks/av/camera/include/camera/android/hardware/ICameraClient.h
+frameworks/av/camera/include/camera/android/hardware/ICamera.h
+frameworks/av/camera/include/camera/ICameraServiceProxy.h
+frameworks/av/camera/include/camera/Camera.h
+frameworks/av/camera/aidl/android/hardware/ICameraServiceProxy.aidl
+frameworks/av/camera/aidl/android/hardware/ICameraServiceListener.aidl
+frameworks/av/camera/aidl/android/hardware/ICameraService.aidl
+frameworks/av/camera/aidl/android/hardware/camera2
+frameworks/av/camera/aidl/android/hardware/camera2/impl/CameraMetadataNative.aidl
+frameworks/av/camera/aidl/android/hardware/camera2/ICameraDeviceCallbacks.aidl
+frameworks/av/camera/aidl/android/hardware/camera2/ICameraDeviceUser.aidl
+frameworks/av/camera/aidl/android/hardware/ICamera.aidl
+frameworks/av/camera/aidl/android/hardware/CameraInfo.aidl
+frameworks/av/camera/aidl/android/hardware/ICameraClient.aidl
+frameworks/av/camera/ICameraClient.cpp
+frameworks/av/camera/camera2
+frameworks/av/camera/ndk/libcamera2ndk.map.txt
+frameworks/av/camera/ndk/impl/ACameraMetadata.cpp
+frameworks/av/camera/ndk/impl/ACameraDevice.cpp
+frameworks/av/camera/ndk/impl/ACameraMetadata.h
+frameworks/av/camera/ndk/impl/ACameraCaptureSession.cpp
+frameworks/av/camera/ndk/impl/ACameraCaptureSession.h
+frameworks/av/camera/ndk/impl/ACameraDevice.h
+frameworks/av/camera/ndk/impl/ACameraManager.cpp
+frameworks/av/camera/ndk/impl/ACameraManager.h
+frameworks/av/camera/ndk/NdkCameraCaptureSession.cpp
+frameworks/av/camera/ndk/include/camera
+frameworks/av/camera/ndk/include/camera/NdkCameraManager.h
+frameworks/av/camera/ndk/include/camera/NdkCameraDevice.h
+frameworks/av/camera/ndk/include/camera/NdkCameraMetadata.h
+frameworks/av/camera/ndk/include/camera/NdkCameraCaptureSession.h
+frameworks/av/camera/ndk/include/camera/NdkCameraMetadataTags.h
+frameworks/av/camera/ndk/include/camera/NdkCameraError.h
+frameworks/av/camera/ndk/NdkCameraMetadata.cpp
+frameworks/av/camera/ndk/NdkCameraManager.cpp
+frameworks/av/camera/ndk/NdkCameraDevice.cpp
+frameworks/av/camera/CameraBase.cpp
+frameworks/av/camera/ICameraServiceProxy.cpp
+frameworks/av/camera/Camera.cpp
+frameworks/av/camera/cameraserver
+frameworks/av/camera/cameraserver/main_cameraserver.cpp
+frameworks/av/camera/cameraserver/cameraserver.rc
+frameworks/av/camera/CameraUtils.cpp
+frameworks/av/camera/ICameraRecordingProxy.cpp
+frameworks/av/media/libstagefright/CameraSourceTimeLapse.cpp
+frameworks/av/media/libstagefright/include/media/stagefright/CameraSource.h
+frameworks/av/media/libstagefright/include/media/stagefright/CameraSourceTimeLapse.h
+frameworks/av/media/libstagefright/CameraSource.cpp
+frameworks/ex/camera2
+frameworks/ex/camera2/portability/tests/src/com/android/ex/camera2
+frameworks/ex/camera2/portability/tests/src/com/android/ex/camera2/portability/Camera2PortabilityTest.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCamera2Capabilities.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraExceptionHandler.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraActions.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraAgent.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCamera2Settings.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCameraSettings.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraDeviceInfo.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraAgentFactory.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCamera2AgentImpl.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraCapabilitiesFactory.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraStateHolder.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCameraCapabilities.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraSettings.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/AndroidCameraAgentImpl.java
+frameworks/ex/camera2/portability/src/com/android/ex/camera2/portability/CameraCapabilities.java
+frameworks/ex/camera2/utils/tests/src/com/android/ex/camera2
+frameworks/ex/camera2/utils/tests/src/com/android/ex/camera2/utils/Camera2UtilsTest.java
+frameworks/ex/camera2/utils/tests/src/com/android/ex/camera2/utils/Camera2DeviceTester.java
+frameworks/ex/camera2/utils/src/com/android/ex/camera2
+frameworks/ex/camera2/utils/src/com/android/ex/camera2/utils/Camera2RequestSettingsSet.java
+frameworks/ex/camera2/utils/src/com/android/ex/camera2/utils/Camera2CaptureCallbackForwarder.java
+frameworks/ex/camera2/utils/src/com/android/ex/camera2/utils/Camera2CaptureCallbackSplitter.java
+frameworks/ex/camera2/public/src/com/android/ex/camera2
+frameworks/ex/camera2/public/src/com/android/ex/camera2/blocking/BlockingCameraManager.java
+19:13:16 liu: master$ 
+================================================================================================

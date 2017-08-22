@@ -4,7 +4,7 @@ CPUS=$(grep processor /proc/cpuinfo |wc -l)
 ROOT_DIR=$(cd $(dirname $0); pwd)
 
 targets="droidcore"
-targets="selinuxtarballs"
+#targets="selinuxtarballs"
 #targets="boottarball"
 variant="userdebug"
 
@@ -16,6 +16,7 @@ variant="userdebug"
 export WITH_DEXPREOPT=true
 #export MALLOC_IMPL=dlmalloc
 #export MALLOC_IMPL_MUSL=true
+export TARGET_BUILD_JAVA_SUPPORT_LEVEL=platform
 
 
 function build(){

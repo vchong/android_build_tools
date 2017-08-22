@@ -1,0 +1,33 @@
+From 1a569e608837ac1c114f1db0fc9f75260d0f3ea0 Mon Sep 17 00:00:00 2001
+From: Yongqin Liu <yongqin.liu@linaro.org>
+Date: Fri, 18 Aug 2017 18:37:58 +0800
+Subject: [PATCH 1/1] hikey_defconfig: add configs for webcam support
+
+Change-Id: I4acae14156aaf5cd8aa9c153a04e7d2ec411862e
+Signed-off-by: Yongqin Liu <yongqin.liu@linaro.org>
+---
+ arch/arm64/configs/hikey_defconfig | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm64/configs/hikey_defconfig b/arch/arm64/configs/hikey_defconfig
+index aa0d630..d2e0b2c 100644
+--- a/arch/arm64/configs/hikey_defconfig
++++ b/arch/arm64/configs/hikey_defconfig
+@@ -574,3 +574,14 @@ CONFIG_CRYPTO_GHASH_ARM64_CE=y
+ CONFIG_CRC_T10DIF=y
+ CONFIG_TEE=y
+ CONFIG_OPTEE=y
++
++# to enable usb webcam
++CONFIG_FRAME_VECTOR=y
++CONFIG_MEDIA_CAMERA_SUPPORT=y
++CONFIG_VIDEOBUF2_CORE=y
++CONFIG_VIDEOBUF2_MEMOPS=y
++CONFIG_VIDEOBUF2_VMALLOC=y
++CONFIG_MEDIA_USB_SUPPORT=y
++CONFIG_USB_VIDEO_CLASS=y
++CONFIG_USB_VIDEO_CLASS_INPUT_EVDEV=y
++CONFIG_V4L_PLATFORM_DRIVERS=y
+-- 
+2.7.4
+
