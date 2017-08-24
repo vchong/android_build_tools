@@ -20,3 +20,13 @@ sudo apt-get install owncloud-client
 sudo apt-get install python-virtualenv
 vncserver:
 1. I need to install vino. After that, once I execute vino-preferences in a terminal, then the Desktop Sharing is show up.
+
+============ get the temperature of cpus
+cat /sys/class/thermal/thermal_zone*/temp
+============ get the speed of cpus
+sudo cat  /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+sudo cat  /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
+
+description from Documentation/cpu-freq/user-guide.txt:
+cpuinfo_cur_freq : Current frequency of the CPU as obtained from the hardware, in KHz. This is the frequency the CPU actually runs at.
+caling_cur_freq :  Current frequency of the CPU as determined by the governor and cpufreq core, in KHz. This is  the frequency the kernel thinks the CPU runs at

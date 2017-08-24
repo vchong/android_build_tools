@@ -30,3 +30,7 @@ apply packages/apps/Settings 434679/2
 ## lsusb.c: output manufacturer and product as well
 ## http://android-review.linaro.org/17812
 apply --linaro external/toybox 17812/1
+
+## grub.cfg: set serialno for boot_fat.uefi.img
+## https://android-review.googlesource.com/355649
+apply device/linaro/hikey 355649/7
