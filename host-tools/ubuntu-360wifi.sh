@@ -10,17 +10,17 @@ function usage() {
 
 
 if [ $# -lt 2 ] || [ $# -gt 3 ] ; then
-usage
+    usage
 fi
 
 key=$(echo $RANDOM)$(echo $RANDOM)
 
 if [ $# -eq 3 ]; then
-key=$3
+    key=$3
 fi
 
 if [ ${#key} -lt 8 ]; then
-echo "[x] The length of password can not be less than 8."
+    echo "[x] The length of password can not be less than 8."
     exit
 fi
 
@@ -37,7 +37,7 @@ echo "[*] Checking 360-wifi ... "
 result=$(lsusb | grep -e "148f:5370 Ralink Technology")
 
 if [ $? -ne 0 ]; then
-echo "[x] Please insert 360-wifi into the USB interface"
+    echo "[x] Please insert 360-wifi into the USB interface"
     exit
 fi
 
@@ -51,10 +51,9 @@ kernel_version=$(uname -r)
 result=$(cat /boot/config-$kernel_version | grep -e "CONFIG_RT2800USB_RT53XX=y")
 
 if [ $? -ne 0 ]; then
-echo "[x] Sorry, your kernel version is not currently supported"
+    echo "[x] Sorry, your kernel version is not currently supported"
     exit
 fi
-
 
 # [3] install necessary packages
 echo "[*] Installing necessary packages ... "
@@ -68,7 +67,7 @@ sudo apt-get install isc-dhcp-server > /dev/null
 # [4] set isc-dhcp-server
 echo "[*] Setting isc-dhcp-server ... "
 if [ -f /etc/dhcp/dhcpd.$in_interface.conf ]; then
-sudo rm /etc/dhcp/dhcpd.$in_interface.conf
+    sudo rm /etc/dhcp/dhcpd.$in_interface.conf
 fi
 
 echo "default-lease-time 600;
@@ -88,7 +87,7 @@ sudo dhcpd -q -cf /etc/dhcp/dhcpd.$in_interface.conf -pf /var/run/dhcp-server/dh
 echo "[*] Setting iptable ... "
 forward=$(cat /proc/sys/net/ipv4/ip_forward)
 if [ $forward -eq "0" ]; then
-echo " -->[*] Enabling ipv4 forwarding"
+    echo " -->[*] Enabling ipv4 forwarding"
     echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 fi
 echo " -->[*] Setting iptables rules"
@@ -108,7 +107,7 @@ echo
 function clean_up {
     echo "[*] Cleaning up ..."
     if [ -f /var/run/dhcp-server/dhcpd.pid ]; then
-dhcpd_pid=$(cat /var/run/dhcp-server/dhcpd.pid)
+        dhcpd_pid=$(cat /var/run/dhcp-server/dhcpd.pid)
         sudo kill -9 $dhcpd_pid > /dev/null
         # echo $dhcpd_pid
     fi
@@ -117,11 +116,11 @@ dhcpd_pid=$(cat /var/run/dhcp-server/dhcpd.pid)
 trap 'clean_up;echo "Goodbye"' SIGINT SIGTERM SIGQUIT SIGKILL
 
 if [ ! -d $WIFI_HOME ]; then
-mkdir $WIFI_HOME
+    mkdir $WIFI_HOME
 fi
 
 if [ -f $WIFI_HOME/.hostapd.$in_interface.conf ]; then
-rm $WIFI_HOME/.hostapd.$in_interface.conf
+    rm $WIFI_HOME/.hostapd.$in_interface.conf
 fi
 
 echo "interface=$in_interface
