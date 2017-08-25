@@ -1,0 +1,30 @@
+from UsingPerfOnAndroid
+https://wiki.linaro.org/LMG/Engineering/UsingPerfOnAndroid
+= Run Java on Android
+
+== SAMPLE SOURCE Main.java
+    public class Main {
+        public static void main(String[] args) {
+            long startTime = System.nanoTime();
+            System.out.println(sum(1000*1000*1000));
+            System.out.println((System.nanoTime() - startTime) / 1000 / 1000);
+        }
+
+        static long sum(long count) {
+            long res = 0;
+            for (long i = 0; i <= count; ++i) {
+                res += i;
+            }
+            return res;
+        }
+    }
+== COMPILE JAVA SOURCE TO CLASS FILE
+    javac -g src/Main.java -d class
+== COMPILE CLASS FILE TO DEX FILE
+    dx --dex --debug --output=out/Main.jar class
+== PUSH TO TARGET
+    adb push out/Main.jar /data/local/tmp/Main.jar
+== RUN THE DEX FILE
+Additional compiler option "-Xcompiler-option -g" is used to tell dex2oat to generate oat files with debug information which can be used by perf.
+    adb shell dalvikvm32 -Xcompiler-option -g -cp /data/local/tmp/Main.jar Main
+    adb shell dalvikvm64 -Xcompiler-option -g -cp /data/local/tmp/Main.jar Main

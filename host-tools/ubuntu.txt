@@ -26,6 +26,7 @@ cat /sys/class/thermal/thermal_zone*/temp
 ============ get the speed of cpus
 sudo cat  /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
 sudo cat  /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
+cat /proc/cpuinfo | grep MHz
 
 description from Documentation/cpu-freq/user-guide.txt:
 cpuinfo_cur_freq : Current frequency of the CPU as obtained from the hardware, in KHz. This is the frequency the CPU actually runs at.
