@@ -39,19 +39,15 @@ function build_juno(){
     targets="droidcore boottarball"
     export TARGET_BUILD_KERNEL=true
     build juno
-    targets="selinuxtarballs"
+    targets="droidcore"
 }
 function build_db410c(){
-    targets="droid"
     build db410c
-    targets="selinuxtarballs"
 }
 function build_x20(){
-    targets="droid"
     export TARGET_BUILD_KERNEL=true
     export TARGET_GCC_VERSION_EXP=6.3-linaro
     build full_amt6797_64_open
-    targets="selinuxtarballs"
 }
 
 ######################
@@ -111,7 +107,6 @@ function build_hikey(){
     cd ${ROOT_DIR}
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
-    targets="droid"
 #    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
 #    export TARGET_USERDATAIMAGE_4GB=true
 #    export TARGET_USERDATAIMAGE_TYPE=f2fs
@@ -123,16 +118,13 @@ function build_hikey(){
     export TARGET_BUILD_UEFI=true
     export CFG_SECURE_DATA_PATH=y
     build hikey
-    targets="selinuxtarballs"
 }
 
 function build_manta(){
     #export WITH_DEXPREOPT=true
     export TARGET_PREBUILT_KERNEL=device/samsung/manta/kernel
-    targets="droidcore"
     build aosp_manta
     unset TARGET_PREBUILT_KERNEL
-    targets="selinuxtarballs"
 }
 
 function clean_for_manta(){
@@ -143,20 +135,10 @@ function clean_for_manta(){
     rm -fr out/target/product/manta/obj/EXECUTABLES/init_intermediates
 }
 
-function build_flounder(){
-    export TARGET_PREBUILT_KERNEL=device/htc/flounder-kernel/Image.gz-dtb
-    targets="droidcore"
-    build aosp_flounder
-    unset TARGET_PREBUILT_KERNEL
-    targets="selinuxtarballs"
-}
-
 function build_flo(){
     export TARGET_PREBUILT_KERNEL=device/asus/flo-kernel/kernel
-    targets="droidcore"
     build aosp_flo
     unset TARGET_PREBUILT_KERNEL
-    targets="selinuxtarballs"
 }
 
 function build_vexpress(){
@@ -249,9 +231,7 @@ function build_x15(){
     export BOARD_USES_FULL_RECOVERY_IMAGE=true
     export TARGET_USES_MKE2FS=true
     #export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
-    targets="droidcore"
     build full_am57xevm
-    targets="selinuxtarballs"
 
     if false; then
         CROSS_COMPILE="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-"

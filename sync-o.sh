@@ -15,9 +15,10 @@ else
 fi
 
 branch="android-o-preview-4"
+branch="android-8.0.0_r4"
 
-LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
-LOCAL_MANIFEST_BRANCH="linaro-o-preview"
+LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
+LOCAL_MANIFEST_BRANCH="linaro-oreo"
 
 main "$@"
 
@@ -26,9 +27,8 @@ ${BASE}/sync-projects.sh  \
                           android-patchsets \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
-                          external/optee_test \
-
-#                          build \
+                          frameworks/base \
+                          build \
 
 #${BASE}/sync-projects.sh \
 #                        system/extras \
@@ -49,9 +49,9 @@ fi
 #export https_proxy=192.168.0.102:37586
 
 func_apply_patch get-hikey-blobs
-func_apply_patch O-MLCR-PATCHSET
+func_apply_patch O-RLCR-PATCHSET
 func_apply_patch hikey-o-workarounds
-func_apply_patch hikey-optee-master
+func_apply_patch hikey-optee-o
 func_apply_patch hikey-optee-4.9
 func_apply_patch hikey-clang-4.9
 func_apply_patch x15-o-workarounds
