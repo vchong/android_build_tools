@@ -1,5 +1,6 @@
 #!/bin/bash
 
+parent_dir=$(cd $(dirname $0); pwd)
 hikey_premerge_ci_jobs="
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-boottime.json
@@ -162,7 +163,8 @@ function submit_job(){
     sed -i "s=%%ANDROID_CACHE%%=${DOWNLOAD_URL}/cache${img_ext}=" ${job_file}
     sed -i "s=%%JOB_NAME%%=${build_name}=" ${job_file}
 
-    lava-tool submit-job "${lava_server}" "${job_file}"
+    #lava-tool submit-job "${lava_server}" "${job_file}"
+    ${parent_dir}/lava_submit_jobs2.py "${job_file}"
     if [ $? -ne 0 ]; then
         echo "Failed to submit job file to servier: ${lava_server}"
         echo "Failed job file is: ${job_file}"
@@ -199,9 +201,19 @@ function submit_remain_jobs_for_juno_premerge(){
     done
 }
 
+function submit_hikey_jobs(){
+    local build_number="${1}"
+    local build_name="android-lcr-reference-hikey-o"
+    local img_ext=".img.xz"
+    for job_url in ${hikey_jobs}; do
+        submit_job "${job_url}" "${build_number}" "${build_name}" "${img_ext}"
+    done
+}
+
 function main(){
     #submit_remain_jobs_for_x15_premerge 156
-    submit_remain_jobs_for_hikey_premerge 167
+    #submit_remain_jobs_for_hikey_premerge 167
+    submit_hikey_jobs 4
 }
 
 main "$@"
