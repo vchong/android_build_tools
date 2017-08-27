@@ -44,3 +44,4 @@ Android.bp
 bootstrap.bash
 kernel-3.18/
 clang-src/
+android-tools/benchmarks/

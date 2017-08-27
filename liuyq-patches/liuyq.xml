@@ -19,6 +19,7 @@
   <project path="external/opencv-upstream" name="liuyq/opencv" revision="master" remote="github4liuyq" />
 -->
   <project path="android-tools/apks" name="liuyq/apks" revision="master" remote="github4liuyq" />
+  <project path="android-tools/benchmarks" name="liuyq/benchmarks" revision="master" remote="github4liuyq" />
   <!--
   https://code.videolan.org/videolan/vlc-android.git
   <project path="android-tools/apks" name="liuyq/apks" revision="master" remote="github4liuyq" />

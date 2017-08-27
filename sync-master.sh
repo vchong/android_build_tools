@@ -37,11 +37,11 @@ ${BASE}/sync-projects.sh  \
 #                        system/vold \
 #                        system/core \
 
-#${BASE}/sync-projects.sh \
-#                        external/libdrm \
-#                        device/ti/am57xevm \
-#                        kernel/ti/x15/ \
-#                        ti/u-boot/ \
+${BASE}/sync-projects.sh \
+                        external/libdrm \
+                        device/ti/am57xevm \
+                        kernel/ti/x15/ \
+                        ti/u-boot/ \
 
 #                          art \
 #                          external/opencv-upstream \
