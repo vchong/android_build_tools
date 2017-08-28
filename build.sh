@@ -13,7 +13,7 @@ variant="userdebug"
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true
 #export TARGET_GCC_VERSION_EXP=6.3-linaro
 #export USE_CLANG_PLATFORM_BUILD=false
-export WITH_DEXPREOPT=true
+#export WITH_DEXPREOPT=true
 #export MALLOC_IMPL=dlmalloc
 #export MALLOC_IMPL_MUSL=true
 export TARGET_BUILD_JAVA_SUPPORT_LEVEL=platform
@@ -116,7 +116,7 @@ function build_hikey(){
     export KERNEL_BUILD_WITH_CLANG=true
     export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true
-    export CFG_SECURE_DATA_PATH=y
+    export CFG_SECURE_DATA_PATH=n
     build hikey
 }
 

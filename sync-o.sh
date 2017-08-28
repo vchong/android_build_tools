@@ -28,7 +28,6 @@ ${BASE}/sync-projects.sh  \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
-                          build \
 
 #${BASE}/sync-projects.sh \
 #                        system/extras \
