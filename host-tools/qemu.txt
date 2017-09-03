@@ -30,4 +30,11 @@ https://en.wikibooks.org/wiki/QEMU/Images
 5. host devices:
    -device usb-host,hostbus=3,hostaddr=2
 
+   open the usb harddisk in the guest qemu
+   Bus 001 Device 008: ID 05e3:0718 Genesys Logic, Inc. IDE/SATA Adapter
+   sudo qemu-system-x86_64 -m 1024 -hda winxp.img -enable-kvm -usb -usbdevice host:05e3:0718
 
+6. virt-manager
+   UI tools to manage qemu vitual machines
+   sudo apt-get install virt-manager
+   sudo virt-manager
