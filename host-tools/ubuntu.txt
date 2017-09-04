@@ -1,3 +1,21 @@
+== icon path on launcher======
+
+2:32:03 liuyq: sdk_studio$ cat /home/liuyq/./.local/share/applications/jetbrains-studio.desktop
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=Welcome to Android Studio
+Icon=jetbrains-studio.png
+Path=/SATA3/sdk_studio
+Exec=/usr/lib/jvm/java-8-openjdk-amd64/bin/java -Xbootclasspath/a:./android-studio/bin/../lib/boot.jar -classpath ./android-studio/bin/../lib/bootstrap.jar:./android-studio/bin/../lib/extensions.jar:./android-studio/bin/../lib/util.jar:./android-studio/bin/../lib/jdom.jar:./android-studio/bin/../lib/log4j.jar:./android-studio/bin/../lib/trove4j.jar:./android-studio/bin/../lib/jna.jar:/usr/lib/jvm/java-8-openjdk-amd64/lib/tools.jar -Xms256m -Xmx1280m -XX:MaxPermSize=350m -XX:ReservedCodeCacheSize=240m -XX:+UseConcMarkSweepGC -XX:SoftRefLRUPolicyMSPerMB=50 -da -Djna.nosys=true -Djna.boot.library.path= -Djna.debug_load=true -Djna.debug_load.jna=true -Dsun.io.useCanonCaches=false -Djava.net.preferIPv4Stack=true -XX:+HeapDumpOnOutOfMemoryError -Dawt.useSystemAAFontSettings=lcd -Djb.vmOptionsFile=./android-studio/bin/studio64.vmoptions -XX:ErrorFile=/home/liuyq/java_error_in_STUDIO_%p.log -Djb.restart.code=88 -Didea.paths.selector=AndroidStudio2.1 -Didea.platform.prefix=AndroidStudio com.intellij.idea.Main
+StartupNotify=false
+StartupWMClass=jetbrains-studio
+OnlyShowIn=Unity;
+X-UnityGenerated=true
+22:32:10 liuyq: sdk_studio$
+
+
 ==16.04 packages need to be installed:
     sudo apt-get update
     sudo apt-get upgrade

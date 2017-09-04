@@ -1,29 +1,100 @@
+==========================================================
+android HAL PDK introduction
+https://source.android.com/devices/architecture/hidl/
+https://source.android.com/devices/camera/
+https://source.android.com/devices/
 ==================================================================
-16:12:47 liu: master$ /development/android/master/development/scripts/stack /tmp/crash.log 
-Searching for native crashes in /tmp/crash.log
+图文详解YUV420数据格式
+http://blog.csdn.net/man9953211/article/details/51896658
+
+YUV格式有两大类：planar和packed。
+对于planar的YUV格式，先连续存储所有像素点的Y，紧接着存储所有像素点的U，随后是所有像素点的V。
+对于packed的YUV格式，每个像素点的Y,U,V是连续交*存储的。
+
+YUV码流的存储格式其实与其采样的方式密切相关，主流的采样方式有三种，YUV4:4:4，YUV4:2:2，YUV4:2:0
+
+YUV 4:4:4采样，每一个Y对应一组UV分量。
+YUV 4:2:2采样，每两个Y共用一组UV分量。
+YUV 4:2:0采样，每四个Y共用一组UV分量。
+
+YUV，分为三个分量，“Y”表示明亮度（Luminance或Luma），也就是灰度值；而“U”和“V” 表示的则是色度（Chrominance或Chroma），作用是描述影像色彩及饱和度，用于指定像素的颜色。
+
+yuv420p 和 YUV420的区别 在存储格式上有区别
+yuv420p：yyyyyyyy uuuuuuuu vvvvv yuv420： yuv yuv yuv
+
+  YUV420P，Y，U，V三个分量都是平面格式，分为I420和YV12。I420格式和YV12格式的不同处在U平面和V平面的位置不同。在I420格式中，U平面紧跟在Y平面之后，然后才是V平面（即：YUV）；但YV12则是相反（即：YVU）。
+  YUV420SP, Y分量平面格式，UV打包格式, 即NV12。 NV12与NV21类似，U 和 V 交错排列,不同在于UV顺序。
+  I420: YYYYYYYY UU VV    =>YUV420P
+  YV12: YYYYYYYY VV UU    =>YUV420P
+  NV12: YYYYYYYY UVUV     =>YUV420SP
+  NV21: YYYYYYYY VUVU     =>YUV420SP
+
+==================================================================
+the pixel format defaut to MJPEG:
+    when have mouse connected to the usb port too.
+select timeout problem:
+    when have the usb-eth connected
+
+workaround:
+    enabled wifi
+    create adb connection over wifi ip
+    run am start com.android.camera/com.android.camera.Camera to start the LegacyCamera activity
+==================================================================
+http://www.cnblogs.com/tureno/category/1006825.html
+drivers/media/usb/uvc/uvc_driver.c:
+    uvc_parse_standard_control
+    uvc_parse_streaming
+    uvc_parse_standard_control 
+    uvc_parse_control
+    uvc_probe
+drivers/media/usb/uvc/uvc_v4l2.c
+    uvc_ioctl_g_fmt_vid_cap
+    uvc_v4l2_get_format
+==================================================================
+When usb mouse pluged in, the only supported pixel format is changed to MJPG, instead of the YUYV format
+
+15:31:50 liu: master$ ./development/scripts/stack /tmp/logcat.log 
+Searching for native crashes in /tmp/logcat.log
 Reading symbols from /development/android/master/out/target/product/hikey/symbols
-signal 11 (SIGSEGV), code 1, fault addr 0xf71b0000 in tid 2922 (CameraPreviewTh), pid 2859 (cameraserver)
+signal 11 (SIGSEGV), code 1, fault addr 0xf652b000 in tid 2967 (CameraPreviewTh), pid 1890 (provider@2.4-se)
 Revision: '0'
-pid: 2859, tid: 2922, name: CameraPreviewTh  >>> /system/bin/cameraserver <<<
-signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xf71b0000
-r0 00000004  r1 f71b0000  r2 00000420  r3 f5118ffe
-r4 00052000  r5 00000000  r6 f5118ffc  r7 00000000
-r8 f50c7000  r9 f715e000  sl 00096000  fp 00000000
-ip 00000087  sp f57ff890  lr ffff2200  pc f6460092  cpsr 80070030
+pid: 1890, tid: 2967, name: CameraPreviewTh  >>> /vendor/bin/hw/android.hardware.camera.provider@2.4-service <<<
+signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xf652b000
+    r0 00000004  r1 f652b000  r2 00000420  r3 f4adeffe
+    r4 00051000  r5 00000000  r6 f4adeffc  r7 00000000
+    r8 f4a8e000  r9 f64da000  sl 00096000  fp 00000000
+    ip 00000087  sp f4f69890  lr ffff2200  pc f5bed9c2  cpsr 80010030
 Using arm toolchain from: /development/android/master/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/
 
 Stack Trace:
-RELADDR   FUNCTION                                                FILE:LINE
-00007092  convertYUYVtoRGB565+30                                  hardware/linaro/common/libcamera/rgbconvert.c:45
-00006191  android::CameraHardware::previewThread()+196            hardware/linaro/common/libcamera/CameraHardware.cpp:208
-00006fe1  android::CameraHardware::PreviewThread::threadLoop()+4  hardware/linaro/common/libcamera/CameraHardware.h:126
-0000e617  android::Thread::_threadLoop(void*)+274                 system/core/libutils/Threads.cpp:754
-0004739b  __pthread_start(void*)+22                               bionic/libc/bionic/pthread_create.cpp:214
-0001ad01  __start_thread+32                                       bionic/libc/bionic/clone.cpp:47
-16:12:51 liu: master$ 
+    RELADDR   FUNCTION                                                FILE:LINE
+    000079c2  convertYUYVtoRGB565+30                                  hardware/linaro/common/libcamera/rgbconvert.c:45
+    00006921  android::CameraHardware::previewThread()+196            hardware/linaro/common/libcamera/CameraHardware.cpp:208
+    00007911  android::CameraHardware::PreviewThread::threadLoop()+4  hardware/linaro/common/libcamera/CameraHardware.h:126
+    0000d163  android::Thread::_threadLoop(void*)+274                 system/core/libutils/Threads.cpp:747
+    000479f3  __pthread_start(void*)+22                               bionic/libc/bionic/pthread_create.cpp:214
+    0001af69  __start_thread+32                                       bionic/libc/bionic/clone.cpp:47
+15:32:03 liu: master$ 
+
 16:12:52 liu: master$ file out/target/product/hikey/system/bin/cameraserver 
 out/target/product/hikey/system/bin/cameraserver: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /system/bin/linker, BuildID[md5/uuid]=25792f1aaa30a9f848094ffaf6eb2cde, stripped
 16:13:46 liu: master$ 
+===================================================================
+update on hidl related things:
+
+08-31 04:06:34.862  2951  2951 V camera  : Preferred camera (id= 0) missing. Defaulting to the first one
+08-31 04:06:34.868  2951  3053 V CameraHolder: open camera 0
+08-31 04:06:34.870  1894  1933 I CameraService: CameraService::connect call (PID -1 "com.android.camera", camera ID 0) for HAL version default and Camera API version 1
+08-31 04:06:34.877  1894  1933 E CameraService: CameraService::connect X (PID 2951) rejected (invalid camera ID 0)
+08-31 04:06:34.880  2951  3053 W CameraBase: An error occurred while connecting to camera 0: Status(-8): '4: validateConnectLocked:861: No camera device with ID "0" available'
+08-31 04:06:34.881  2951  3053 E CameraHolder: fail to connect Camera
+08-31 04:06:34.881  2951  3053 E CameraHolder: java.lang.RuntimeException: Fail to connect to camera service
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at android.hardware.Camera.<init>(Camera.java:510)
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at android.hardware.Camera.open(Camera.java:359)
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at com.android.camera.CameraHolder.open(CameraHolder.java:131)
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at com.android.camera.Util.openCamera(Util.java:267)
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at com.android.camera.Camera$4.run(Camera.java:1114)
+08-31 04:06:34.881  2951  3053 E CameraHolder:  at java.lang.Thread.run(Thread.java:764)
 ===================================================================
 LOCAL_MODULE_RELATIVE_PATH := hw
 

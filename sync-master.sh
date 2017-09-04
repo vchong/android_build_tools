@@ -18,6 +18,8 @@ branch="master"
 
 LOCAL_MANIFEST="ssh://git@dev-private-git.linaro.org/linaro-art/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-master"
+LOCAL_MANIFEST="https://android-git.linaro.org/git/platform/manifest.git"
+LOCAL_MANIFEST_BRANCH="linaro-master"
 
 main "$@"
 
