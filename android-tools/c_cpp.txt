@@ -35,5 +35,6 @@ writev(klog_fd, iov, 1);
 close(klog_fd);
 fflush(NULL);
 ==========print in CPP file==============
-std::cout << "====LIUYQ===" << __FILE__ <<" :" << __LINE__ << std::endl;
+std::cout << "====LIUYQ===" << __FILE__ <<" :" << __LINE__ << " :" << __func__ << std::endl;
 strerror(errno))
+=========================================
