@@ -4,12 +4,13 @@
 IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
-URL_JUNO_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/lcr-member-juno-m/template-cts-focused1.json"
+URL_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/hikey-v2/template-cts-focused1-v7a.yaml"
 
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
-    local available_cts=$(curl -L ${url_cts}|grep 'android-cts-7.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
+    local available_cts=$(curl -L ${url_cts}|grep 'android-cts-8.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
     # https://dl.google.com/dl/android/cts/android-cts-7.0_r1-linux_x86-arm.zip
+    # https://dl.google.com/dl/android/cts/android-cts-8.0_r1-linux_x86-arm.zip
     if [ -z "${available_cts}" ]; then
         echo "Failed to wget cts download webpage: ${url_cts}"
         exit 0
@@ -91,9 +92,9 @@ __EOF__
 }
 
 function getLCRURL(){
-    local url_lcr=$(curl -L ${URL_JUNO_CTS_TEMPLATE}|grep CTS_URL|cut -d\" -f 4)
+    local url_lcr=$(curl -L ${URL_CTS_TEMPLATE}|grep CTS_URL|cut -d\" -f 4)
     if [ -z "${url_lcr}" ]; then
-        echo "Failed to get the url information for LCR via url ${URL_JUNO_CTS_TEMPLATE}"
+        echo "Failed to get the url information for LCR via url ${URL_CTS_TEMPLATE}"
         echo "Please check the status and try again"
         exit 1
     fi

@@ -17,25 +17,26 @@ cd ${BASE_DIR}
 #repo init -u https://android.googlesource.com/mirror/manifest --mirror --repo-url=git://android.git.linaro.org/tools/repo
 #repo init -u http://android.git.linaro.org/git/platform/manifest.git --repo-url=git://android.git.linaro.org/tools/repo
 function echoerror {
-	echo "$@" 1>&2;
+    echo "$@" 1>&2;
 }
 
 function sync_aosp_mirror(){
-	echo "Started aosp-mirror sync:" `date` >>sync.timestamp
-	local try_count=1
-	while ! repo sync; do
-	    sleep 3600
-            try_count=$((try_count + 1))
-            if [ ${try_count} -gt 10 ]; then
-                irc_notify "Failed to run repo sync for 10 times"
-                exit 1
-            fi
-	done
-	echo "Finished aosp-mirror sync:" `date` >>sync.timestamp
-	echo "===================================">>sync.timestamp
+    echo "Started aosp-mirror sync:" `date` >>sync.timestamp
+    local try_count=1
+    while ! repo sync; do
+        try_count=$((try_count + 1))
+        if [ ${try_count} -gt 10 ]; then
+            irc_notify "Failed to run repo sync for 10 times"
+            exit 1
+        fi
+        sleep 3600
+    done
+    echo "Finished aosp-mirror sync:" `date` >>sync.timestamp
+    echo "===================================">>sync.timestamp
 }
 
 
+android_tag_prefix="android-8"
 function get_latest_tag_for_aosp(){
     local PWD_BASE=$(cd $PWD; pwd)
     cd ${manifest_git}
@@ -46,7 +47,7 @@ function get_latest_tag_for_aosp(){
         exit 1
     fi
 
-    local latest_branch_aosp=$(git branch -a|grep 'android-7'|sort -V|tail -n1|tr -d ' ')
+    local latest_branch_aosp=$(git branch -a|grep "${android_tag_prefix}"|sort -V|tail -n1|tr -d ' ')
     if [ -z "${latest_branch_aosp}" ]; then
         echoerror "Failed to get the tags information for AOSP"
         echoerror "Please check the status and try again"
@@ -58,8 +59,8 @@ function get_latest_tag_for_aosp(){
 }
 
 function get_latest_tag_for_lcr(){
-    local url_m_lcr_juno="https://android-git.linaro.org/android-build-configs.git/plain/lcr-member-juno-n"
-    local latest_branch_lcr=$(curl ${url_m_lcr_juno}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
+    local url_lcr="https://android-git.linaro.org/android-build-configs.git/plain/lcr-reference-hikey-o"
+    local latest_branch_lcr=$(curl ${url_lcr}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
     if [ -z "${latest_branch_lcr}" ]; then
         echoerror "Failed to get the tags information for LCR"
         echoerror "Please check the status and try again"
@@ -137,36 +138,36 @@ __EOF__
 
 dir_aosp_master="/home/ubuntu/aosp-master"
 function change_log(){
-	export old_tag="$1"
-	export new_tag="$2"
-	if [ -z "${old_tag}" ] || [ -z "${new_tag}" ]; then
-		return
-	fi
-	local changelog_file="${3}"
-	if [ -z "${changelog_file}" ]; then
-		return
-	fi
-	cd ${dir_aosp_master}
-	repo init -b ${new_tag}
-	repo sync -j4
-	repo forall -c ' \
-	        diff_commits=$(git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null|wc -l)
-	        if [ ${diff_commits} -gt 0 ]; then \
-		    echo ========${REPO_PROJECT} between ${old_tag}..${new_tag}=========
-                    git diff --stat ${old_tag} ${new_tag}
-                    git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null
-		    echo ""
-		fi;
+    export old_tag="$1"
+    export new_tag="$2"
+    if [ -z "${old_tag}" ] || [ -z "${new_tag}" ]; then
+        return
+    fi
+    local changelog_file="${3}"
+    if [ -z "${changelog_file}" ]; then
+        return
+    fi
+    cd ${dir_aosp_master}
+    repo init -b ${new_tag}
+    repo sync -j4
+    repo forall -c ' \
+            diff_commits=$(git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null|wc -l)
+            if [ ${diff_commits} -gt 0 ]; then \
+                echo ========${REPO_PROJECT} between ${old_tag}..${new_tag}=========
+                git diff --stat ${old_tag} ${new_tag}
+                git log --oneline --no-merges ${old_tag}..${new_tag} 2>/dev/null
+                echo ""
+            fi;
                '|tee ${changelog_file}.tmp
 
-	total_line=$(grep -e 'file changed' -e "files changed" ${changelog_file}.tmp|awk 'BEGIN { file_changed=0; insertions=0; deletions=0} { file_changed=file_changed+$1; insertions=insertions+$4; deletions=deletions+$6} END { printf("%d file changed, %d insertions(+), %d deletions(-)\n", file_changed, insertions, deletions)}')
-	echo "***************************************************************"  >${changelog_file}
-	echo "***************************************************************"  >>${changelog_file}
-	echo "  ${total_line}"  >>${changelog_file}
-	echo "***************************************************************"  >>${changelog_file}
-	echo "***************************************************************"  >>${changelog_file}
-	cat ${changelog_file}.tmp >>${changelog_file}
-	sudo -u yongqin.liu scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
+    total_line=$(grep -e 'file changed' -e "files changed" ${changelog_file}.tmp|awk 'BEGIN { file_changed=0; insertions=0; deletions=0} { file_changed=file_changed+$1; insertions=insertions+$4; deletions=deletions+$6} END { printf("%d file changed, %d insertions(+), %d deletions(-)\n", file_changed, insertions, deletions)}')
+    echo "***************************************************************"  >${changelog_file}
+    echo "***************************************************************"  >>${changelog_file}
+    echo "  ${total_line}"  >>${changelog_file}
+    echo "***************************************************************"  >>${changelog_file}
+    echo "***************************************************************"  >>${changelog_file}
+    cat ${changelog_file}.tmp >>${changelog_file}
+    sudo -u yongqin.liu scp ${changelog_file} people.linaro.org:/home/yongqin.liu/public_html/ChangeLogs
 }
 
 function update_android_build_config(){
@@ -228,10 +229,10 @@ function update_android_build_config(){
 function main(){
     sync_aosp_mirror
     if has_new_tags; then
-	local old_tag="$(get_latest_tag_for_lcr)"
-	local new_tag="$(get_latest_tag_for_aosp)"
-	local changelog_file="ChangeLog-${old_tag}-${new_tag}-$(date +%Y-%m-%d-%H-%M-%S).txt"
-	change_log ${old_tag} ${new_tag} "${changelog_file}"
+        local old_tag="$(get_latest_tag_for_lcr)"
+        local new_tag="$(get_latest_tag_for_aosp)"
+        local changelog_file="ChangeLog-${old_tag}-${new_tag}-$(date +%Y-%m-%d-%H-%M-%S).txt"
+        change_log ${old_tag} ${new_tag} "${changelog_file}"
         local url_gerrit=$(update_android_build_config "${old_tag}" "${new_tag}" "http://people.linaro.org/~yongqin.liu/ChangeLogs/${changelog_file}")
         local message="There are new tags released. The latest AOSP tag is: ${new_tag}."
         message="${message} Please check the change log here: http://people.linaro.org/~yongqin.liu/ChangeLogs/${changelog_file}"

@@ -7,6 +7,7 @@ IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
 
+android_tag_prefix="android-8"
 function get_latest_tag_for_aosp(){
     local PWD_BASE=$(cd $PWD; pwd)
     cd ${manifest_git}
@@ -17,7 +18,7 @@ function get_latest_tag_for_aosp(){
         exit 1
     fi
 
-    local latest_branch_aosp=$(git branch -a|grep 'android-6'|sort -V|tail -n1|tr -d ' ')
+    local latest_branch_aosp=$(git branch -a|grep "${android_tag_prefix}"|sort -V|tail -n1|tr -d ' ')
     if [ -z "${latest_branch_aosp}" ]; then
         echo "Failed to get the tags information for AOSP"
         echo "Please check the status and try again"
@@ -29,15 +30,15 @@ function get_latest_tag_for_aosp(){
 }
 
 function get_latest_tag_for_lcr(){
-    local url_m_lcr_juno="https://android-git.linaro.org/gitweb/android-build-configs.git/blob_plain/HEAD:/lcr-member-juno-m"
-    local latest_branch_lcr=$(curl ${url_m_lcr_juno}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
+    local url_lcr="https://android-git.linaro.org/gitweb/android-build-configs.git/blob_plain/HEAD:/lcr-reference-hikey-o"
+    local latest_branch_lcr=$(curl ${url_lcr}|grep '^MANIFEST_BRANCH='|cut -d= -f2)
     if [ -z "${latest_branch_lcr}" ]; then
         echo "Failed to get the tags information for LCR"
         echo "Please check the status and try again"
         exit 1
     fi
-#    echo "${latest_branch_lcr}"
-    echo "android-6.0.1_r42"
+    echo "${latest_branch_lcr}"
+#    echo "android-6.0.1_r42"
 }
 
 function has_new_tags(){
