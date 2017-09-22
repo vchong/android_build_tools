@@ -3,6 +3,7 @@ android HAL PDK introduction
 https://source.android.com/devices/architecture/hidl/
 https://source.android.com/devices/camera/
 https://source.android.com/devices/
+https://linuxtv.org
 ==================================================================
 图文详解YUV420数据格式
 http://blog.csdn.net/man9953211/article/details/51896658
@@ -39,17 +40,27 @@ workaround:
     enabled wifi
     create adb connection over wifi ip
     run am start com.android.camera/com.android.camera.Camera to start the LegacyCamera activity
+    run am start com.android.camera2/com.android.camera.CameraActivity to start the LegacyCamera activity
+    am start com.android.devcamera/.DevCameraActivity
 ==================================================================
 http://www.cnblogs.com/tureno/category/1006825.html
 drivers/media/usb/uvc/uvc_driver.c:
     uvc_parse_standard_control
     uvc_parse_streaming
-    uvc_parse_standard_control 
+    uvc_parse_standard_control
     uvc_parse_control
     uvc_probe
 drivers/media/usb/uvc/uvc_v4l2.c
     uvc_ioctl_g_fmt_vid_cap
     uvc_v4l2_get_format
+
+drivers/media/v4l2-core/v4l2-dev.c:672:     SET_VALID_IOCTL(ops, VIDIOC_DQBUF, vidioc_dqbuf);
+-->drivers/media/usb/uvc/uvc_v4l2.c:1469:  .vidioc_dqbuf = uvc_ioctl_dqbuf,
+   -->drivers/media/usb/uvc/uvc_v4l2.c:750:static int uvc_ioctl_dqbuf(struct file *file, void *fh, struct v4l2_buffer *buf)
+        ------>drivers/media/usb/uvc/uvc_queue.c:286:int uvc_dequeue_buffer(struct uvc_video_queue *queue, struct v4l2_buffer *buf,
+                --->drivers/media/v4l2-core/videobuf2-v4l2.c:574:int vb2_dqbuf(struct vb2_queue *q, struct v4l2_buffer *b, bool nonblocking)
+                    ---->drivers/media/v4l2-core/videobuf2-core.c:1583:int vb2_core_dqbuf(struct vb2_queue *q, unsigned int *pindex, void *pb,
+
 ==================================================================
 When usb mouse pluged in, the only supported pixel format is changed to MJPG, instead of the YUYV format
 

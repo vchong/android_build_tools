@@ -91,6 +91,13 @@ function setup_for_clang_upstream() {
 
     # 2. Handle missing modules from Upstream clang
     cp -af  ${CLANG_AOSP_DIR}/test ${CLANG_MASTER_DIR}/test
+
+    #
+    cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.ubsan_standalone* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
+    cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.tsan* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
+    cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.profile* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
+    cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.asan* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
+    cp -a ${CLANG_AOSP_DIR}/lib64/LLVMgold.so  ${CLANG_MASTER_DIR}/lib64/
 }
 
 function build_hikey(){

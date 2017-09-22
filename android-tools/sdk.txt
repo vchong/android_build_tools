@@ -1,0 +1,12 @@
+SDK Tools Release Notes
+https://developer.android.com/studio/releases/sdk-tools.html
+
+SDK Platform Tools Release Notes
+https://developer.android.com/studio/releases/platform-tools.html
+https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+
+Possible versions:
+https://dl.google.com/android/repository/repository2-1.xml
+
+Mirror of google repository:
+https://mirrors.zzu.edu.cn/android/repository/
