@@ -180,7 +180,7 @@ function update_android_build_config(){
 
     local git_build_config="http://android-git.linaro.org/git/android-build-configs.git"
     local dir_build_config="/home/ubuntu/android-build-configs"
-    local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=serban.constantinescu@linaro.org,r=julien.duraj@linaro.org"
+    local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=praneeth@ti.com,r=serban.constantinescu@linaro.org,r=julien.duraj@linaro.org,r=tom.gall@linaro.org"
     #local reviewers="r=yongqin.liu@linaro.org"
 
     if [ ! -d "${dir_build_config}" ]; then

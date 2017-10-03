@@ -15,7 +15,7 @@ else
 fi
 
 branch="android-o-preview-4"
-branch="android-8.0.0_r12"
+branch="android-8.0.0_r17"
 
 LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-oreo"
