@@ -8,7 +8,7 @@ URL_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/hikey-v
 
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
-    local available_cts=$(curl -L ${url_cts}|grep 'android-cts-8.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
+    local available_cts=$(curl --insecure -L ${url_cts}|grep 'android-cts-8.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
     # https://dl.google.com/dl/android/cts/android-cts-7.0_r1-linux_x86-arm.zip
     # https://dl.google.com/dl/android/cts/android-cts-8.0_r1-linux_x86-arm.zip
     if [ -z "${available_cts}" ]; then
@@ -92,7 +92,7 @@ __EOF__
 }
 
 function getLCRURL(){
-    local url_lcr=$(curl -L ${URL_CTS_TEMPLATE}|grep CTS_URL|cut -d\" -f 4)
+    local url_lcr=$(curl --insecure -L ${URL_CTS_TEMPLATE}|grep TEST_URL|cut -d\" -f 2)
     if [ -z "${url_lcr}" ]; then
         echo "Failed to get the url information for LCR via url ${URL_CTS_TEMPLATE}"
         echo "Please check the status and try again"
