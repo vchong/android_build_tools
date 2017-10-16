@@ -123,7 +123,7 @@ function build_hikey(){
     export KERNEL_BUILD_WITH_CLANG=true
     export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true
-    export CFG_SECURE_DATA_PATH=n
+    export CFG_SECURE_DATA_PATH=y
     build hikey
 }
 
