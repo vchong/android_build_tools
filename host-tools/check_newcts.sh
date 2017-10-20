@@ -195,7 +195,7 @@ function generateLinaroCtsPackage(){
             git config --global user.email yongqin.liu@linaro.org && \
             sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
             cp ../commit-msg .git/hooks/ && \
-            sed -i "s%${url_lcr}%${new_url}%" android/*/*.json && \
+            sed -i "s%${url_lcr}%${new_url}%" android/*/*.yaml && \
             git add . && \
             git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
             sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
@@ -218,7 +218,7 @@ function main(){
             message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
         else
             mkdir -p ${local_dir}
-            wget ${remote_url} -O "${local_dir}/${package_name}"
+            wget --no-check-certificate ${remote_url} -O "${local_dir}/${package_name}"
             if [ $? -ne 0 ]; then
                 message="${message}, failed to download it, please check manually"
             else
