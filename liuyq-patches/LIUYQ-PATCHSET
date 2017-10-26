@@ -17,7 +17,7 @@ fi
 #==================================
 ## config.xml: set to use pool.ntp.org as default ntp server
 ## https://android-review.linaro.org/#/c/17779/
-apply --linaro device/linaro/hikey 17779/1
+#apply --linaro device/linaro/hikey 17779/1
 
 ## lsusb.c: output manufacturer and product as well
 ## http://android-review.linaro.org/17812
@@ -35,7 +35,7 @@ apply --linaro --local kernel/linaro/hisilicon kernel/hikey-linaro 17846/2
 
 ## add patches for webcam support
 ## http://android-review.linaro.org/17847
-apply --linaro device/linaro/hikey 17847/3
+#apply --linaro device/linaro/hikey 17847/3
 #============================================
 #=== patches for webcam =====================
 #============================================

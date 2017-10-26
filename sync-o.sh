@@ -15,7 +15,7 @@ else
 fi
 
 branch="android-o-preview-4"
-branch="android-8.0.0_r17"
+branch="android-8.0.0_r23"
 
 LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-oreo"
@@ -51,13 +51,13 @@ func_apply_patch O-RLCR-PATCHSET
 func_apply_patch hikey-o-workarounds
 func_apply_patch hikey-optee-o
 func_apply_patch hikey-optee-4.9
-func_apply_patch hikey-clang-4.9
+#func_apply_patch hikey-clang-4.9
 func_apply_patch OREO-BOOTTIME-OPTIMIZATIONS-HIKEY
-#func_apply_patch x15-o-workarounds
+func_apply_patch x15-o-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
 
-#func_apply_patch LIUYQ-PATCHSET
+func_apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit

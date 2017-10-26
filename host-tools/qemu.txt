@@ -38,3 +38,7 @@ https://en.wikibooks.org/wiki/QEMU/Images
    UI tools to manage qemu vitual machines
    sudo apt-get install virt-manager
    sudo virt-manager
+
+12:15:06 liuyq: VirtualBox$ sudo qemu-system-x86_64 -m 20480 -hda ubuntu1604.img -smp cores=4 -cpu host -enable-kvm -machine accel=kvm:tcg -drive file=/dev/mmcblk0,format=raw
+qemu-system-x86_64: -drive file=/dev/mmcblk0,format=raw: could not open disk image /dev/mmcblk0: Could not open '/dev/mmcblk0': Permission denied
+12:15:13 liuyq: VirtualBox$ c

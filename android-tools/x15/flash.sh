@@ -28,15 +28,16 @@ function flash_image(){
         exit 1
     fi
     # sleep 2 after flash
-    sleep 2
+    sleep 5
 }
 
 flash_image xloader ${img_dir}/MLO
 flash_image bootloader ${img_dir}/u-boot.img
 flash_image environment ${img_dir}/am57xx-evm-reva3.dtb
-flash_image recovery ${img_dir}/recovery.img
+#flash_image recovery ${img_dir}/recovery.img
 flash_image boot ${img_dir}/boot.img
 flash_image system ${img_dir}/system.img
 flash_image cache ${img_dir}/cache.img
 flash_image userdata ${img_dir}/userdata.img
+flash_image vendor ${img_dir}/vendor.img
 fastboot reboot
