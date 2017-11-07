@@ -148,14 +148,13 @@ function generateLinaroCtsPackage(){
         prepareCtsDir "${working_dir}/google" "${url_google}" "${local_google_pkg}"
 
         cp ${working_dir}/google/android-cts/testcases/egl-master.txt ${working_dir}/google/egl-master.txt && \
-        cp ${working_dir}/google/android-cts/tools/tradefed-prebuilt.jar ${working_dir}/google/tradefed-prebuilt.jar && \
+        cp ${working_dir}/google/android-cts/tools/cts-tradefed.jar ${working_dir}/google/cts-tradefed.jar && \
         rm -fr ${working_dir}/google/android-cts
 
         mkdir -p ${working_dir}/google/android-cts//testcases/ ${working_dir}/google/android-cts//tools
         sed -i '/dEQP-EGL.functional.sharing.gles2.multithread.random.images.copyteximage2d/d' ${working_dir}/google/egl-master.txt > ${working_dir}/google/android-cts/testcases/egl-master.txt
 
-        rm -fr ${working_dir}/linaro/android-cts/tools/config
-        cd ${working_dir}/linaro/android-cts/tools/ && rm -fr config && jar -xf tradefed-prebuilt.jar && mv config ${working_dir}/google/android-cts//tools
+        cd ${working_dir}/linaro/android-cts/tools/ && rm -fr config && jar -xf cts-tradefed.jar && mv config ${working_dir}/google/android-cts//tools
         if ! diff ${working_dir}/linaro//modules.sort ${working_dir}/google//modules.sort > ${working_dir}/diff.txt; then
             grep '^>' ${working_dir}/diff.txt|awk '{print $2}' > ${working_dir}/modules-google-only.txt
             grep '^<' ${working_dir}/diff.txt|awk '{print $2}' > ${working_dir}/modules-old-only.txt
@@ -172,11 +171,11 @@ function generateLinaroCtsPackage(){
             ## add modules in new version to cts-part4.xml
             while read -r module_name; do
                 new_module_line="    <option name=\"compatibility:include-filter\" value=\"${module_name}\" />"
-                sed "/<\/configuration>/i ${new_module_line}" cts-part4.xml
+                sed "/<\/configuration>/i ${new_module_line}" cts-part5.xml
             done < ${working_dir}/modules-old-only.txt
         fi
 
-        cp ${working_dir}/google/tradefed-prebuilt.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf tradefed-prebuilt.jar config/
+        cp ${working_dir}/google/cts-tradefed.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf cts-tradefed.jar config/
 
         cd ${working_dir}/google/ && zip -ru cts.zip android-cts && mv cts.zip ${package_name_linaro}
 
