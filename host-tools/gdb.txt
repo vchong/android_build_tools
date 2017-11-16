@@ -1,4 +1,4 @@
-139|flounder:/data/local/tmp # gdbserver64 --help                                                                                                                                                            
+139|flounder:/data/local/tmp # gdbserver64 --help
 Usage:  gdbserver [OPTIONS] COMM PROG [ARGS ...]
         gdbserver [OPTIONS] --attach COMM PID
         gdbserver [OPTIONS] --multi COMM

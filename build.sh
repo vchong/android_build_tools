@@ -177,6 +177,9 @@ function build_tools_ddmlib(){
 }
 
 function build_x15(){
+    rm -fr out/target/product/am57xevm/vendor*
+    rm -fr out/target/product/am57xevm/system*
+    rm -fr out/target/product/am57xevm/obj/ETC/system_build_prop_intermediates/
 
     # compile kernel
     if false; then

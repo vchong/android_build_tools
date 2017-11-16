@@ -1,3 +1,13 @@
+zygote:
+frameworks/base/core/jni/AndroidRuntime.cpp
+frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk
+
+art:
+art/runtime/gc/heap.cc
+art/runtime/runtime.cc
+art/runtime/runtime_options.def
+
+
 from UsingPerfOnAndroid
 https://wiki.linaro.org/LMG/Engineering/UsingPerfOnAndroid
 = Run Java on Android

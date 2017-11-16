@@ -15,7 +15,7 @@ else
 fi
 
 branch="android-o-preview-4"
-branch="android-8.0.0_r23"
+branch="android-8.0.0_r34"
 
 LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-oreo"
@@ -28,6 +28,7 @@ ${BASE}/sync-projects.sh  \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
+                          frameworks/native \
                           system/sepolicy \
 
 #                        system/vold \

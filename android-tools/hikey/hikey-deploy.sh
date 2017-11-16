@@ -35,7 +35,7 @@ function flash_image(){
     sleep 2
 }
 
-flash_image fastboot "${FIRMWARE_DIR}"/fip.bin
+#flash_image fastboot "${FIRMWARE_DIR}"/fip.bin
 #flash_image boot ${img_dir}/boot_fat.uefi.img
 flash_image boot ${img_dir}/boot.img
 flash_image system ${img_dir}/system.img
