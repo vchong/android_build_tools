@@ -1,0 +1,61 @@
+Internet <--> eno1 on Ubuntu16.04 <--> eno4 on Ubuntu16.04 <--> Wifi Router Lan1
+
+https://killtacknine.com/building-an-ubuntu-16-04-router-part-1-network-interfaces/
+================================================================
+Settings on Ubuntu16.04
+================================================================
+1. iptables settings:
+
+#!/bin/bash
+out_inf="tun0" #interface of the vpn access
+local_inf="eno4" # interface to provide vpn service for wifi router
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo iptables -F
+sudo iptables -t nat -F
+sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o ${out_inf} -j MASQUERADE
+sudo iptables -A FORWARD -s 192.168.10.0/24 -o ${out_inf} -j ACCEPT
+sudo iptables -A FORWARD -d 192.168.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -i ${out_inf} -j ACCEPT
+
+2. eno4 interface settings
+
+18:42:59 liu: oreo$ cat /etc/network/interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+# WAN interface
+auto eno1
+iface eno1 inet dhcp
+
+#auto eno2
+#iface eno2 inet dhcp
+
+#auto eno3
+#iface eno3 inet dhcp
+
+# LAN interface
+auto eno4
+iface eno4 inet static
+    address 192.168.10.1
+    network 192.168.10.0
+    netmask 255.255.255.0
+    broadcast 192.168.10.255
+18:43:09 liu: oreo$
+
+sudo systemctl restart networking
+
+3. dhcp settings:
+sudo apt-get install isc-dhcp-server
+
+19:00:52 liu: oreo$ cat /etc/default/dhcpd.conf
+# /etc/default/dhcpd.conf
+INTERFACES="eno4"
+19:00:55 liu: oreo$
+
+
+================================================================
+Settings on Wifi Router side
+================================================================
+1. Disable DHCP service on the wifi router side
+2. Set the IP of the wifi router to some one out of the range of 192.168.10.*
+
