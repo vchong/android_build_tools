@@ -1,0 +1,65 @@
+files under frameworks/native/data/etc/ defined various feature
+
+adb shell dumpsys package android.content.cts
+adb shell cat /data/system/packages.xml
+aapt d permissions out/host/linux-x86/cts/android-cts/testcases/CtsContentTestCases.apk
+
+./frameworks/base/core/java/android/content/pm/PackageParser.java
+
+frameworks/base/core/java/android/content/pm/PackageManager.java:3245: public abstract @PermissionResult int checkPermission(String permName, String pkgName);
+------> frameworks/base/core/java/android/app/ApplicationPackageManager.java nublic int checkPermission(String permName, String pkgName) {
+            try {
+                return mPM.checkPermission(permName, pkgName, mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+frameworks/base/core/java/android/app/ContextImpl.java
+frameworks/base/core/java/android/app/ActivityThread.java
+
+
+18:57:19 liu: oreo$ grep -rn 'int checkPermission(' frameworks/base/core/
+frameworks/base/core/java/android/app/IActivityManager.aidl:169:    int checkPermission(in String permission, int pid, int uid);
+frameworks/base/core/java/android/app/ApplicationPackageManager.java:557:    public int checkPermission(String permName, String pkgName) {
+frameworks/base/core/java/android/app/ContextImpl.java:1660:    public int checkPermission(String permission, int pid, int uid) {
+frameworks/base/core/java/android/app/ContextImpl.java:1686:    public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
+frameworks/base/core/java/android/content/pm/IPackageManager.aidl:95:    int checkPermission(String permName, String pkgName, int userId);
+frameworks/base/core/java/android/content/pm/PackageManager.java:3245:    public abstract @PermissionResult int checkPermission(String permName, String pkgName);
+frameworks/base/core/java/android/content/Context.java:3998:    public abstract int checkPermission(@NonNull String permission, int pid, int uid);
+frameworks/base/core/java/android/content/Context.java:4002:    public abstract int checkPermission(@NonNull String permission, int pid, int uid,
+frameworks/base/core/java/android/content/ContextWrapper.java:717:    public int checkPermission(String permission, int pid, int uid) {
+frameworks/base/core/java/android/content/ContextWrapper.java:723:    public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
+18:57:33 liu: oreo$
+
+
+frameworks/base/core/java/android/app/ContextImpl.java
+    @Override
+    public int checkPermission(String permission, int pid, int uid) {
+        if (permission == null) {
+            throw new IllegalArgumentException("permission is null");
+        }
+
+        final IActivityManager am = ActivityManager.getService();
+        if (am == null) {
+            // Well this is super awkward; we somehow don't have an active
+            // ActivityManager instance. If we're testing a root or system
+            // UID, then they totally have whatever permission this is.
+            final int appId = UserHandle.getAppId(uid);
+            if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
+                Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " holds " + permission);
+                return PackageManager.PERMISSION_GRANTED;
+            }
+        }
+
+        try {
+            return am.checkPermission(permission, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+
+frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java:4986:
+frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java:8212:
