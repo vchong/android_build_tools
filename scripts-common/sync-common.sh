@@ -55,7 +55,7 @@ function parseArgs(){
 
 sync_init(){
     #while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} -g "default,-device,-non-default,hikey,flounder,-darwin,-mips,-x86" --depth=1 -p linux; do
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g "default,device,-notdefault,-darwin,-mips,-x86" -p linux; do
+    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g "default,device,-notdefault,-darwin,-mips,-x86,-juno" -p linux; do
         sleep 30
     done
 }
