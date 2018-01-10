@@ -8,6 +8,7 @@ targets="droidcore"
 #targets="boottarball"
 variant="userdebug"
 
+export ALLOW_MISSING_DEPENDENCIES=true
 #export CFG_GP_SOCKETS=n
 #export INCLUDE_STLPORT_FOR_MASTER=true
 #export INCLUDE_LAVA_HACK_FOR_MASTER=true

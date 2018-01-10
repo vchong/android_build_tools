@@ -15,7 +15,9 @@ else
 fi
 
 branch="android-o-preview-4"
-branch="android-8.0.0_r34"
+branch="android-8.0.0_r32"
+branch="android-o-mr1-preview-1"
+branch="android-8.1.0_r7"
 
 LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-oreo"
@@ -30,17 +32,19 @@ ${BASE}/sync-projects.sh  \
                           frameworks/base \
                           frameworks/native \
                           system/sepolicy \
+                          packages/inputmethods/LatinIME \
+                          system/core \
+                          hardware/interfaces \
 
 #                        system/vold \
-#                        system/core \
 
 ${BASE}/sync-projects.sh \
                         external/libdrm \
                         device/ti/am57xevm \
-                        kernel/ti/x15/ \
-                        ti/u-boot/ \
 
 #                          art \
+#                        kernel/ti/x15/ \
+#                        ti/u-boot/ \
 #                          external/opencv-upstream \
 
 fi
