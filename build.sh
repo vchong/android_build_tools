@@ -115,7 +115,7 @@ function build_hikey(){
     cd ${ROOT_DIR}
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
-#    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
 #    export TARGET_USERDATAIMAGE_4GB=true
 #    export TARGET_USERDATAIMAGE_TYPE=f2fs
     export TARGET_BUILD_KERNEL=true
@@ -294,8 +294,8 @@ build_project() {
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-#build_hikey
-build_x15
+build_hikey
+#build_x15
 #build_x20
 #build_db410c
 #build_flo
