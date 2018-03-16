@@ -1,0 +1,23 @@
+https://bugs.linaro.org/enter_bug.cgi?product=Linaro%20Android&op_sys=Android&bug_severity=normal&component=General&rep_platform=HiKey&version=OREO-8.0&cf_kernel_version=4.4&short_desc=android-hikey-linaro-4.4-android-8.0:%20CtsWebkitTestCases has failures
+
+
+The failed test cases for v8a are:
+android.graphics.drawable.cts.AnimatedVectorDrawableParameterizedTest.testInfiniteAVD[1] — FAIL
+
+
+as shown in qa-report here:
+https://qa-reports.linaro.org/android-lkft/android-hikey-linaro-4.4-android-8.0/build/v4.4.118-568864-gbb107d3e8a4d/testrun/130294/suite/cts-lkft-arm64-v8a$arm64-v8a.CtsGraphicsTestCases/tests/
+
+The lava job is:
+https://lkft.validation.linaro.org/scheduler/job/130294/definition
+
+
+The failed test cases for v7a are:
+android.webkit.cts.WebViewSslTest.testSslErrorProceedResponseNotReusedForDifferentHost — FAIL
+android.webkit.cts.WebViewTest.testGoBackAndForward — FAIL
+
+as shown in qa-report here:
+https://qa-reports.linaro.org/android-lkft/android-hikey-linaro-4.4-android-8.0/build/v4.4.118-568864-gbb107d3e8a4d/testrun/130293/suite/cts-lkft-armeabi-v7a$armeabi-v7a.CtsWebkitTestCases/tests/
+
+The lava job is:
+https://lkft.validation.linaro.org/scheduler/job/130293
