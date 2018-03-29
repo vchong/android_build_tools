@@ -36,6 +36,18 @@ https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-focused1.json
 https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-focused2.json
 "
+
+hikey_cts_jobs="
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-part1.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-part2-64.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-part2-32.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-part3.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-part4.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-opengl.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-media-32.json
+https://git.linaro.org/qa/test-plans.git/blob_plain/HEAD:/android/hikey/template-cts-media-64.json
+"
+
 hikey_jobs="${hikey_premerge_ci_jobs}
 ${hikey_other_jobs}
 ${hikey_weekly_jobs}
@@ -213,7 +225,7 @@ function submit_hikey_jobs(){
 function main(){
     #submit_remain_jobs_for_x15_premerge 156
     #submit_remain_jobs_for_hikey_premerge 167
-    submit_hikey_jobs 4
+    submit_hikey_jobs 73
 }
 
 main "$@"

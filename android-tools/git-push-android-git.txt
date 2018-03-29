@@ -1,0 +1,2 @@
+git push ssh://yongqin.liu@android.git.linaro.org:29418/platform/frameworks/base HEAD:refs/for/linaro-juice2
+git push ssh://yongqin.liu@android-git.linaro.org:29418/platform/frameworks/base HEAD:refs/for/linaro-juice2

@@ -47,3 +47,4 @@ clang-src/
 android-tools/benchmarks/
 android-build-configs/
 compatibility/
+test
