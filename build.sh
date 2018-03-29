@@ -242,6 +242,9 @@ function build_x15(){
     # compile android
     export TARGET_BUILD_KERNEL=true
     export TARGET_BUILD_UBOOT=true
+    export TARGET_BUILD_ITBS=true
+    export UBOOT_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
+    export KERNEL_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
     #export BOARD_USES_FULL_RECOVERY_IMAGE=true
     export TARGET_USES_MKE2FS=true
     #export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
@@ -297,8 +300,8 @@ build_project() {
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-build_hikey
-#build_x15
+#build_hikey
+build_x15
 #build_x20
 #build_db410c
 #build_flo
