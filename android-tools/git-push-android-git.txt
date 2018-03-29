@@ -1,2 +1,23 @@
-git push ssh://yongqin.liu@android.git.linaro.org:29418/platform/frameworks/base HEAD:refs/for/linaro-juice2
+## push for review
+git push ssh://yongqin.liu@android-review.linaro.org:29418/platform/frameworks/base HEAD:refs/for/linaro-juice2
 git push ssh://yongqin.liu@android-git.linaro.org:29418/platform/frameworks/base HEAD:refs/for/linaro-juice2
+
+
+
+# push all the branch to android-git.linaro.org
+git clone --mirror  git://git.ti.com/android/external-kmsxx
+git push --mirror ssh://yongqin.liu@android-review.linaro.org:29418/platform/external/kmsxx
+
+# only push to specified branch
+git push ssh://yongqin.liu@android-review.linaro.org:29418/device/mediatek/mt6797 HEAD:master
+git push --force ssh://yongqin.liu@android-review.linaro.org:29418/hardware/ti/dce.git HEAD:linaro-mirror-3.00.14.00
+
+
+
+16:41:25 liu: proprietary-open$ cat .gitreview
+[gerrit]
+host=android-review.linaro.org
+port=29418
+project=device/ti/proprietary-open
+defaultbranch=d-oreo-mr1-core-release
+16:41:28 liu: proprietary-open$
