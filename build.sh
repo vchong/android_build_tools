@@ -99,6 +99,7 @@ function setup_for_clang_upstream() {
     cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.profile* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
     cp -a ${CLANG_AOSP_DIR}/lib64/clang/5.0/lib/linux/libclang_rt.asan* ${CLANG_MASTER_DIR}/lib64/clang/5.0/lib/linux/
     cp -a ${CLANG_AOSP_DIR}/lib64/LLVMgold.so  ${CLANG_MASTER_DIR}/lib64/
+    cp -a ${CLANG_AOSP_DIR}/lib64/LLVMgold.so  ${CLANG_MASTER_DIR}/lib/
 }
 
 function build_hikey(){
@@ -128,6 +129,7 @@ function build_hikey(){
     export CFG_SECURE_DATA_PATH=y
     export OPTEE_PLATFORM_FLAVOR=hikey
     #export CFG_DYN_SHM_CAP=n
+    #export CFG_GP_SOCKETS=y
     build hikey
 }
 
@@ -300,8 +302,8 @@ build_project() {
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-#build_hikey
-build_x15
+build_hikey
+#build_x15
 #build_x20
 #build_db410c
 #build_flo
