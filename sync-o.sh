@@ -17,7 +17,7 @@ fi
 branch="android-o-preview-4"
 branch="android-8.0.0_r32"
 branch="android-o-mr1-preview-1"
-branch="android-8.1.0_r18"
+branch="android-8.1.0_r23"
 
 LOCAL_MANIFEST="git://android-git.linaro.org/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-oreo"
@@ -51,10 +51,10 @@ fi
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-func_apply_patch get-hikey-blobs
 func_apply_patch O-RLCR-PATCHSET
 func_apply_patch hikey-o-workarounds
 func_apply_patch hikey-optee-o
+func_apply_patch optee-310-workarounds
 func_apply_patch hikey-optee-4.9
 #func_apply_patch hikey-clang-4.9
 func_apply_patch OREO-BOOTTIME-OPTIMIZATIONS-HIKEY
