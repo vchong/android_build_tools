@@ -103,6 +103,7 @@ function setup_for_clang_upstream() {
 }
 
 function build_hikey(){
+    rm -fr out/dist out/target/product/hikey/optee/ optee/optee_os/out/
     export BUILD_CLANG_MASTER=true
     export BUILD_CLANG_MASTER=false
     if ${BUILD_CLANG_MASTER}; then
@@ -127,6 +128,7 @@ function build_hikey(){
     export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true
     export CFG_SECURE_DATA_PATH=y
+    export CFG_SECSTOR_TA_MGMT_PTA=y
     export OPTEE_PLATFORM_FLAVOR=hikey
     #export CFG_DYN_SHM_CAP=n
     #export CFG_GP_SOCKETS=y
