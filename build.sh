@@ -103,6 +103,7 @@ function setup_for_clang_upstream() {
 }
 
 function build_hikey(){
+    rm -fr out/target/product/hikey/obj/kernel/
     rm -fr out/dist out/target/product/hikey/optee/ optee/optee_os/out/
     export BUILD_CLANG_MASTER=true
     export BUILD_CLANG_MASTER=false
