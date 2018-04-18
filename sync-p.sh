@@ -53,8 +53,7 @@ fi
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-#func_apply_patch get-hikey-blobs
-#func_apply_patch O-RLCR-PATCHSET
+func_apply_patch P-RLCR-PATCHSET
 func_apply_patch hikey-p-workarounds
 func_apply_patch hikey-optee-p
 func_apply_patch optee-310-workarounds
@@ -65,7 +64,7 @@ func_apply_patch x15-p-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
 
-#func_apply_patch LIUYQ-PATCHSET
+func_apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit
