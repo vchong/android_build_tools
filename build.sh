@@ -134,6 +134,12 @@ function build_hikey(){
     #export CFG_DYN_SHM_CAP=n
     #export CFG_GP_SOCKETS=y
     build hikey
+    if false; then
+        ## lkft cts patch https://android-review.linaro.org/#/c/18007/
+        ## ./96boards-hikey-aosp-master.yaml
+        make -j"${CPUs}" vts cts
+        # make -j8 vts showcommands dist TARGET_PRODUCT=aosp_arm64 WITH_DEXPREOPT=false TARGET_BUILD_VARIANT=userdebug
+    fi
 }
 
 function build_manta(){

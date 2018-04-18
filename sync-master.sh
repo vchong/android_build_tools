@@ -29,9 +29,9 @@ ${BASE}/sync-projects.sh  \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
-                          bionic \
                           frameworks/av \
 
+#                          bionic \
 #                          build \
 
 #${BASE}/sync-projects.sh \
@@ -42,9 +42,9 @@ ${BASE}/sync-projects.sh  \
 ${BASE}/sync-projects.sh \
                         external/libdrm \
                         device/ti/am57xevm \
-                        kernel/ti/x15/ \
-                        ti/u-boot/ \
 
+#                        kernel/ti/x15/ \
+#                        ti/u-boot/ \
 #                          art \
 #                          external/opencv-upstream \
 
@@ -52,20 +52,18 @@ fi
 #export http_proxy=192.168.0.102:37586
 #export https_proxy=192.168.0.102:37586
 
-#func_apply_patch MASTER-RLCR-PATCHSET
+func_apply_patch MASTER-RLCR-PATCHSET
 func_apply_patch hikey-master-workarounds
-#func_apply_patch get-hikey-blobs
-#func_apply_patch hikey-optee-master
-#func_apply_patch hikey-optee-4.9
-#func_apply_patch optee-master-workarounds
+func_apply_patch hikey-optee-master
+func_apply_patch hikey-optee-4.9
 #func_apply_patch hikey-clang-4.9
 #func_apply_patch MASTER-CLANG-PATCHSET
-func_apply_patch x15-o-workarounds
+func_apply_patch x15-p-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
 
-#func_apply_patch LIUYQ-PATCHSET
+func_apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit
