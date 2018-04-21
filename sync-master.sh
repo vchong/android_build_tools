@@ -55,7 +55,8 @@ fi
 func_apply_patch MASTER-RLCR-PATCHSET
 func_apply_patch hikey-master-workarounds
 func_apply_patch hikey-optee-master
-func_apply_patch hikey-optee-4.9
+#func_apply_patch hikey-optee-4.9
+func_apply_patch hikey-optee-4.14
 #func_apply_patch hikey-clang-4.9
 #func_apply_patch MASTER-CLANG-PATCHSET
 func_apply_patch x15-p-workarounds

@@ -8,6 +8,7 @@ targets="droidcore"
 #targets="boottarball"
 variant="userdebug"
 
+export SHOW_COMMANDS=showcommands
 export ALLOW_MISSING_DEPENDENCIES=true
 #export CFG_GP_SOCKETS=n
 #export INCLUDE_STLPORT_FOR_MASTER=true
@@ -125,6 +126,7 @@ function build_hikey(){
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
     export KERNEL_BUILD_WITH_CLANG=true
+    export CLANG_TRIPLE=aarch64-linux-gnu-
     ## settings for optee
     export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true

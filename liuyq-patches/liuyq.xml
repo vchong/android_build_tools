@@ -5,13 +5,19 @@
 
   <project path="packages/apps/AndroidTerm" name="platform/external/AndroidTerm" revision="linaro-master" remote="linaro-android"/>
   <project path="packages/inputmethods/hackerskeyboard" name="liuyq/hackerskeyboard" revision="master" remote="github4liuyq"/>
+  <!--
   <project path="external/lzo" name="liuyq/lzo.git" revision="master" remote="github4liuyq"/>
   <project path="external/btrfs-progs" name="liuyq/btrfs-progs" revision="android-btrfs" remote="github4liuyq"/>
-  <!-- https://android-git.linaro.org/git/platform/external/iozone.git -->
-  <project path="external/iozone" name="platform/external/iozone.git" revision="iozone3_434" remote="linaro-android"/>
   <project path="packages/apps/0xbench" name="platform/packages/apps/0xbench.git" revision="linaro-master" remote="linaro-android"/>
+  -->
+  <!-- https://android-git.linaro.org/git/platform/external/iozone.git -->
+  <!--
+  <project path="external/iozone" name="platform/external/iozone.git" revision="iozone3_434" remote="linaro-android"/>
+  -->
   <!-- https://git.linaro.org/people/yongqin.liu/public/bonnie.git -->
+  <!--
   <project path="external/bonnie" name="people/yongqin.liu/public/bonnie.git" revision="master" remote="linaro-other"/>
+  -->
   <project path="hardware/linaro/common" name="people/yongqin.liu/public/hardware/linaro/common.git" revision="linaro-android" remote="linaro-other" />
 <!--
   <project path="external/opencv-upstream" name="Itseez/opencv" revision="master" remote="github4liuyq" />
