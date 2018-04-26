@@ -33,7 +33,7 @@ function build(){
 
     echo "Start to build:" >>time.log
     date +%Y-%m-%d-%H-%M >>time.log
-    (time make ${targets} -j${CPUS} showcommands) 2>&1 |tee build-${product}.log
+    (time LANG=C make ${targets} -j${CPUS} ) 2>&1 |tee build-${product}.log
     date +%Y-%m-%d-%H-%M >>time.log
 }
 
@@ -255,13 +255,13 @@ function build_x15(){
     # compile android
     export TARGET_BUILD_KERNEL=true
     export TARGET_BUILD_UBOOT=true
-    export TARGET_BUILD_ITBS=true
+    #export TARGET_BUILD_ITBS=true
     export UBOOT_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
     export KERNEL_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
     #export BOARD_USES_FULL_RECOVERY_IMAGE=true
     export TARGET_USES_MKE2FS=true
     #export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
-    build full_am57xevm
+    build am57xevm_full
 
     if false; then
         CROSS_COMPILE="/SATA3/nougat/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-"
