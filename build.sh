@@ -125,8 +125,9 @@ function build_hikey(){
     export TARGET_BUILD_KERNEL=true
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
-    export KERNEL_BUILD_WITH_CLANG=true
-    export CLANG_TRIPLE=aarch64-linux-gnu-
+    #export KERNEL_BUILD_WITH_CLANG=true
+    #export CLANG_TRIPLE=aarch64-linux-gnu-
+    #export LLVM_PREBUILTS_VERSION=clang-4679922
     ## settings for optee
     export TARGET_TEE_IS_OPTEE=true
     export TARGET_BUILD_UEFI=true
@@ -134,6 +135,7 @@ function build_hikey(){
     export CFG_SECSTOR_TA_MGMT_PTA=y
     export OPTEE_PLATFORM_FLAVOR=hikey
     #export CFG_DYN_SHM_CAP=n
+    #export TARGET_KERNEL_USE=4.14
     #export CFG_GP_SOCKETS=y
     build hikey
     if false; then
@@ -255,7 +257,6 @@ function build_x15(){
     # compile android
     export TARGET_BUILD_KERNEL=true
     export TARGET_BUILD_UBOOT=true
-    #export TARGET_BUILD_ITBS=true
     export UBOOT_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
     export KERNEL_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-7.2-linaro/bin/arm-linux-androideabi-
     #export BOARD_USES_FULL_RECOVERY_IMAGE=true

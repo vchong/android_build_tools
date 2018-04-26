@@ -41,6 +41,8 @@ ${BASE}/sync-projects.sh  \
 ${BASE}/sync-projects.sh \
                         external/libdrm \
                         device/ti/am57xevm \
+                        system/connectivity/wificond \
+                        bootable/recovery \
 
 #                          art \
 #                        kernel/ti/x15/ \
