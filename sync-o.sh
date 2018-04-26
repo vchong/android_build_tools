@@ -64,7 +64,7 @@ func_apply_patch x15-o-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-X15
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-JUNO
 
-#func_apply_patch LIUYQ-PATCHSET
+func_apply_patch LIUYQ-PATCHSET
 
 #./build.sh
 exit
