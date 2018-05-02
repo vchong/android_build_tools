@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #IRC_NOTIFY_CHANNEL="#linaro-android"
 IRC_NOTIFY_CHANNEL="#liuyq-sync"
 IRC_NOTIFY_SERVER="irc.freenode.net"
 IRC_NOTIFY_NICK="aosp-tag-check"
 URL_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/hikey-v2/template-cts-focused1-v7a.yaml"
+PUBLISH_TOKEN=''
 
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
@@ -23,7 +24,7 @@ function get_latest_cts(){
 
 function get_latest_for_lcr(){
     local latest_lcr=$(getLCRURL)
-    latest_lcr=${latest_lcr#http://testdata.validation.linaro.org/cts/android-cts-}
+    latest_lcr=${latest_lcr#http://testdata.linaro.org/cts/android-cts-}
     latest_lcr=${latest_lcr%.zip}
     echo "${latest_lcr}"
 }
@@ -124,25 +125,38 @@ function prepareCtsDir(){
     tail -n ${tail_num} ${f_modules_list} | head -n ${head_num} |sort > ${f_modules_sort}
 }
 
+function upload_to_s3(){
+    local local_file_path=$1 && shift
+    local remote_dir_path=$1 && shift
+    # remote url will be https://testdata.linaro.org/${remote_dir_path}/$(basename $(local_file_path))
+    export PUBLISH_TOKEN
+    wget https://git.linaro.org/ci/publishing-api.git/plain/linaro-cp.py -O linaro-cp.py
+    python linaro-cp.py ${local_file_path} ${remote_dir_path} --server=https://testdata.linaro.org/
+}
+
 function generateLinaroCtsPackage(){
     local local_google_pkg=$1
     local new_cts_version=$(get_latest_cts)
     local local_dir=$(date +%y.%m)
     local package_name_linaro="android-cts-${new_cts_version}-linux_x86-arm-linaro.zip"
-    local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org readlink /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip)
-    if [[ "X${testdata_remote_file_to_check}" =~ "${local_dir}/${package_name_linaro}" ]]; then
+    local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
+    local testdata_remote_file_url="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
+    if wget --spider ${testdata_remote_file_url}; then
         return
     fi
     if which java >/dev/null; then
         local url_lcr=$(getLCRURL)
         local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
-        local url_google="http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+        local url_google="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
         local working_dir=$(mktemp -d -p /tmp/ -d CTS-XXX)
+
         sudo rm -fr /tmp/build-tools.tar.gz
-        sudo -u yongqin.liu scp testdata.validation.linaro.org:/home/testdata.validation.linaro.org/apks/workload-automation/build-tools.tar.gz /tmp/build-tools.tar.gz
-        tar -C ${working_dir} -xvf /tmp/build-tools.tar.gz
-        sudo rm -fr /tmp/build-tools.tar.gz
-        export PATH=${PATH}:${working_dir}/build-tools/android-4.4/
+        ## https://developer.android.com/studio/releases/build-tools
+        wget https://dl.google.com/android/repository/build-tools_r27.0.3-linux.zip -O /tmp/build-tools_r27.0.3-linux.zip
+        $(cd ${working_dir} && unzip /tmp/build-tools_r27.0.3-linux.zip)
+        sudo rm -fr /tmp/build-tools_r27.0.3-linux.zip
+
+        export PATH=${PATH}:${working_dir}/android-8.1.0
         mkdir ${working_dir}/linaro ${working_dir}/google
         prepareCtsDir "${working_dir}/linaro" "${url_lcr}"
         prepareCtsDir "${working_dir}/google" "${url_google}" "${local_google_pkg}"
@@ -151,7 +165,7 @@ function generateLinaroCtsPackage(){
         cp ${working_dir}/google/android-cts/tools/cts-tradefed.jar ${working_dir}/google/cts-tradefed.jar && \
         rm -fr ${working_dir}/google/android-cts
 
-        mkdir -p ${working_dir}/google/android-cts//testcases/ ${working_dir}/google/android-cts//tools
+        mkdir -p ${working_dir}/google/android-cts/testcases/ ${working_dir}/google/android-cts/tools
         sed -i '/dEQP-EGL.functional.sharing.gles2.multithread.random.images.copyteximage2d/d' ${working_dir}/google/egl-master.txt > ${working_dir}/google/android-cts/testcases/egl-master.txt
 
         cd ${working_dir}/linaro/android-cts/tools/ && rm -fr config && jar -xf cts-tradefed.jar && mv config ${working_dir}/google/android-cts//tools
@@ -168,36 +182,37 @@ function generateLinaroCtsPackage(){
                 done
             done < ${working_dir}/modules-old-only.txt
 
-            ## add modules in new version to cts-part4.xml
+            ## add modules in new version to cts-part5.xml
             while read -r module_name; do
                 new_module_line="    <option name=\"compatibility:include-filter\" value=\"${module_name}\" />"
                 sed "/<\/configuration>/i ${new_module_line}" cts-part5.xml
             done < ${working_dir}/modules-old-only.txt
         fi
 
-        cp ${working_dir}/google/cts-tradefed.jar ${working_dir}/google/android-cts//tools && cd ${working_dir}/google/android-cts//tools && jar -uvf cts-tradefed.jar config/
+        cp ${working_dir}/google/cts-tradefed.jar ${working_dir}/google/android-cts/tools && cd ${working_dir}/google/android-cts/tools && jar -uvf cts-tradefed.jar config/
 
-        cd ${working_dir}/google/ && zip -ru cts.zip android-cts && mv cts.zip ${package_name_linaro}
+        cd ${working_dir}/google/ && \
+            zip -ru cts.zip android-cts && \
+            mv cts.zip ${package_name_linaro} \
+            upload_to_s3 "${local_dir}/${package_name}" "cts/${local_dir}"
 
-        sudo -u yongqin.liu scp -r ${package_name_linaro} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
+        #sudo -u yongqin.liu ssh testdata.linaro.org ln -s /home/testdata.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.linaro.org/cts/android-cts-${new_cts_version}.zip
 
-        sudo -u yongqin.liu ssh testdata.validation.linaro.org ln -s /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip
-
-        local new_url="http://testdata.validation.linaro.org/cts/android-cts-${new_cts_version}.zip"
-        local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=jakub.pavelek@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
-        cd ${working_dir}/ && \
-            sudo chmod 777 ${working_dir} && \
-            sudo rm -fr test-plans && \
-            git clone https://git.linaro.org/qa/test-plans.git && \
-            cd test-plans && \
-            git config --global user.name "Yongqin Liu" && \
-            git config --global user.email yongqin.liu@linaro.org && \
-            sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
-            cp ../commit-msg .git/hooks/ && \
-            sed -i "s%${url_lcr}%${new_url}%" android/*/*.yaml && \
-            git add . && \
-            git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
-            sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
+        local new_url="http://testdata.linaro.org/cts/android-cts-${new_cts_version}.zip"
+        local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
+        #cd ${working_dir}/ && \
+        #    sudo chmod 777 ${working_dir} && \
+        #    sudo rm -fr test-plans && \
+        #    git clone https://git.linaro.org/qa/test-plans.git && \
+        #    cd test-plans && \
+        #    git config --global user.name "Yongqin Liu" && \
+        #    git config --global user.email yongqin.liu@linaro.org && \
+        #    sudo -u yongqin.liu  scp -p -P 29418 yongqin.liu@review.linaro.org:hooks/commit-msg ../commit-msg && \
+        #    cp ../commit-msg .git/hooks/ && \
+        #    sed -i "s%${url_lcr}%${new_url}%" android/*/*.yaml && \
+        #    git add . && \
+        #    git commit -s -m "update to cts version to ${new_cts_version}" --author="Yongqin Liu<yongqin.liu@linaro.org>" && \
+        #    sudo -u yongqin.liu git push ssh://yongqin.liu@review.linaro.org:29418/qa/test-plans HEAD:refs/for/master%${reviewers}
     else
         echo "No java command is found, please generate the linaro cts package manually"
     fi
@@ -211,25 +226,24 @@ function main(){
         local remote_url="https://dl.google.com/dl/android/cts/${package_name}"
         local message="There is new cts package released. The latest AOSP tag is: ${new_cts_version}"
         message="${message}, ${remote_url}"
-        local testdata_remote_file="/home/testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
-        local testdata_remote_file_to_check=$(sudo -u yongqin.liu ssh testdata.validation.linaro.org ls /home/testdata.validation.linaro.org/cts/${local_dir}/${package_name})
-        if [ "X${testdata_remote_file}" = "X${testdata_remote_file_to_check}" ]; then
-            message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+        local testdata_remote_file_url="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
+        if wget --spider ${testdata_remote_file_url}; then
+            message="${message}, also downloaded to ${testdata_remote_file_url}"
         else
             mkdir -p ${local_dir}
             wget --no-check-certificate ${remote_url} -O "${local_dir}/${package_name}"
             if [ $? -ne 0 ]; then
                 message="${message}, failed to download it, please check manually"
             else
-                sudo -u yongqin.liu scp -r ${local_dir} testdata.validation.linaro.org:/home/testdata.validation.linaro.org/cts/${local_dir}
+                upload_to_s3 "${local_dir}/${package_name}" "cts/${local_dir}"
                 if [ $? -eq 0 ]; then
-                    message="${message}, also downloaded to http://testdata.validation.linaro.org/cts/${local_dir}/${package_name}"
+                    message="${message}, also downloaded to http://testdata.linaro.org/cts/${local_dir}/${package_name}"
+                    local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
+                    generateLinaroCtsPackage "${abs_path}"
+                    rmdir $(dirname ${abs_path})
                 else
                     message="${message}, failed to download it, please check manually"
                 fi
-                local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
-                generateLinaroCtsPackage "${abs_path}"
-                rmdir $(dirname ${abs_path})
             fi
         fi
         irc_notify "${message}"
@@ -237,5 +251,7 @@ function main(){
         echo "No new tags released in AOSP"
     fi
 }
+
+
 
 main "$@"
