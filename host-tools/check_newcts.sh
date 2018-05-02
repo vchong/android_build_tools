@@ -7,6 +7,17 @@ IRC_NOTIFY_NICK="aosp-tag-check"
 URL_CTS_TEMPLATE="https://git.linaro.org/qa/test-plans.git/plain/android/hikey-v2/template-cts-focused1-v7a.yaml"
 PUBLISH_TOKEN=''
 
+
+function getLCRURL(){
+    local url_lcr=$(curl --insecure -L ${URL_CTS_TEMPLATE}|grep TEST_URL|cut -d\" -f 2)
+    if [ -z "${url_lcr}" ]; then
+        echo "Failed to get the url information for LCR via url ${URL_CTS_TEMPLATE}"
+        echo "Please check the status and try again"
+        exit 1
+    fi
+    echo "${url_lcr}"
+}
+
 function get_latest_cts(){
     local url_cts="https://source.android.com/compatibility/cts/downloads.html"
     local available_cts=$(curl --insecure -L ${url_cts}|grep 'android-cts-8.*-linux_x86-arm.zip'|cut -d\" -f 2|head -n1)
@@ -24,8 +35,9 @@ function get_latest_cts(){
 
 function get_latest_for_lcr(){
     local latest_lcr=$(getLCRURL)
-    latest_lcr=${latest_lcr#http://testdata.linaro.org/cts/android-cts-}
-    latest_lcr=${latest_lcr%.zip}
+    ## http://testdata.linaro.org/cts/18.05/android-cts-8.1_r4-linux_x86-arm-linaro.zip
+    latest_lcr=${latest_lcr#http://testdata.linaro.org/cts/*/android-cts-}
+    latest_lcr=${latest_lcr%-linux_x86-arm-linaro.zip}
     echo "${latest_lcr}"
 }
 
@@ -92,16 +104,6 @@ __EOF__
     echo "IRC Notify Finished"
 }
 
-function getLCRURL(){
-    local url_lcr=$(curl --insecure -L ${URL_CTS_TEMPLATE}|grep TEST_URL|cut -d\" -f 2)
-    if [ -z "${url_lcr}" ]; then
-        echo "Failed to get the url information for LCR via url ${URL_CTS_TEMPLATE}"
-        echo "Please check the status and try again"
-        exit 1
-    fi
-    echo "${url_lcr}"
-}
-
 function prepareCtsDir(){
     local work_dir=$1
     local cts_url=$2
@@ -132,6 +134,17 @@ function upload_to_s3(){
     export PUBLISH_TOKEN
     wget https://git.linaro.org/ci/publishing-api.git/plain/linaro-cp.py -O linaro-cp.py
     python linaro-cp.py ${local_file_path} ${remote_dir_path} --server=https://testdata.linaro.org/
+    rm -fr linaro-cp.py
+}
+
+function upload_build_info_to_s3(){
+    build_info="Format-Version: 0.5\n\nFiles-Pattern: *\nLicense-Type: open\n"
+    echo -e ${build_info} >BUILD-INFO.txt
+
+    export PUBLISH_TOKEN
+    wget https://git.linaro.org/ci/publishing-api.git/plain/linaro-cp.py -O linaro-cp.py
+    python linaro-cp.py BUILD-INFO.txt ${remote_dir_path} --server=https://testdata.linaro.org/
+    rm -fr BUILD-INFO.txt linaro-cp.py
 }
 
 function generateLinaroCtsPackage(){
@@ -153,7 +166,7 @@ function generateLinaroCtsPackage(){
         sudo rm -fr /tmp/build-tools.tar.gz
         ## https://developer.android.com/studio/releases/build-tools
         wget https://dl.google.com/android/repository/build-tools_r27.0.3-linux.zip -O /tmp/build-tools_r27.0.3-linux.zip
-        $(cd ${working_dir} && unzip /tmp/build-tools_r27.0.3-linux.zip)
+        pushd ${working_dir} && unzip /tmp/build-tools_r27.0.3-linux.zip && popd
         sudo rm -fr /tmp/build-tools_r27.0.3-linux.zip
 
         export PATH=${PATH}:${working_dir}/android-8.1.0
@@ -193,13 +206,11 @@ function generateLinaroCtsPackage(){
 
         cd ${working_dir}/google/ && \
             zip -ru cts.zip android-cts && \
-            mv cts.zip ${package_name_linaro} \
-            upload_to_s3 "${local_dir}/${package_name}" "cts/${local_dir}"
+            mv cts.zip ${package_name_linaro} && \
+            upload_to_s3 "${package_name_linaro}" "cts/${local_dir}"
 
-        #sudo -u yongqin.liu ssh testdata.linaro.org ln -s /home/testdata.linaro.org/cts/${local_dir}/${package_name_linaro} /home/testdata.linaro.org/cts/android-cts-${new_cts_version}.zip
-
-        local new_url="http://testdata.linaro.org/cts/android-cts-${new_cts_version}.zip"
-        local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
+        #local new_url="http://testdata.linaro.org/cts/${local_dir}/${package_name_linaro}"
+        #local reviewers="r=yongqin.liu@linaro.org,r=bernhard.rosenkranzer@linaro.org,r=vishal.bhoj@linaro.org,r=milosz.wasilewski@linaro.org,r=naresh.kamboju@linaro.org"
         #cd ${working_dir}/ && \
         #    sudo chmod 777 ${working_dir} && \
         #    sudo rm -fr test-plans && \
@@ -240,18 +251,17 @@ function main(){
                     message="${message}, also downloaded to http://testdata.linaro.org/cts/${local_dir}/${package_name}"
                     local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
                     generateLinaroCtsPackage "${abs_path}"
-                    rmdir $(dirname ${abs_path})
                 else
                     message="${message}, failed to download it, please check manually"
                 fi
+                upload_build_info_to_s3
             fi
+            rm -fr ${local_dir}
         fi
         irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
     fi
 }
-
-
 
 main "$@"
