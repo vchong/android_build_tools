@@ -30,8 +30,19 @@ https://help.ubuntu.com/community/PostgreSQL
 4. cheatsheet
    \l or \list to show all database in postgressql
    \c dbname or \connect dbname to change to a new database
-   \dt disply all the tables in currect database
+   \dt display all the tables in currect database
    select * from table_name ;  to show records in that table
+   \h help
+   \q exit
+
+   CREATE DATABASE myproject;
+   CREATE USER myprojectuser WITH PASSWORD 'password';
+   # for django
+   #ALTER ROLE myprojectuser SET client_encoding TO 'utf8';
+   #ALTER ROLE myprojectuser SET default_transaction_isolation TO 'read committed';
+   #ALTER ROLE myprojectuser SET timezone TO 'UTC';
+
+   GRANT ALL PRIVILEGES ON DATABASE myproject TO myprojectuser;
 
 5. config file /etc/postgresql/9.6/main/postgresql.conf
    defines the database directory and configuration file path
