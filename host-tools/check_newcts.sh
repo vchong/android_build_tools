@@ -138,13 +138,13 @@ function upload_to_s3(){
 }
 
 function upload_build_info_to_s3(){
-    build_info="Format-Version: 0.5\n\nFiles-Pattern: *\nLicense-Type: open\n"
-    echo -e ${build_info} >BUILD-INFO.txt
+    local remote_dir_path=$1
+    local build_info_path=$(mktemp -p /tmp/ BUILD-INFO.txt_XXX)
+    local build_info="Format-Version: 0.5\n\nFiles-Pattern: *\nLicense-Type: open\n"
+    echo -e ${build_info} >${build_info_path}
 
-    export PUBLISH_TOKEN
-    wget https://git.linaro.org/ci/publishing-api.git/plain/linaro-cp.py -O linaro-cp.py
-    python linaro-cp.py BUILD-INFO.txt ${remote_dir_path} --server=https://testdata.linaro.org/
-    rm -fr BUILD-INFO.txt linaro-cp.py
+    upload_to_s3 ${build_info_path} ${remote_dir_path}
+    rm -fr ${build_info_path}
 }
 
 function generateLinaroCtsPackage(){
@@ -152,24 +152,21 @@ function generateLinaroCtsPackage(){
     local new_cts_version=$(get_latest_cts)
     local local_dir=$(date +%y.%m)
     local package_name_linaro="android-cts-${new_cts_version}-linux_x86-arm-linaro.zip"
-    local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
-    local testdata_remote_file_url="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
-    if wget --spider ${testdata_remote_file_url}; then
+    local testdata_linaro_url="http://testdata.linaro.org/cts/${local_dir}/${package_name_linaro}"
+    if wget --spider ${testdata_linaro_url}; then
         return
     fi
     if which java >/dev/null; then
-        local url_lcr=$(getLCRURL)
-        local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
-        local url_google="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
-        local working_dir=$(mktemp -d -p /tmp/ -d CTS-XXX)
-
         sudo rm -fr /tmp/build-tools.tar.gz
         ## https://developer.android.com/studio/releases/build-tools
         wget https://dl.google.com/android/repository/build-tools_r27.0.3-linux.zip -O /tmp/build-tools_r27.0.3-linux.zip
         pushd ${working_dir} && unzip /tmp/build-tools_r27.0.3-linux.zip && popd
         sudo rm -fr /tmp/build-tools_r27.0.3-linux.zip
-
         export PATH=${PATH}:${working_dir}/android-8.1.0
+
+        local url_lcr=$(getLCRURL)
+        local url_google="http://testdata.linaro.org/cts/${local_dir}/android-cts-${new_cts_version}-linux_x86-arm.zip"
+        local working_dir=$(mktemp -d -p /tmp/ -d CTS-XXX)
         mkdir ${working_dir}/linaro ${working_dir}/google
         prepareCtsDir "${working_dir}/linaro" "${url_lcr}"
         prepareCtsDir "${working_dir}/google" "${url_google}" "${local_google_pkg}"
@@ -234,31 +231,38 @@ function main(){
         local new_cts_version=$(get_latest_cts)
         local local_dir=$(date +%y.%m)
         local package_name="android-cts-${new_cts_version}-linux_x86-arm.zip"
+        local package_linaro_name="android-cts-${new_cts_version}-linux_x86-arm-linaro.zip"
         local remote_url="https://dl.google.com/dl/android/cts/${package_name}"
         local message="There is new cts package released. The latest AOSP tag is: ${new_cts_version}"
         message="${message}, ${remote_url}"
         local testdata_remote_file_url="http://testdata.linaro.org/cts/${local_dir}/${package_name}"
-        if wget --spider ${testdata_remote_file_url}; then
-            message="${message}, also downloaded to ${testdata_remote_file_url}"
+        local testdata_remote_linaro_url="http://testdata.linaro.org/cts/${local_dir}/${package_linaro_name}"
+        if wget --spider ${testdata_remote_file_url} && wget --spider ${testdata_remote_linaro_url}; then
+            message="${message}, also downloaded to ${testdata_remote_file_url}, linaro package is here: ${testdata_remote_linaro_url}"
         else
             mkdir -p ${local_dir}
-            wget --no-check-certificate ${remote_url} -O "${local_dir}/${package_name}"
-            if [ $? -ne 0 ]; then
-                message="${message}, failed to download it, please check manually"
-            else
-                upload_to_s3 "${local_dir}/${package_name}" "cts/${local_dir}"
-                if [ $? -eq 0 ]; then
-                    message="${message}, also downloaded to http://testdata.linaro.org/cts/${local_dir}/${package_name}"
-                    local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
-                    generateLinaroCtsPackage "${abs_path}"
+
+            if ! wget --spider ${testdata_remote_file_url}; then
+                wget --no-check-certificate ${remote_url} -O "${local_dir}/${package_name}"
+                if [ $? -ne 0 ]; then
+                    message="${message}, failed to download ${remote_url}, please check manually"
                 else
-                    message="${message}, failed to download it, please check manually"
+                    upload_to_s3 "${local_dir}/${package_name}" "cts/${local_dir}"
+                    if [ $? -eq 0 ]; then
+                        message="${message}, also uploaded google cts package to http://testdata.linaro.org/cts/${local_dir}/${package_name}"
+                    else
+                        message="${message}, failed to upload google cts package to http://testdata.linaro.org/cts/${local_dir}/${package_name}, please check manually"
+                    fi
+                    ## when there are old version files in the same directory already,
+                    ## we should not exit in such case
+                    upload_build_info_to_s3 "cts/${local_dir}" && true
                 fi
-                upload_build_info_to_s3
             fi
+            local abs_path="$(cd ${local_dir}; pwd)/${package_name}"
+            generateLinaroCtsPackage "${abs_path}"
             rm -fr ${local_dir}
+            irc_notify "${message}"
         fi
-        irc_notify "${message}"
     else
         echo "No new tags released in AOSP"
     fi
