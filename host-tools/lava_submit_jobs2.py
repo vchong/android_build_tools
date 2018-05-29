@@ -7,10 +7,10 @@ from lava_tool.authtoken import AuthenticatingServerProxy, KeyringAuthBackend
 
 # lava-tool auth-add https://yongqin.liu@validation.linaro.org/RPC2/
 
-TOKEN = ""
-SERVER_URL="https://yongqin.liu:%s@lkft.validation.linaro.org/RPC2/" % TOKEN
 
 def submit_yaml_job(job_yaml_str, server_url):
+    #TOKEN = ""
+    #SERVER_URL="https://yongqin.liu:%s@lkft.validation.linaro.org/RPC2/" % TOKEN
     # server = xmlrpclib.ServerProxy(SERVER_URL)
     server = AuthenticatingServerProxy(server_url, auth_backend=KeyringAuthBackend())
     try:

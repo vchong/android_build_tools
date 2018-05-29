@@ -1,8 +1,12 @@
 #!/bin/bash
-TOKEN=""
-SERVER_URL="https://yongqin.liu:${TOKEN}@lkft.validation.linaro.org/RPC2/"
-AP_SSID="LAVATEST"
-AP_KEY="NepjqGbq"
+
+parent_dir=$(cd $(dirname $0); pwd)
+
+TOKEN="${TOKEN}"
+#SERVER_URL="https://yongqin.liu:${TOKEN}@lkft.validation.linaro.org/RPC2/"
+SERVER_URL="https://yongqin.liu:${TOKEN}@lkft-staging.validation.linaro.org/RPC2/"
+AP_SSID="${AP_SSID}"
+AP_KEY="${AP_KEY}"
 function submit_one_job(){
     local job_file="${1}"
     local build_number="${2}"
@@ -29,7 +33,7 @@ function submit_one_job(){
     #lava-tool submit-job "${SERVER_URL}" "${job_file}"
     #/development/srv/test-plans/android/submit.py "${job_file}"
     #/development/android/master/host-tools/lava_submit_jobs2.py "${job_file}" "${SERVER_URL}"
-    /data/master/host-tools/lava_submit_jobs2.py "${job_file}" "${SERVER_URL}"
+    ${parent_dir}/lava_submit_jobs2.py "${job_file}" "${SERVER_URL}"
     if [ $? -ne 0 ]; then
         echo "Failed mit job file to servier: ${SERVER_URL}"
         echo "Failed job file is: ${job_file}"
@@ -39,17 +43,19 @@ function submit_one_job(){
 }
 
 function main(){
-    local build_number="73"
-    local build_name="android-lcr-reference-hikey-o"
-    local img_ext=".img.xz"
+    local build_number="76"
+    local build_name="android-lcr-reference-x15-o"
+    #local img_ext=".img.xz"
+    local img_ext=".img"
 #    local template_dir="/development/srv/test-plans/android/xtest/"
 #    local template_dir="/development/srv/test-plans/android/cts/"
-    #local template_dir="/development/srv/test-plans/android/hikey-v2/"
-    local template_dir="/SATA3/srv/test-plans/android/hikey-v2/"
+    #local template_dir="/SATA3/srv/test-plans/android/hikey-v2/"
+    #local template_dir="/SATA3/srv/test-plans/android/x15-v2/"
+    local template_dir="/development/srv/test-plans/android/x15-v2/"
 
     #for f in $(ls ${template_dir}/*); do
     #for f in $(ls ${template_dir}/template*); do
-    for f in $(ls ${template_dir}/template-cts-*.yaml); do
+    for f in $(ls ${template_dir}/template-*.yaml); do
         f_basename=$(basename $f)
         job_file="/tmp/${f_basename}"
         cp -vf "${f}" ${job_file}

@@ -1,4 +1,6 @@
 #!/bin/bash
+# repo sync -c -j24 -m manifest.xml
+
 export BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/sync-common.sh
@@ -26,6 +28,7 @@ main "$@"
 if true; then
 ${BASE}/sync-projects.sh  \
                           android-patchsets \
+                          android-build-configs \
                           device/linaro/hikey \
                           kernel/linaro/hisilicon/ \
                           frameworks/base \
@@ -55,9 +58,8 @@ fi
 func_apply_patch MASTER-RLCR-PATCHSET
 func_apply_patch hikey-master-workarounds
 func_apply_patch hikey-optee-master
-#func_apply_patch hikey-optee-4.9
-func_apply_patch hikey-optee-4.14
-#func_apply_patch hikey-clang-4.9
+func_apply_patch hikey-optee-4.9
+#func_apply_patch hikey-optee-4.14
 #func_apply_patch MASTER-CLANG-PATCHSET
 func_apply_patch x15-p-workarounds
 #func_apply_patch NOUGAT-BOOTTIME-OPTIMIZATIONS-HIKEY

@@ -35,6 +35,8 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
     (time LANG=C make ${targets} -j${CPUS} ) 2>&1 |tee build-${product}.log
     date +%Y-%m-%d-%H-%M >>time.log
+    mkdir -p .repo/pinned-manifest
+    repo manifest -r -o .repo/pinned-manifest/$(date +%Y-%m-%d-%H-%M)-pinned.xml
 }
 
 function build_juno(){
@@ -104,8 +106,8 @@ function setup_for_clang_upstream() {
 }
 
 function build_hikey(){
-    rm -fr out/target/product/hikey/obj/kernel/
-    rm -fr out/dist out/target/product/hikey/optee/ optee/optee_os/out/
+    #rm -fr out/target/product/hikey/obj/kernel/
+    #rm -fr out/dist out/target/product/hikey/optee/ optee/optee_os/out/
     export BUILD_CLANG_MASTER=true
     export BUILD_CLANG_MASTER=false
     if ${BUILD_CLANG_MASTER}; then
@@ -119,14 +121,14 @@ function build_hikey(){
     cd ${ROOT_DIR}
     #https://github.com/96boards/documentation/wiki/HiKeyGettingStarted#section-2 -O hikey-vendor.tar.bz2
     #wget http://builds.96boards.org/snapshots/hikey/linaro/binaries/20150706/vendor.tar.bz2 -O hikey-vendor.tar.bz2
-    export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+    #export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
 #    export TARGET_USERDATAIMAGE_4GB=true
 #    export TARGET_USERDATAIMAGE_TYPE=f2fs
     export TARGET_BUILD_KERNEL=true
 #    export TARGET_KERNEL_USE_4_1=true
     export TARGET_BOOTIMAGE_USE_FAT=true
-    #export KERNEL_BUILD_WITH_CLANG=true
-    #export CLANG_TRIPLE=aarch64-linux-gnu-
+    export KERNEL_BUILD_WITH_CLANG=true
+    export CLANG_TRIPLE=aarch64-linux-gnu-
     #export LLVM_PREBUILTS_VERSION=clang-4679922
     ## settings for optee
     export TARGET_TEE_IS_OPTEE=true
@@ -141,6 +143,7 @@ function build_hikey(){
     if false; then
         ## lkft cts patch https://android-review.linaro.org/#/c/18007/
         ## ./96boards-hikey-aosp-master.yaml
+        :
         make -j"${CPUs}" vts cts
         # make -j8 vts showcommands dist TARGET_PRODUCT=aosp_arm64 WITH_DEXPREOPT=false TARGET_BUILD_VARIANT=userdebug
     fi
@@ -314,8 +317,8 @@ build_project() {
 # clean_for manta && build_manta
 #build_tools_ddmlib
 #build juno
-build_hikey
-#build_x15
 #build_x20
 #build_db410c
 #build_flo
+#build_hikey
+build_x15

@@ -31,9 +31,10 @@ function flash_image(){
     sleep 5
 }
 
-#fastboot erase environment
-#flash_image xloader ${img_dir}/MLO
-#flash_image bootloader ${img_dir}/u-boot.img
+fastboot erase environment
+fastboot oem format
+flash_image xloader ${img_dir}/MLO
+flash_image bootloader ${img_dir}/u-boot.img
 #flash_image environment ${img_dir}/am57xx-evm-reva3.dtb
 #flash_image recovery ${img_dir}/recovery.img
 #flash_image boot ${img_dir}/boot.img
