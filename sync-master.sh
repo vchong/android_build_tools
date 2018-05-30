@@ -1,5 +1,4 @@
 #!/bin/bash
-# repo sync -c -j24 -m manifest.xml
 
 export BASE=$(cd $(dirname $0);pwd)
 

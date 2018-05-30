@@ -115,8 +115,18 @@ main(){
     if $sync_linaro; then
         func_sync_linaro
     fi
+    if [[ "X${MIRROR}" = X/* ]]; then
+        mirror_dir=$(dirname $(dirname ${MIRROR}))
+        pushd "${mirror_dir}"
+        CPUS=$(grep processor /proc/cpuinfo |wc -l)
+        repo sync -j ${CPUS}
+        popd
+    fi
     sync_init
     sync
+    mkdir -p .repo/pinned-manifest
+    ## repo sync -c -j24 -m .repo/pinned-manifest/manifest.xml
+    repo manifest -r -o .repo/pinned-manifest/$(date +%Y-%m-%d-%H-%M)-pinned.xml
 }
 
 function func_apply_patch(){

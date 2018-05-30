@@ -35,8 +35,6 @@ function build(){
     date +%Y-%m-%d-%H-%M >>time.log
     (time LANG=C make ${targets} -j${CPUS} ) 2>&1 |tee build-${product}.log
     date +%Y-%m-%d-%H-%M >>time.log
-    mkdir -p .repo/pinned-manifest
-    repo manifest -r -o .repo/pinned-manifest/$(date +%Y-%m-%d-%H-%M)-pinned.xml
 }
 
 function build_juno(){
