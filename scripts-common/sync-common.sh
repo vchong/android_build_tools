@@ -1,18 +1,30 @@
 #!/bin/bash
+
+set -e
+
 export BASE=`pwd`
+
+source ${BASE}/scripts-common/helpers
+
 export MIRROR="https://android.googlesource.com/platform/manifest"
+
 repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
 sync_linaro=true
-branch="master"
 
-LOCAL_MANIFEST="git://android.git.linaro.org/platform/manifest.git"
+branch="master"
+version="master"
+board="hikey"
+
+LOCAL_MANIFEST="https://android-git.linaro.org/git/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-master"
-#export branch="studio-1.1-dev"
 
 print_usage(){
-    echo "$(basename $0) [-nl|--nolinaro] [-b|--branch branch] [-m|--mirror mirror_url]"
+    echo "$(basename $0) [-j CPUS] [-nl|--nolinaro] [t|--target board] [-v|--version aosp version] [-b|--branch branch] [-m|--mirror mirror_url]"
+    echo "\t -j: number of CPUs for build"
     echo "\t -nl|--nolinaro: do not sync linaro source"
+    echo "\t -t|--target: board name"
+    echo "\t -v|--version: AOSP version (e.g. master or o or p)"
     echo "\t -b|--branch branch: sync the specified branch, default master"
     echo "\t -u|--mirror mirror_url: specify the url where you want to sync from"
     echo "\t\t default: $repo_url"
@@ -23,11 +35,32 @@ print_usage(){
 function parseArgs(){
     while [ -n "$1" ]; do
         case "X$1" in
+            X-j) # set build parallellism
+                echo "Num threads: $2"
+                CPUS=$2
+                shift
+                ;;
             X-nl|X--nolinaro)
                 sync_linaro=false
                 shift
                 ;;
-            X-b|X--branch)
+            X-t|X--target)
+                if [ -z "$2" ]; then
+                    echo "Please specify target board for the -t|--target option"
+                    exit 1
+                fi
+                board="$2"
+                shift
+                ;;
+            X-v|X--version)
+                if [ -z "$2" ]; then
+                    echo "Please specify AOSP version for the -v|--version option"
+                    exit 1
+                fi
+                version="$2"
+                shift
+                ;;
+             X-b|X--branch)
                 if [ -z "$2" ]; then
                     echo "Please specify the branch name for the -b|--branch option"
                     exit 1
@@ -50,21 +83,21 @@ function parseArgs(){
                 exit 1
                 ;;
         esac
+	shift
     done
 }
 
 sync_init(){
-    #while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} -g "default,-device,-non-default,hikey,flounder,-darwin,-mips,-x86" --depth=1 -p linux; do
-    #while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g "default,device,-notdefault,-darwin,-mips,-x86,-juno" -p linux; do
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g "default,device,-notdefault,-darwin,-mips,-x86,-juno"; do
+    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux; do
+	echo "wait 30s"
         sleep 30
     done
 }
 
 sync(){
-    #Syncronize and check out
-    CPUS=$(grep processor /proc/cpuinfo |wc -l)
+    # synchronize and check out
     while ! repo sync -j ${CPUS} -c --force-sync; do
+	echo "wait 30s"
         sleep 30
     done
 }
@@ -81,22 +114,12 @@ func_sync_linaro(){
 
     cd ${BASE}
 
-    cp -uvf liuyq-patches/liuyq.xml .repo/local_manifests/liuyq.xml
+    cp -auvf swg.xml .repo/local_manifests/
     if [ ! -d android-patchsets ]; then
         mkdir -p android-patchsets
     fi
-    cp -uvf liuyq-patches/LIUYQ-PATCHSET android-patchsets
-    #juno_mali_binary
-    #hikey_mali_binary
-}
-
-juno_mali_binary(){
-    local b_name="juno-20151111-vendor.tar.bz2"
-    if [ -f ./${b_name} ]; then
-        return
-    fi
-    curl --fail --show-error -b license_accepted_51722ba4ccc270bcd54cb360cb242798=yes http://snapshots.linaro.org/android/binaries/arm/20151111-members-only/vendor.tar.bz2 >${b_name}
-    tar xavf ${b_name}
+    #cp -auvf SWG-PATCHSET android-patchsets/
+    #hikey_mali_binary_new
 }
 
 hikey_mali_binary(){
@@ -108,25 +131,44 @@ hikey_mali_binary(){
     tar xavf ${b_name}
 }
 
+hikey_mali_binary_new(){
+	wget --no-check-certificate https://dl.google.com/dl/android/aosp/linaro-hikey-20170523-4b9ebaff.tgz
+	for i in linaro-hikey-*.tgz; do
+		tar xf $i
+	done
+	mkdir junk
+	echo 'cat "$@"' >junk/more
+	chmod +x junk/more
+	export PATH=`pwd`/junk:$PATH
+	for i in extract-linaro-hikey.sh; do
+		echo -e "\nI ACCEPT" |./$i
+	done
+	rm -rf junk linaro-hikey-*.tgz extract-linaro-hikey.sh
+}
+
 main(){
     # update myself first
     git pull
     parseArgs "$@"
+    export_config ${board} ${version}
+
     if $sync_linaro; then
         func_sync_linaro
     fi
+    # if MIRROR is local then repo sync
     if [[ "X${MIRROR}" = X/* ]]; then
         mirror_dir=$(dirname $(dirname ${MIRROR}))
         pushd "${mirror_dir}"
-        CPUS=$(grep processor /proc/cpuinfo |wc -l)
-        repo sync -j ${CPUS}
+        echo "Skip repo sync ${MIRROR} for now!"
+        #repo sync -j ${CPUS}
         popd
     fi
+    # init repos
     sync_init
+    # sync repos
     sync
-    mkdir -p .repo/pinned-manifest
-    ## repo sync -c -j24 -m .repo/pinned-manifest/manifest.xml
-    repo manifest -r -o .repo/pinned-manifest/$(date +%Y-%m-%d-%H-%M)-pinned.xml
+    mkdir -p archive
+    repo manifest -r -o archive/pinned-manifest-"$(date +%Y-%m-%d_%H:%M:%S)".xml
 }
 
 function func_apply_patch(){
@@ -144,5 +186,4 @@ function func_apply_patch(){
         echo "Failed to run ${patch_name}"
         exit 1
     fi
-
 }

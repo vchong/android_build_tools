@@ -1,14 +1,23 @@
 #!/bin/bash
 
-CPUS=$(grep processor /proc/cpuinfo |wc -l)
+set -e
+
+#CPUS=${CPUS:-$(grep processor /proc/cpuinfo |wc -l)}
+CPUS=${CPUS:-1}
 
 function export_config(){
-    local f_config=$1
+    # http://wiki.bash-hackers.org/syntax/pe#use_a_default_value
+    local android_board=${1:-hikey}
+    local android_ver=${2:-master}
+
+    echo "Exporting configs from android-build-configs/lcr-reference-${android_board}-${android_ver}"
+
     while read line; do
         if ! echo $line |grep -q '^#'; then
+	    echo "export $line"
             eval "export $line"
         fi
-    done < android-build-configs/${f_config}
+    done < android-build-configs/lcr-reference-${android_board}-${android_ver}
 }
 
 function get_manifest_groups(){
