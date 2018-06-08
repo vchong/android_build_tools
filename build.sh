@@ -1,7 +1,8 @@
 #!/bin/bash
-CPUS=$(grep processor /proc/cpuinfo |wc -l)
-#CPUS=1
 ROOT_DIR=$(cd $(dirname $0); pwd)
+source ${ROOT_DIR}/scripts-common/helpers
+
+#CPUS=1
 
 targets="droidcore"
 #targets="selinuxtarballs"
@@ -309,14 +310,18 @@ build_project() {
     echo -e "\nINFO: Build $PROJECT for $TARGET\n"
     mmm $PROJECT | tee $LOG_FILE.log
 }
+##########################################################
+##########################################################
+function build_board_ver(){
+    local android_board=${1-hikey}
+    local android_ver=${2-master}
+    export_config lcr-reference-${android_board}-${android_ver}
+    build ${TARGET_PRODUCT}
+}
 
-#build_vexpress
-#build fvp
-# clean_for manta && build_manta
-#build_tools_ddmlib
-#build juno
-#build_x20
-#build_db410c
-#build_flo
-#build_hikey
-build_x15
+#build_board_ver hikey o
+#build_board_ver x15 o
+#build_board_ver hikey p
+#build_board_ver x15 p
+build_board_ver hikey master
+#build_board_ver x15 master

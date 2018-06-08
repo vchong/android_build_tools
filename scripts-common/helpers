@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CPUS=$(grep processor /proc/cpuinfo |wc -l)
+
+function export_config(){
+    local f_config=$1
+    while read line; do
+        eval "export $line"
+    done < android-build-configs/${f_config}
+}
+
+function get_manifest_groups(){
+    pushd .repo/manifests
+    groups=$(git config --get manifest.groups)
+    if [ -z "${groups}" ]; then
+        groups_opt=""
+    else
+        groups_opt="-g ${groups}"
+    fi
+    popd
+    echo "${groups_opt}"
+}
