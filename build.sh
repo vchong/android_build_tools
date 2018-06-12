@@ -313,8 +313,9 @@ build_project() {
 ##########################################################
 ##########################################################
 function build_board_ver(){
-    local android_board=${1-hikey}
-    local android_ver=${2-master}
+    # http://wiki.bash-hackers.org/syntax/pe#use_a_default_value
+    local android_board=${1:-hikey}
+    local android_ver=${2:-master}
     export_config lcr-reference-${android_board}-${android_ver}
     build ${TARGET_PRODUCT}
 }
@@ -323,5 +324,6 @@ function build_board_ver(){
 #build_board_ver x15 o
 #build_board_ver hikey p
 #build_board_ver x15 p
-build_board_ver hikey master
 #build_board_ver x15 master
+build_board_ver hikey master
+#make -j"${CPUs}" vts cts
