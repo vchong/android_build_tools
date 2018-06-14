@@ -20,15 +20,9 @@ LOCAL_MANIFEST="https://android-git.linaro.org/git/platform/manifest.git"
 LOCAL_MANIFEST_BRANCH="linaro-master"
 
 print_usage(){
-    echo "$(basename $0) [-j CPUS] [-nl|--nolinaro] [t|--target board] [-v|--version aosp version] [-b|--branch branch] [-m|--mirror mirror_url]"
+    echo "$(basename $0) [-j CPUS] [-nl|--nolinaro] [-h|--help]"
     echo "\t -j: number of CPUs for build"
     echo "\t -nl|--nolinaro: do not sync linaro source"
-    echo "\t -t|--target: board name"
-    echo "\t -v|--version: AOSP version (e.g. master or o or p)"
-    echo "\t -b|--branch branch: sync the specified branch, default master"
-    echo "\t -u|--mirror mirror_url: specify the url where you want to sync from"
-    echo "\t\t default: $repo_url"
-    echo "$(basename $0) [-h|--help]"
     echo "\t -h|--help: print this usage"
 }
 
@@ -44,43 +38,8 @@ function parseArgs(){
                 sync_linaro=false
                 shift
                 ;;
-            X-t|X--target)
-                if [ -z "$2" ]; then
-                    echo "Please specify target board for the -t|--target option"
-                    exit 1
-                fi
-                board="$2"
-                shift
-                ;;
-            X-v|X--version)
-                if [ -z "$2" ]; then
-                    echo "Please specify AOSP version for the -v|--version option"
-                    exit 1
-                fi
-                version="$2"
-                shift
-                ;;
-             X-b|X--branch)
-                if [ -z "$2" ]; then
-                    echo "Please specify the branch name for the -b|--branch option"
-                    exit 1
-                fi
-                branch="$2"
-                shift
-                ;;
-            X-h|X--help)
-                print_usage
-                exit 1
-                ;;
-            X-*)
-                echo "Unknown option: $1"
-                print_usage
-                exit 1
-                ;;
             X*)
                 echo "Unknown option: $1"
-                print_usage
-                exit 1
                 ;;
         esac
 	shift
