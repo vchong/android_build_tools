@@ -12,8 +12,7 @@ export SHOW_COMMANDS=showcommands
 #export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
 export USE_CCACHE=1
 
-#this is true in android-build-configs so overwrite it
-export TARGET_SYSTEMIMAGES_USE_SQUASHFS=false
+USE_SQUASHFS=false
 
 function build(){
     #export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
@@ -77,7 +76,7 @@ while [ "$1" != "" ]; do
 			;;
 		-squashfs)
 			echo "Use squashfs for system img"
-			export TARGET_SYSTEMIMAGES_USE_SQUASHFS=true
+			USE_SQUASHFS=true
 			;;
 		-cts)
 			echo "Build CTS"
@@ -97,4 +96,7 @@ while [ "$1" != "" ]; do
 done
 
 export_config hikey o
+echo "Overwrite TARGET_SYSTEMIMAGES_USE_SQUASHFS=true in android-build-configs (abc)!"
+echo "export TARGET_SYSTEMIMAGES_USE_SQUASHFS=$USE_SQUASHFS"
+export TARGET_SYSTEMIMAGES_USE_SQUASHFS=$USE_SQUASHFS
 build ${TARGET_PRODUCT}
