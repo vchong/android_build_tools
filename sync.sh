@@ -98,6 +98,6 @@ else
 	echo "no swg-mods patchsets applied"
 fi
 
+#./build.sh
 #./build.sh -j ${CPUS}
-##./build.sh -j $(getconf _NPROCESSORS_ONLN)
 exit

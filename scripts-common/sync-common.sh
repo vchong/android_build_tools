@@ -14,24 +14,13 @@ version="master"
 board="hikey"
 
 sync_init(){
-    echo "repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux"
-    repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux
-
-    #while ! repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux; do
-	#echo "wait 30s"
-        #sleep 30
-    #done
+    echo "repo init -u ${MIRROR} -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux"
+    repo init -u ${MIRROR} -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux
 }
 
 sync(){
     echo "repo sync -j${CPUS} -c --force-sync"
     repo sync -j${CPUS} -c --force-sync
-
-    # synchronize and check out
-    #while ! repo sync -j${CPUS} -c --force-sync; do
-	#echo "wait 30s"
-        #sleep 30
-    #done
 }
 
 func_sync_linaro(){
@@ -52,6 +41,7 @@ func_sync_linaro(){
     if [ ! -d android-patchsets ]; then
         mkdir -p android-patchsets
     fi
+    # can have my own local patch file in this repo
     #cp -auvf SWG-PATCHSET android-patchsets/
     #hikey_mali_binary_new
 }
