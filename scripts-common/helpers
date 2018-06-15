@@ -4,6 +4,19 @@ set -e
 
 #CPUS=${CPUS:-$(grep processor /proc/cpuinfo |wc -l)}
 CPUS=${CPUS:-1}
+dbg=false
+
+# sync*.sh get config, build*.sh doesn't!
+function get_config(){
+	if [ -d android-build-configs ]; then
+		echo "android-build-configs exists"
+		echo "Force sync - please wait.."
+		repo sync -j${CPUS} --force-sync android-build-configs
+	else
+		echo "Get android-build-configs"
+		git clone https://android-git.linaro.org/git/android-build-configs.git
+	fi
+}
 
 function export_config(){
     # http://wiki.bash-hackers.org/syntax/pe#use_a_default_value

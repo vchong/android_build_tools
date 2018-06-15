@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 export BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/sync-common.sh
@@ -17,12 +15,14 @@ fi
 ##########################################################
 while [ "$1" != "" ]; do
 	case $1 in
-		-b)     # overwrite branch in sync-common.sh
-			# default is master
-			# eg android-8.1.0_r29 or android-p-preview-1
+		-nl|--nolinaro)
+			echo "Skip local manifests sync"
+			sync_linaro=false
+			;;
+		-j)	# set build parallellism
 			shift
-			echo "branch=$1"
-			branch=$1
+			echo "Num threads: $1"
+			CPUS=$1
 			;;
 		-v)     # overwrite version in sync-common.sh
 			# default is master
@@ -38,20 +38,6 @@ while [ "$1" != "" ]; do
 			echo "board=$1"
 			board=$1
 			;;
-		-m)     # overwrite LOCAL_MANIFEST in sync-common.sh
-			# default is https://android-git.linaro.org/git/platform/manifest.git
-			# no other eg atm
-			shift
-			echo "LOCAL_MANIFEST=$1"
-			LOCAL_MANIFEST=$1
-			;;
-		-n)     # overwrite LOCAL_MANIFEST_BRANCH in sync-common.sh
-			# default is linaro-master
-			# eg linaro-oreo or linaro-p-preview
-			shift
-			echo "LOCAL_MANIFEST_BRANCH=$1"
-			LOCAL_MANIFEST_BRANCH=$1
-			;;
 		-u)     # overwrite MIRROR in sync-common.sh
 			# default remote is https://android.googlesource.com/platform/manifest
 			# default local above overwrites default remote
@@ -60,17 +46,20 @@ while [ "$1" != "" ]; do
 			echo "export MIRROR=$1"
 			export MIRROR=$1
 			;;
-                *)
-                        echo "Unknown option: $1"
-                        ;;
+		-d)
+			echo "Print debug"
+			dbg=true
+			;;
+		*)
+			echo "Unknown option: $1"
+			;;
 	esac
 	shift
 done
 
-#main -j ${CPUS} -nl -t ${board} -v {version} -b {branch} -h
-main "$@"
+main
 
-${BASE}/sync-projects.sh  \
+${BASE}/sync-projects.sh -j ${CPUS} -d \
                           android-patchsets \
                           android-build-configs \
                           device/linaro/hikey \
@@ -94,11 +83,20 @@ ${BASE}/sync-projects.sh  \
                         optee/optee_os
 
 for i in ${PATCHSETS}; do
+	echo ""
+	echo ""
 	echo "applying patchset: $i"
 	func_apply_patch $i
 done
-echo "applying patchset: swg-mods-${version}"
-func_apply_patch swg-mods-${version}
+
+if [ "$version" = "o" ] || [ "$version" = "n" ]; then
+	echo ""
+	echo ""
+	echo "applying patchset: swg-mods-${version}"
+	func_apply_patch swg-mods-${version}
+else
+	echo "no swg-mods patchsets applied"
+fi
 
 #./build.sh -j ${CPUS}
 ##./build.sh -j $(getconf _NPROCESSORS_ONLN)

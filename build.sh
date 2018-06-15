@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 ROOT_DIR=$(cd $(dirname $0); pwd)
 source ${ROOT_DIR}/scripts-common/helpers
 
@@ -49,7 +47,10 @@ function build_hikey(){
     export CFG_TA_DYNLINK=y
     build hikey
     echo "HiKey build done!"
-    if [ x"${CTS}" = x"true" ]; then
+    if $CTS; then
+	if $dbg; then
+		echo "CPUS=${CPUS}"
+	fi
 	echo "Building CTS.."
 	make -j${CPUS} cts
 	echo "CTS build done!"
@@ -84,11 +85,11 @@ while [ "$1" != "" ]; do
 			;;
 		-b | --build-target)
 			shift
-			echo "Adding Build target: $1"
+			echo "Adding build target: $1"
 			TARGETS=(${TARGETS[@]} $1)
 			;;
                 *)	# default adds to target list without shift
-                        echo "Adding Build target by default: $1"
+                        echo "Adding build target by default: $1"
                         TARGETS=(${TARGETS[@]} $1)
                         ;;
 	esac

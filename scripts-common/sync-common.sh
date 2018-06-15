@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 export BASE=`pwd`
 
 source ${BASE}/scripts-common/helpers
@@ -12,53 +10,28 @@ repo_url="git://android.git.linaro.org/tools/repo"
 export base_manifest="default.xml"
 sync_linaro=true
 
-branch="master"
 version="master"
 board="hikey"
 
-LOCAL_MANIFEST="https://android-git.linaro.org/git/platform/manifest.git"
-LOCAL_MANIFEST_BRANCH="linaro-master"
-
-print_usage(){
-    echo "$(basename $0) [-j CPUS] [-nl|--nolinaro] [-h|--help]"
-    echo "\t -j: number of CPUs for build"
-    echo "\t -nl|--nolinaro: do not sync linaro source"
-    echo "\t -h|--help: print this usage"
-}
-
-function parseArgs(){
-    while [ -n "$1" ]; do
-        case "X$1" in
-            X-j) # set build parallellism
-                echo "Num threads: $2"
-                CPUS=$2
-                shift
-                ;;
-            X-nl|X--nolinaro)
-                sync_linaro=false
-                shift
-                ;;
-            X*)
-                echo "Unknown option: $1"
-                ;;
-        esac
-	shift
-    done
-}
-
 sync_init(){
-    while ! repo init -u $MIRROR -m ${base_manifest} -b ${branch} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux; do
-	echo "wait 30s"
-        sleep 30
-    done
+    echo "repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux"
+    repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux
+
+    #while ! repo init -u $MIRROR -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux; do
+	#echo "wait 30s"
+        #sleep 30
+    #done
 }
 
 sync(){
+    echo "repo sync -j${CPUS} -c --force-sync"
+    repo sync -j${CPUS} -c --force-sync
+
     # synchronize and check out
-    while ! repo sync -j ${CPUS} -c --force-sync; do
-	echo "wait 30s"
-        sleep 30
-    done
+    #while ! repo sync -j${CPUS} -c --force-sync; do
+	#echo "wait 30s"
+        #sleep 30
+    #done
 }
 
 func_sync_linaro(){
@@ -66,8 +39,10 @@ func_sync_linaro(){
     cd .repo
     if [ -d ./local_manifests ]; then
         cd ./local_manifests;
+	echo "git pull local manifest"
         git pull
     else
+	echo "git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifest"
         git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifests
     fi
 
@@ -108,7 +83,7 @@ hikey_mali_binary_new(){
 main(){
     # update myself first
     git pull
-    parseArgs "$@"
+    get_config
     export_config ${board} ${version}
 
     if $sync_linaro; then
@@ -117,17 +92,15 @@ main(){
     # if MIRROR is local then repo sync
     if [[ "X${MIRROR}" = X/* ]]; then
         mirror_dir=$(dirname $(dirname ${MIRROR}))
-        pushd "${mirror_dir}"
-        echo "Skip repo sync ${MIRROR} for now!"
-        #repo sync -j ${CPUS}
-        popd
+        echo "Skip repo sync local mirror for now!"
+        #repo sync -j${CPUS} "${mirror_dir}"
     fi
     # init repos
     sync_init
     # sync repos
     sync
     mkdir -p archive
-    repo manifest -r -o archive/pinned-manifest-"$(date +%Y-%m-%d_%H:%M:%S)".xml
+    repo manifest -r -o archive/pinned-manifest-"$(date +%Y-%m-%d_%H:%M)".xml
 }
 
 function func_apply_patch(){
@@ -137,6 +110,7 @@ function func_apply_patch(){
     fi
 
     if [ ! -f "./android-patchsets/${patch_name}" ]; then
+	echo "android-patchsets/${patch_name}: no such file!"
         return
     fi
 
