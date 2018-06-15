@@ -99,6 +99,11 @@ function func_apply_patch(){
         return
     fi
 
+    if [[ "${patch_name}" = "optee"* ]]; then
+	echo "Skipping versioned optee patches since we're using master!"
+	return
+    fi
+
     if [ ! -f "./android-patchsets/${patch_name}" ]; then
 	echo "android-patchsets/${patch_name}: no such file!"
         return
