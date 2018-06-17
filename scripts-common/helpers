@@ -8,13 +8,15 @@ dbg=false
 
 # sync*.sh get config, build*.sh doesn't!
 function get_config(){
-	if [ -d android-build-configs ]; then
-		echo "android-build-configs exists"
-		echo "Force sync - please wait.."
-		repo sync -j${CPUS} --force-sync android-build-configs
+	if [ -d abc ]; then
+		echo "android-build-configs (abc) exists"
+		echo "git pull abc"
+		pushd abc
+		git pull
+		popd
 	else
-		echo "Get android-build-configs"
-		git clone https://android-git.linaro.org/git/android-build-configs.git
+		echo "Get android-build-configs (abc)"
+		git clone https://android-git.linaro.org/git/android-build-configs.git abc
 	fi
 }
 
@@ -23,14 +25,14 @@ function export_config(){
     local android_board=${1:-hikey}
     local android_ver=${2:-master}
 
-    echo "Exporting configs from android-build-configs/lcr-reference-${android_board}-${android_ver}"
+    echo "Exporting configs from abc/lcr-reference-${android_board}-${android_ver}"
 
     while read line; do
         if ! echo ${line} |grep -q '^#'; then
 	    echo "export ${line}"
             eval "export ${line}"
         fi
-    done < android-build-configs/lcr-reference-${android_board}-${android_ver}
+    done < abc/lcr-reference-${android_board}-${android_ver}
 }
 
 function get_manifest_groups(){
