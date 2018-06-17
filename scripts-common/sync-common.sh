@@ -86,6 +86,8 @@ hikey_mali_binary_new(){
 }
 
 main(){
+    mkdir -p logs
+
     # update myself first
     git pull
     get_config

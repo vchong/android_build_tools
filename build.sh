@@ -25,11 +25,11 @@ function build(){
     source build/envsetup.sh
     lunch ${product}-${variant}
 
-    echo "Start to build:" >>time.log
-    date +%Y%m%d-%H%M >>time.log
-    echo "(time LANG=C make ${TARGETS[@]} -j${CPUS}) 2>&1 |tee build-${product}.log"
-    (time LANG=C make ${TARGETS[@]} -j${CPUS} ) 2>&1 |tee build-${product}.log
-    date +%Y%m%d-%H%M >>time.log
+    echo "Start to build:" >>logs/time.log
+    date +%Y%m%d-%H%M >>logs/time.log
+    echo "(time LANG=C make ${TARGETS[@]} -j${CPUS}) 2>&1 |tee logs/build-${product}.log"
+    (time LANG=C make ${TARGETS[@]} -j${CPUS} ) 2>&1 |tee logs/build-${product}.log
+    date +%Y%m%d-%H%M >>logs/time.log
 }
 
 function build_hikey(){
