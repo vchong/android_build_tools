@@ -109,6 +109,9 @@ for i in ${PATCHSETS}; do
 	func_apply_patch $i
 done
 
+echo "applying patchset: optee-master-workarounds"
+func_apply_patch optee-master-workarounds
+
 if [ "$version" = "o" ] || [ "$version" = "n" ]; then
 	echo ""
 	echo ""
