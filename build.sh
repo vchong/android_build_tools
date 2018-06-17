@@ -26,10 +26,10 @@ function build(){
     lunch ${product}-${variant}
 
     echo "Start to build:" >>time.log
-    date +%Y-%m-%d_%H:%M >>time.log
+    date +%Y%m%d-%H%M >>time.log
     echo "(time LANG=C make ${TARGETS[@]} -j${CPUS}) 2>&1 |tee build-${product}.log"
     (time LANG=C make ${TARGETS[@]} -j${CPUS} ) 2>&1 |tee build-${product}.log
-    date +%Y-%m-%d_%H:%M >>time.log
+    date +%Y%m%d-%H%M >>time.log
 }
 
 function build_hikey(){
