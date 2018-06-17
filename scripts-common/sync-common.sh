@@ -14,18 +14,34 @@ version="master"
 board="hikey"
 
 sync_init(){
-    echo "repo init -u ${MIRROR} -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux"
-    repo init -u ${MIRROR} -m ${base_manifest} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux
+    echo "repo init -u ${MIRROR} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux"
+    repo init -u ${MIRROR} -b ${MANIFEST_BRANCH} --no-repo-verify --repo-url=${repo_url} --depth=1 -g ${REPO_GROUPS} -p linux
 }
 
 sync(){
-    echo "repo sync -j${CPUS} -c --force-sync"
-    repo sync -j${CPUS} -c --force-sync
+    if [ "${base_manifest}" = "default.xml" ]; then
+	echo "repo sync -j${CPUS} -c --force-sync"
+	repo sync -j${CPUS} -c --force-sync
+
+	echo "Save revisions to pinned manifest"
+	mkdir -p archive
+	repo manifest -r -o archive/pinned-manifest-"$(date +%Y-%m-%d_%H:%M)".xml
+    else
+	echo "repo sync -j${CPUS} -m ${base_manifest}"
+	repo sync -j${CPUS} -m ${base_manifest}
+    fi
+}
+
+func_cp_manifest(){
+    echo "rm local_manifests and cp pinned manifests to .repo/manifests/"
+    rm -rf .repo/local_manifests
+    cp archive/${base_manifest} .repo/manifests/
 }
 
 func_sync_linaro(){
-    mkdir -p .repo
-    cd .repo
+    pushd .repo
+    echo "rm pinned manifest"
+    rm -f manifests/pinned-manifest*.xml
     if [ -d ./local_manifests ]; then
         cd ./local_manifests;
 	echo "git pull local manifest"
@@ -34,8 +50,7 @@ func_sync_linaro(){
 	echo "git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifest"
         git clone ${LOCAL_MANIFEST} -b ${LOCAL_MANIFEST_BRANCH} local_manifests
     fi
-
-    cd ${BASE}
+    popd
 
     cp -auvf swg.xml .repo/local_manifests/
     if [ ! -d android-patchsets ]; then
@@ -76,21 +91,31 @@ main(){
     get_config
     export_config ${board} ${version}
 
-    if $sync_linaro; then
-        func_sync_linaro
-    fi
     # if MIRROR is local then repo sync
     if [[ "X${MIRROR}" = X/* ]]; then
         mirror_dir=$(dirname $(dirname ${MIRROR}))
         echo "Skip repo sync local mirror for now!"
         #repo sync -j${CPUS} "${mirror_dir}"
     fi
+
     # init repos
     sync_init
+
+    if $sync_linaro; then
+        echo "Sync local manifest"
+        func_sync_linaro
+    else
+	if [ "${base_manifest}" = "default.xml" ]; then
+		echo "Skip local manifest sync"
+	elif [[ "${base_manifest}" = "pinned-manifest"* ]]; then
+		func_cp_manifest
+	else # should NEVER be here with args check in sync.sh
+		echo "Unknown manifest!"
+	fi
+    fi
+
     # sync repos
     sync
-    mkdir -p archive
-    repo manifest -r -o archive/pinned-manifest-"$(date +%Y-%m-%d_%H:%M)".xml
 }
 
 function func_apply_patch(){

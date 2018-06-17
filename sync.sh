@@ -15,9 +15,16 @@ fi
 ##########################################################
 while [ "$1" != "" ]; do
 	case $1 in
-		-nl|--nolinaro)
+		-nl|--nolinaro) # overwrite sync_linaro in sync-common.sh
 			echo "Skip local manifests sync"
 			sync_linaro=false
+			;;
+		-bm|--base-manifest) # overwrite base_manifest in sync-common.sh
+			shift
+			base_manifest=$1
+			echo "Use pinned manifest: $1"
+			sync_linaro=false
+			echo "Force sync_linaro=false"
 			;;
 		-j)	# set build parallellism
 			shift
@@ -56,6 +63,19 @@ while [ "$1" != "" ]; do
 	esac
 	shift
 done
+
+# check conflicting args
+
+# no need since we force sync_linaro=false if pinned-manifest specified!
+#if $sync_linaro && [[ "${base_manifest}" = "pinned-manifest"* ]]; then
+#	echo "Cannot use both local and pinned manifest at the same time!"
+#	exit 1
+#fi
+
+if [ "${base_manifest}" != "default.xml" ] && [[ "{$base_manifest}" != "pinned-manifest"* ]]; then
+	echo "Invalid pinned manifest specified!"
+	exit 1
+fi
 
 main
 
