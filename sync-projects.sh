@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export BASE=$(cd $(dirname $0);pwd)
+BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/helpers
 

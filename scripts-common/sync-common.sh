@@ -1,13 +1,13 @@
 #!/bin/bash
 
-export BASE=`pwd`
+BASE=`pwd`
 
 source ${BASE}/scripts-common/helpers
 
-export MIRROR="https://android.googlesource.com/platform/manifest"
+MIRROR="https://android.googlesource.com/platform/manifest"
 
 repo_url="git://android.git.linaro.org/tools/repo"
-export base_manifest="default.xml"
+base_manifest="default.xml"
 sync_linaro=true
 
 version="master"

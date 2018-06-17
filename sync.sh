@@ -1,12 +1,12 @@
 #!/bin/bash
 
-export BASE=$(cd $(dirname $0);pwd)
+BASE=$(cd $(dirname $0);pwd)
 
 source ${BASE}/scripts-common/sync-common.sh
 
 # overwrite remote MIRROR in sync-common.sh if local mirror exists
 if [ -d /home/ubuntu/aosp-mirror/platform/manifest.git ]; then
-    export MIRROR="/home/ubuntu/aosp-mirror/platform/manifest.git"
+    MIRROR="/home/ubuntu/aosp-mirror/platform/manifest.git"
 else
     echo "No local mirrors"
 fi
