@@ -1,5 +1,5 @@
 #!/bin/bash
 
-export BASE=$(cd $(dirname $0);pwd)
-${BASE}/sync.sh -v master -d 2>&1 |tee sync-master.log
-#${BASE}/sync.sh -v master -j 24 -d 2>&1 |tee sync-master.log
+./sync.sh -d 2>&1 |tee sync-master.log
+#./sync.sh -bm pinned-manifest-YYYY-MM-DD_HH:MM -d 2>&1 |tee sync-master.log
+#./sync.sh -j 24 -d 2>&1 |tee sync-master.log
