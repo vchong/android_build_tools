@@ -15,6 +15,10 @@ fi
 ##########################################################
 while [ "$1" != "" ]; do
 	case $1 in
+		-wv) #overwrite wv in sync-common.sh
+			echo "wv build"
+			wv=true
+			;;
 		-zfs) #overwrite zfs_clone in sync-common.sh
 			echo "src dir is a zfs clone"
 			zfs_clone=true
@@ -130,6 +134,15 @@ if [ "$board" = "hikey960" ]; then
 	${BASE}/sync-projects.sh -j ${CPUS} -d \
 		optee/uefi-tools \
 		optee/edk2
+fi
+
+if [ "$wv" = true ]; then
+	echo "unshallow wv repos"
+	${BASE}/sync-projects.sh -j ${CPUS} -d \
+		external/optee-widevine-ref \
+		vendor/widevine
+		#vendor/widevine \
+		#ExoPlayer
 fi
 
 fi

@@ -10,6 +10,7 @@ repo_url="git://android.git.linaro.org/tools/repo"
 base_manifest="default.xml"
 sync_linaro=true
 zfs_clone=false
+wv=false
 
 version="master"
 board="hikey"

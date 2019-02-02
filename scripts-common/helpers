@@ -22,10 +22,14 @@ function get_config(){
 }
 
 function export_config(){
-    local file=${board}-optee-${version}
+    if [ "$wv" = true ]; then
+        local file=${board}-optee-${version}-widevine
+    else
+        local file=${board}-optee-${version}
+    fi
 
-    echo "Remove ${file}-pullreqs from abc/${file} before exporting configs"
-    sed -e "s/${file}-pullreqs //g" abc/${file} > abc/foo
+    echo "Remove ${board}-optee-${version}-pullreqs from abc/${file} before exporting configs"
+    sed -e "s/${board}-optee-${version}-pullreqs //g" abc/${file} > abc/foo
     mv abc/foo abc/${file}
 
     echo "Exporting configs from abc/${file}"
