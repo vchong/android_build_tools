@@ -10,7 +10,6 @@ repo_url="git://android.git.linaro.org/tools/repo"
 base_manifest="default.xml"
 sync_linaro=true
 zfs_clone=false
-wv=false
 
 version="master"
 board="hikey"
@@ -96,7 +95,7 @@ hikey_mali_binary(){
 	for i in linaro-hikey-*.tgz; do
 		tar xf $i
 	done
-	mkdir junk
+	mkdir -p junk
 	echo 'cat "$@"' >junk/more
 	chmod +x junk/more
 	export PATH=`pwd`/junk:$PATH
@@ -111,7 +110,7 @@ hikey960_mali_binary(){
 	for i in hisilicon-hikey960-*.tgz; do
 		tar xf $i
 	done
-	mkdir junk
+	mkdir -p junk
 	echo 'cat "$@"' >junk/more
 	chmod +x junk/more
 	export PATH=`pwd`/junk:$PATH

@@ -90,37 +90,36 @@ clean_build() {
 ##########################################################
 while [ "$1" != "" ]; do
 	case $1 in
-		-mmma)	shift
-			MMMA=true
-			DIR1=$1
+		-4g)
+			echo "Set 4GB board"
+			export TARGET_USERDATAIMAGE_4GB=true
+			;;
+		-b | --build-target)
+			shift
+			echo "Adding build target: $1"
+			TARGETS=(${TARGETS[@]} $1)
+			;;
+		-cts)
+			echo "Build CTS"
+			CTS=true
+			;;
+		-d)	# overwrite dbg in helpers
+			echo "Print debug"
+			dbg=true
+			SHOW_COMMANDS=showcommands
 			;;
 		-j)     # set build parallellism
 			shift
 			echo "Num threads: $1"
 			CPUS=$1
 			;;
-		-4g)
-			echo "Set 4GB board"
-			export TARGET_USERDATAIMAGE_4GB=true
+		-mmma)	shift
+			MMMA=true
+			DIR1=$1
 			;;
 		-squashfs)
 			echo "Use squashfs for system img"
 			USE_SQUASHFS=true
-			;;
-		-vts)
-			echo "Build VTS"
-			VTS=true
-			;;
-		-cts)
-			echo "Build CTS"
-			CTS=true
-			;;
-		-v)     # overwrite version above
-			# default is master
-			# eg o or p
-			shift
-			echo "version=$1"
-			version=$1
 			;;
 		-t)     # overwrite board above
 			# default is hikey
@@ -129,15 +128,20 @@ while [ "$1" != "" ]; do
 			echo "board=$1"
 			board=$1
 			;;
-		-d)	# overwrite dbg in helpers
-			echo "Print debug"
-			dbg=true
-			SHOW_COMMANDS=showcommands
-			;;
-		-b | --build-target)
+		-v)     # overwrite version above
+			# default is master
+			# eg o or p
 			shift
-			echo "Adding build target: $1"
-			TARGETS=(${TARGETS[@]} $1)
+			echo "version=$1"
+			version=$1
+			;;
+		-vts)
+			echo "Build VTS"
+			VTS=true
+			;;
+		-wv) #overwrite wv in helpers
+			echo "wv build"
+			wv=true
 			;;
                 *)	# default adds to target list without shift
                         echo "Adding build target by default: $1"
@@ -151,10 +155,10 @@ export_config
 echo "Overwrite TARGET_SYSTEMIMAGES_USE_SQUASHFS=true in android-build-configs (abc)!"
 echo "export TARGET_SYSTEMIMAGES_USE_SQUASHFS=$USE_SQUASHFS"
 export TARGET_SYSTEMIMAGES_USE_SQUASHFS=$USE_SQUASHFS
-echo "Set TARGET_BOOTIMAGE_USE_FAT to false for now due to fat16copy error"
+#echo "Set TARGET_BOOTIMAGE_USE_FAT to false for now due to fat16copy error"
 #alternatively try mcopy
 #see https://github.com/vchong/device-linaro-hikey/commit/fcfe2d6ac00539f2d4cf77295503c0d285ee8170
-echo "export TARGET_BOOTIMAGE_USE_FAT=false"
-export TARGET_BOOTIMAGE_USE_FAT=false
+echo "export TARGET_BOOTIMAGE_USE_FAT=true"
+export TARGET_BOOTIMAGE_USE_FAT=true
 build ${board}
 echo "Please make sure there are no errors before flashing!"
