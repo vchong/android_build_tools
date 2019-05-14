@@ -38,8 +38,13 @@ clean_changes(){
 }
 
 sync(){
-    clean_changes device/linaro/hikey fip.bin
+    if [ "$wv" = true ]; then
+        clean_changes abc ${board}-optee-${version}-widevine
+    else
+        clean_changes abc ${board}-optee-${version}
+    fi
     clean_changes android-patchsets swg-mods-${version}
+    clean_changes device/linaro/hikey fip.bin
 
     if [ "${base_manifest}" = "default.xml" ]; then
 	echo "repo sync -j${CPUS} -c --force-sync"

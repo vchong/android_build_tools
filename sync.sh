@@ -15,18 +15,6 @@ fi
 ##########################################################
 while [ "$1" != "" ]; do
 	case $1 in
-		-wv) #overwrite wv in sync-common.sh
-			echo "wv build"
-			wv=true
-			;;
-		-zfs) #overwrite zfs_clone in sync-common.sh
-			echo "src dir is a zfs clone"
-			zfs_clone=true
-			;;
-		-nl|--nolinaro) # overwrite sync_linaro in sync-common.sh
-			echo "Skip local manifests sync"
-			sync_linaro=false
-			;;
 		-bm|--base-manifest) # overwrite base_manifest in sync-common.sh
 			shift
 			base_manifest=$1
@@ -34,17 +22,18 @@ while [ "$1" != "" ]; do
 			sync_linaro=false
 			echo "Force sync_linaro=false"
 			;;
+		-d)	# overwrite dbg in helpers
+			echo "Print debug"
+			dbg=true
+			;;
 		-j)	# set build parallellism
 			shift
 			echo "Num threads: $1"
 			CPUS=$1
 			;;
-		-v)     # overwrite version in sync-common.sh
-			# default is master
-			# eg o or p
-			shift
-			echo "version=$1"
-			version=$1
+		-nl|--nolinaro) # overwrite sync_linaro in sync-common.sh
+			echo "Skip local manifests sync"
+			sync_linaro=false
 			;;
 		-t)     # overwrite board in sync-common.sh
 			# default is hikey
@@ -61,9 +50,20 @@ while [ "$1" != "" ]; do
 			echo "export MIRROR=$1"
 			export MIRROR=$1
 			;;
-		-d)	# overwrite dbg in helpers
-			echo "Print debug"
-			dbg=true
+		-v)     # overwrite version in sync-common.sh
+			# default is master
+			# eg o or p
+			shift
+			echo "version=$1"
+			version=$1
+			;;
+		-wv) #overwrite wv in helpers
+			echo "wv build"
+			wv=true
+			;;
+		-zfs) #overwrite zfs_clone in sync-common.sh
+			echo "src dir is a zfs clone"
+			zfs_clone=true
 			;;
 		*)
 			echo "Unknown option: $1"
@@ -94,6 +94,7 @@ if [[ "${base_manifest}" != "pinned-manifest"* ]]; then
 ${BASE}/sync-projects.sh -j ${CPUS} -d \
                           android-patchsets \
                           android-build-configs \
+                          build/make \
                           device/linaro/hikey \
                           device/linaro/bootloader/edk2 \
                           frameworks/av \
